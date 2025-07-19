@@ -1,0 +1,3 @@
+[submodule "docs-krita-org"]
+	path = docs-krita-org
+	url = ./docs-krita-org
