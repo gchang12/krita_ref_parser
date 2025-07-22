@@ -215,6 +215,7 @@ def generate_hsx_blendingmode_excerpt(soup: BeautifulSoup):
             )
             subsection = copy(soup)
             subsection.append(new_p_tag)
+            subsection['class'] "%s %s" % (htag_prefix.lower().replace(' ', '-'), hsx_type)
             if hsx_type != "hsy":
                 h_tag = "%s - %s" % (htag_prefix, hsx_type.upper())
             else:
