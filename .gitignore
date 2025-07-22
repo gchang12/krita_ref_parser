@@ -52,3 +52,8 @@ MANIFEST
 .venv*/
 .conda*/
 .python-version
+
+# MY STUFF
+.vim/
+_src-html/
+_my-krita-files/
