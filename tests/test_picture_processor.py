@@ -1,4 +1,5 @@
 """
+Tests for picture manipulation functionality.
 """
 
 import unittest
@@ -11,6 +12,7 @@ from _logging import logger
 
 class HalveImageTests(unittest.TestCase):
     """
+    Tests if 'halve-image' works as intended for all cases.
     """
 
     @staticmethod
@@ -25,6 +27,7 @@ class HalveImageTests(unittest.TestCase):
 
     def test_halve_image__half1(self):
         """
+        Tests if a half-image is returned by function.
         """
         filename = "images/.test.png"
         get_first_half = True
@@ -36,6 +39,7 @@ class HalveImageTests(unittest.TestCase):
 
     def test_halve_image__half2(self):
         """
+        Tests if a half-image is returned by function.
         """
         filename = "images/.test.png"
         get_first_half = False
@@ -53,5 +57,4 @@ if __name__ == "__main__":
     unittest.main(
         defaultTest="HalveImageTests",
     )
-
 

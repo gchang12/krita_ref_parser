@@ -1,4 +1,5 @@
 """
+Tests for parsing HTML soup.
 """
 
 from pathlib import Path
@@ -12,30 +13,35 @@ from _logging import logger
 
 class BaseSoupTestCase(unittest.TestCase):
     """
+    To be inherited by all test-cases. Contains useful methods for comparison.
     """
 
     def setUp(self):
         """
+        Defines `htmldir` for use in comparison method.
         """
         self.htmldir = None
+        self.func_to_test = None
 
     def assertSoupEqual(self, actual, expected):
         """
+        Simulates HTML parser and determines if two soup objects are identical.
         """
+        # obtains non-blank lines only.
         actual = [line.strip() for line in str(actual).splitlines() if line.strip()]
         expected = [line.strip() for line in str(expected).splitlines() if line.strip()]
-        filename = ".actual.html"
-        with open(filename, encoding="utf-8", mode="w") as wfile:
-            wfile.write(str(actual))
-        filename = ".expected.html"
-        with open(filename, encoding="utf-8", mode="w") as wfile:
-            wfile.write(str(expected))
+        # logs to file for scrutiny's sake.
+        for filename in (".actual.html", ".expected.html"):
+            with open(filename, encoding="utf-8", mode="w") as wfile:
+                wfile.write(str(actual))
+        # line-list should be equal.
         self.assertListEqual(actual, expected)
 
     def _test_one(self, path):
         """
+        Describes the way in which a single subsection of a section should be tested.
         """
-        logger.debug("Now inspecting: %s", path)
+        logger.debug("Now running %s on soup in %s", self.func_to_test.__name__, path)
         with open(path, encoding='utf-8') as rfile:
             soup = BeautifulSoup(rfile, "html.parser")
         actual = self.func_to_test(soup)
@@ -43,11 +49,8 @@ class BaseSoupTestCase(unittest.TestCase):
 
     def test_ALL(self):
         """
+        Runs parsing function on all subsections.
         """
-        # check that the excerpt begins with 'section[id]'
-        # check that all a[class='internal'] are replaced with a[class='link-to-official-docs' src='docs.krita.org/...']
-        # check that pilcrows are removed; log h1 text
-        #self.htmldir_for_tools = "_src-html/reference_manual/tools/"
         if self.htmldir is None:
             return
         for path in Path(self.htmldir).iterdir():
@@ -55,22 +58,22 @@ class BaseSoupTestCase(unittest.TestCase):
 
 class ToolsTests(BaseSoupTestCase):
     """
+    For 'Tools' section.
     """
 
     def setUp(self):
         """
+        For 'generate_tools_excerpt' function.
         """
         self.htmldir = "_src-html/reference_manual/tools/"
         self.func_to_test = parser.generate_tools_excerpt
         logger.critical("%s", self.id())
 
-    #@unittest.skip("")
     def test_generate_tools_excerpt(self):
         """
+        Tests equality of soup manually by referencing 'Assistant Tool' page as test case.
         """
-        htmldir = self.htmldir
-        htmlfile = "assistant.html"
-        path_to_html = htmldir + htmlfile
+        path_to_html = self.htmldir + "assistant.html"
         with open(path_to_html, encoding="utf-8") as rfile:
             soup = BeautifulSoup(rfile, 'html.parser')
         actual = self.func_to_test(soup)
@@ -113,19 +116,18 @@ class ToolsTests(BaseSoupTestCase):
 </section>""", 'html.parser').find()
         expected_icon = BeautifulSoup("<img alt='toolassistant' src='./images/assistant_tool.svg' />", 'html.parser').find('img').extract()['src']
         expected = ("Assistant Tool", expected_icon, expected_soup)
-        #logger.debug("actual: %s", type(actual[2]))
-        #logger.debug("expected: %s", type(expected[2]))
         self.assertTupleEqual(actual[:2], expected[:2])
-        #self.assertEqual(actual[2], expected[2])
         a_soup, e_soup = actual[2], expected[2]
         self.assertSoupEqual(a_soup, e_soup)
 
 class BlendingModeTests(BaseSoupTestCase):
     """
+    For 'Blending Mode' section.
     """
 
     def setUp(self):
         """
+        For 'generate_blendingmodes_excerpt' section.
         """
         self.htmldir = "_src-html/reference_manual/blending_modes/"
         self.func_to_test = parser.generate_blendingmodes_excerpt
@@ -133,6 +135,7 @@ class BlendingModeTests(BaseSoupTestCase):
 
     def test_generate_blendingmodes_excerpt(self):
         """
+        Manually tests for HTML equivalency by referencing 'Arithmetic BM' section as test-case.
         """
         htmldir = self.htmldir
         htmlfile = "arithmetic.html"
@@ -299,24 +302,45 @@ class HSXBlendingModeTests(BaseSoupTestCase):
     A file so convoluted that it need its own function.
     """
 
-    def setUp(self):
-        """
-        """
-
     def test_ALL(self):
         """
+        Runs various tests.
         """
         path = "_src-html/reference_manual/blending_modes/hsx.html"
         with open(path, encoding="utf-8") as rfile:
             soup = BeautifulSoup(rfile, 'html.parser')
         subsections = parser.generate_hsx_blendingmode_excerpt(soup)
-        logger.debug("h_tag dotsimg_src subsection")
         for h_tag, dotsimg_src, subsection in subsections:
             self.assertIsInstance(h_tag, str)
             self.assertIsInstance(dotsimg_src, str)
-            logger.debug("%s %s %s", h_tag, dotsimg_src, type(subsection))
-            logger.debug("subsection: %s", subsection)
+            logger.debug("h_tag: %s, dotsimage: %s, subsection: %s", h_tag, dotsimg_src, type(subsection))
             self.assertIsNone(subsection.find('figure'))
+            self.assertIn('class', subsection.attrs)
+            logger.debug("subsection['class']: %s", subsection['class'])
+            try:
+                hsx = {
+                    "Intensity": "hsi",
+                    "Lightness": "hsl",
+                    "Value": "hsv",
+                    "Luminosity": "hsy",
+                }[h_tag]
+                self.assertIn(hsx, subsection['class'])
+                blending_mode = h_tag.lower().replace(' ', '-')
+            elif " - " in h_tag:
+                blending_mode, hsx = h_tag.lower().split(' - ')
+                self.assertIn(hsx, subsection['class'])
+                blending_mode = blending_mode.replace(' ', '-')
+            else:
+                blending_mode = {
+                    "Color": "Color",
+                    "Hue": "Hue",
+                    "Increase Luminosity": "Increase",
+                    "Increase Saturation": "Increase Saturation",
+                    "Saturation": "Saturation",
+                    "Decrease Luminosity": "Decrease",
+                    "Decrease Saturation": "Decrease Saturation",
+                }[h_tag].lower().replace(' ', '-')
+            self.assertIn(blending_mode, subsection['class'])
             if " - " in h_tag:
                 header_suffix = h_tag.split(" - ")[1]
                 header_text = h_tag.split(" - ")[0].replace(' ', '_')
@@ -333,17 +357,17 @@ class HSXBlendingModeTests(BaseSoupTestCase):
             else:
                 header_text = h_tag.replace(' ', '_')
                 self.assertIn(header_text.lower(), dotsimg_src.lower())
-            #print("Now searching through images.")
             for img in subsection.find_all("img"):
-                #print(img)
                 self.assertIs(img['src'].endswith("_with_dots.png"), False)
 
 class DockersTests(BaseSoupTestCase):
     """
+    For 'Dockers' section.
     """
 
     def setUp(self):
         """
+        For 'generate_dockers_excerpt' function.
         """
         self.htmldir = "_src-html/reference_manual/dockers/"
         self.func_to_test = parser.generate_dockers_excerpt
@@ -351,25 +375,29 @@ class DockersTests(BaseSoupTestCase):
 
     def test_layers(self):
         """
+        Tests 'Layers' page.
         """
         path = self.htmldir + "layers.html"
         self._test_one(path)
 
     def _test_one(self, path):
         """
+        Asserts lack of icon and h1, as well as non-null soup.
         """
         h_tag, icon, section = super()._test_one(path)
-        logger.debug("%s %s %s", h_tag, icon, type(section))
+        logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
         self.assertTrue(section)
         self.assertIsNone(section.find('h1'))
         self.assertIsNone(icon)
 
 class FiltersTests(BaseSoupTestCase):
     """
+    For 'Filters' section.
     """
 
     def setUp(self):
         """
+        For 'generate_filters_excerpt' function.
         """
         self.htmldir = "_src-html/reference_manual/filters/"
         self.func_to_test = parser.generate_filters_excerpt
@@ -377,25 +405,29 @@ class FiltersTests(BaseSoupTestCase):
 
     def test_colors(self):
         """
+        Tests parser on 'Colors' filters page.
         """
         path = self.htmldir + "colors.html"
         self._test_one(path)
 
     def _test_one(self, path):
         """
+        Asserts h1 and icon are blank, and soup is non-null. 
         """
         h_tag, icon, section = super()._test_one(path)
-        logger.debug("%s %s %s", h_tag, icon, type(section))
+        logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
         self.assertTrue(section)
         self.assertIsNone(section.find('h1'))
         self.assertIsNone(icon)
 
 class BrushEnginesTests(BaseSoupTestCase):
     """
+    For 'Brush Engines' section.
     """
 
     def setUp(self):
         """
+        For 'generate_brushengines_excerpt' function.
         """
         self.htmldir = "_src-html/reference_manual/brushes/brush_engines/"
         self.func_to_test = parser.generate_brushengines_excerpt
@@ -403,6 +435,7 @@ class BrushEnginesTests(BaseSoupTestCase):
 
     def _test_one(self, path):
         """
+        Tests that source paths lead to right directory.
         """
         h_tag, icon, section = super()._test_one(path)
         logger.debug("%s %s %s", h_tag, icon, type(section))
@@ -412,15 +445,15 @@ class BrushEnginesTests(BaseSoupTestCase):
         for img in section.find_all('img'):
             rootdir = img['src'].split('/')[1]
             self.assertEqual(rootdir, "images")
-        #self.assertIsInstance(icon, str)
-        #self.assertIs(icon.endswith(".svg"), True)
 
 class BrushSettingsTests(BaseSoupTestCase):
     """
+    For 'Brush Settings' section.
     """
 
     def setUp(self):
         """
+        For 'generate_brushsettings_excerpt' function.
         """
         self.htmldir = "_src-html/reference_manual/brushes/brush_settings/"
         self.func_to_test = parser.generate_brushsettings_excerpt
@@ -428,9 +461,10 @@ class BrushSettingsTests(BaseSoupTestCase):
 
     def _test_one(self, path):
         """
+        Tests that source paths lead to right directory.
         """
         h_tag, icon, section = super()._test_one(path)
-        logger.debug("%s %s %s", h_tag, icon, type(section))
+        logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
         self.assertTrue(section)
         self.assertIsNone(section.find('h1'))
         self.assertIsNone(icon)
@@ -440,10 +474,12 @@ class BrushSettingsTests(BaseSoupTestCase):
 
 class LayersAndMasksTests(BaseSoupTestCase):
     """
+    For 'Layers and Masks' section.
     """
 
     def setUp(self):
         """
+        For 'generate_layersandmasks_excerpt' function.
         """
         self.htmldir = "_src-html/reference_manual/layers_and_masks/"
         self.func_to_test = parser.generate_layersandmasks_excerpt
@@ -451,12 +487,13 @@ class LayersAndMasksTests(BaseSoupTestCase):
 
     def _test_one(self, path):
         """
+        Tests that source paths lead to right directory.
         """
         if path.is_dir():
-            logger.debug("Path %s is a directory. Nothing to see here.", path)
+            logger.debug("Path %s is a directory. Skipping.", path)
             return
         h_tag, icon, section = super()._test_one(path)
-        logger.debug("%s %s %s", h_tag, icon, type(section))
+        logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
         self.assertTrue(section)
         self.assertIsNone(section.find('h1'))
         self.assertIsNone(icon)
@@ -466,10 +503,12 @@ class LayersAndMasksTests(BaseSoupTestCase):
 
 class MainMenuTests(BaseSoupTestCase):
     """
+    For 'Main Menu' section.
     """
 
     def setUp(self):
         """
+        For 'generate_mainmenu_excerpt' function.
         """
         self.htmldir = "_src-html/reference_manual/main_menu/"
         self.func_to_test = parser.generate_mainmenu_excerpt
@@ -477,10 +516,12 @@ class MainMenuTests(BaseSoupTestCase):
 
 class PreferencesTests(BaseSoupTestCase):
     """
+    For 'Preferences' section.
     """
 
     def setUp(self):
         """
+        For 'generate_preferences_excerpt' function.
         """
         self.htmldir = "_src-html/reference_manual/preferences/"
         self.func_to_test = parser.generate_preferences_excerpt
@@ -488,24 +529,21 @@ class PreferencesTests(BaseSoupTestCase):
 
 class ResourceManagementTests(BaseSoupTestCase):
     """
+    For 'Resource Management' section.
     """
 
     def setUp(self):
         """
+        For 'generate_resourcemanagement_excerpt' function.
         """
         self.htmldir = "_src-html/reference_manual/resource_management/"
         self.func_to_test = parser.generate_resourcemanagement_excerpt
         logger.critical("%s", self.id())
 
-
-
 if __name__ == "__main__":
-    #logging.basicConfig(
-        #level=logging.DEBUG,
-        #filename=".kritaref_parser.log",
-    #)
     unittest.main(
         defaultTest="HSXBlendingModeTests",
     )
+
 
 

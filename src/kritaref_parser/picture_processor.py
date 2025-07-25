@@ -1,4 +1,5 @@
 """
+Contains functionality to manipulate sample images from Krita-Docs.
 """
 
 from PIL import Image
@@ -7,6 +8,7 @@ from _logging import logger
 
 def halve_image(filename: str, *, get_first_half: bool):
     """
+    Returns one of two halves of image specified by `filename`.
     """
     logger.debug("Now halving: %s", filename)
     with Image.open(filename) as img:
@@ -24,5 +26,4 @@ def halve_image(filename: str, *, get_first_half: bool):
 if __name__ == "__main__":
     filename = "images/.test.png"
     half_image = halve_image(filename, get_first_half=False)
-
 
