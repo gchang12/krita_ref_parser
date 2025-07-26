@@ -41,7 +41,7 @@ class BaseSoupTestCase(unittest.TestCase):
         """
         Describes the way in which a single subsection of a section should be tested.
         """
-        logger.debug("Now running %s on soup in %s", self.func_to_test.__name__, path)
+        #logger.debug("Now running %s on soup in %s", self.func_to_test.__name__, path)
         with open(path, encoding='utf-8') as rfile:
             soup = BeautifulSoup(rfile, "html.parser")
         actual = self.func_to_test(soup)
@@ -313,10 +313,10 @@ class HSXBlendingModeTests(BaseSoupTestCase):
         for h_tag, dotsimg_src, subsection in subsections:
             self.assertIsInstance(h_tag, str)
             self.assertIsInstance(dotsimg_src, str)
-            logger.debug("h_tag: %s, dotsimage: %s, subsection: %s", h_tag, dotsimg_src, type(subsection))
+            #logger.debug("h_tag: %s, dotsimage: %s, subsection: %s", h_tag, dotsimg_src, type(subsection))
             self.assertIsNone(subsection.find('figure'))
             self.assertIn('class', subsection.attrs)
-            logger.debug("subsection['class']: %s", subsection['class'])
+            #logger.debug("subsection['class']: %s", subsection['class'])
             try:
                 hsx = {
                     "Intensity": "hsi",
@@ -385,7 +385,7 @@ class DockersTests(BaseSoupTestCase):
         Asserts lack of icon and h1, as well as non-null soup.
         """
         h_tag, icon, section = super()._test_one(path)
-        logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
+        #logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
         self.assertTrue(section)
         self.assertIsNone(section.find('h1'))
         self.assertIsNone(icon)
@@ -415,7 +415,7 @@ class FiltersTests(BaseSoupTestCase):
         Asserts h1 and icon are blank, and soup is non-null. 
         """
         h_tag, icon, section = super()._test_one(path)
-        logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
+        #logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
         self.assertTrue(section)
         self.assertIsNone(section.find('h1'))
         self.assertIsNone(icon)
@@ -438,10 +438,10 @@ class BrushEnginesTests(BaseSoupTestCase):
         Tests that source paths lead to right directory.
         """
         h_tag, icon, section = super()._test_one(path)
-        logger.debug("%s %s %s", h_tag, icon, type(section))
+        #logger.debug("%s %s %s", h_tag, icon, type(section))
         self.assertTrue(section)
         self.assertIsNone(section.find('h1'))
-        logger.debug("icon: %s, %s", icon, type(icon))
+        #logger.debug("icon: %s, %s", icon, type(icon))
         for img in section.find_all('img'):
             rootdir = img['src'].split('/')[1]
             self.assertEqual(rootdir, "images")
@@ -464,7 +464,7 @@ class BrushSettingsTests(BaseSoupTestCase):
         Tests that source paths lead to right directory.
         """
         h_tag, icon, section = super()._test_one(path)
-        logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
+        #logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
         self.assertTrue(section)
         self.assertIsNone(section.find('h1'))
         self.assertIsNone(icon)
@@ -490,10 +490,10 @@ class LayersAndMasksTests(BaseSoupTestCase):
         Tests that source paths lead to right directory.
         """
         if path.is_dir():
-            logger.debug("Path %s is a directory. Skipping.", path)
+            #logger.debug("Path %s is a directory. Skipping.", path)
             return
         h_tag, icon, section = super()._test_one(path)
-        logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
+        #logger.debug("h_tag: %s, icon: %s, section: %s", h_tag, icon, type(section))
         self.assertTrue(section)
         self.assertIsNone(section.find('h1'))
         self.assertIsNone(icon)
@@ -544,6 +544,5 @@ if __name__ == "__main__":
     unittest.main(
         defaultTest="HSXBlendingModeTests",
     )
-
 
 

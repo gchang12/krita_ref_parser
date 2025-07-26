@@ -10,7 +10,7 @@ def halve_image(filename: str, *, get_first_half: bool):
     """
     Returns one of two halves of image specified by `filename`.
     """
-    logger.debug("Now halving: %s", filename)
+    #logger.debug("Now halving: %s", filename)
     with Image.open(filename) as img:
         half_width = int(img.size[0] / 2)
         full_height = img.size[1]

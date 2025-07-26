@@ -3,7 +3,6 @@ Tests for picture manipulation functionality.
 """
 
 import unittest
-#import logging
 
 from PIL import Image
 
@@ -50,10 +49,6 @@ class HalveImageTests(unittest.TestCase):
         self.assertIsInstance(half, Image.Image)
 
 if __name__ == "__main__":
-    #logging.basicConfig(
-        #level=logging.DEBUG,
-        #filename=".kritaref_parser.log",
-    #)
     unittest.main(
         defaultTest="HalveImageTests",
     )

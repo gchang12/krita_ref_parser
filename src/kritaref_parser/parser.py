@@ -54,15 +54,12 @@ def _reset_anchor_tag_sources(section):
     # for reference: view-source:https://docs.krita.org/en/reference_manual/tools/assistant.html
     # (and add an additional class to this while you're at it)
     external_root = 'https://docs.krita.org/en/'
-    logger.debug("Setting <a> hrefs to reference '%s' instead of '../../'.", external_root)
-    for a in section.find_all('a'):
-        if "internal" in a['class']:
-            href_path = a['href'].split('/')
-            a['href'] = external_root + '/'.join(href_path[2:])
-            a['class'].remove("internal")
-            a['class'].append(CLASS_FOR_LINKS_TO_OFFICIAL_DOCS)
-        else:
-            logger.debug("The 'class' attribute of the <a> tag: '%s', does not contain 'internal'.", a.string)
+    #logger.debug("Setting <a> hrefs to reference '%s' instead of '../../'.", external_root)
+    for a in filter(lambda a_: "internal" in a_['class'], section.find_all('a')):
+        href_path = a['href'].split('/')
+        a['href'] = external_root + '/'.join(href_path[2:])
+        a['class'].remove("internal")
+        a['class'].append(CLASS_FOR_LINKS_TO_OFFICIAL_DOCS)
 
 def _extract_h_tag(section, *, h_level: int):
     """
@@ -71,12 +68,12 @@ def _extract_h_tag(section, *, h_level: int):
     # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#extract
     # extract header tag
     # store filename-header pairs as JSON to be returned
-    logger.debug("Searching for tag: h%d", h_level)
+    #logger.debug("Searching for tag: h%d", h_level)
     h = section.find('h%d' % h_level).extract().text
-    logger.debug("Searching for pilcrow in: '%s'", h)
+    #logger.debug("Searching for pilcrow in: '%s'", h)
     pilcrow_loc = h.index(PILCROW)
     h = h[:pilcrow_loc]
-    logger.debug("Returning: %r", h)
+    #logger.debug("Returning: %r", h)
     return h
 
 def _replace_img_sources(section, *, levels):
@@ -87,14 +84,14 @@ def _replace_img_sources(section, *, levels):
     # change all image sources:
     # - from: '../../_images/'
     # - to: './images/'
-    logger.debug("Replacing `img-src` to ./images/`img-src[%d:]`", levels)
+    #logger.debug("Replacing `img-src` to ./images/`img-src[%d:]`", levels)
     for img in section.find_all("img"):
         img_src = img['src'].split('/')
-        logger.debug("Found `img-src`: %s", img['src'])
+        #logger.debug("Found `img-src`: %s", img['src'])
         # TODO: Delete leading './'
         new_img_src = "./images/" + '/'.join(img_src[levels:])
         img['src'] = new_img_src
-        logger.debug("Set `img-src`: %s", new_img_src)
+        #logger.debug("Set `img-src`: %s", new_img_src)
 
 # TODO: Remember why I needed this.
 #caption = section.find("span", class_="caption-text").extract()
@@ -106,11 +103,11 @@ def _extract_dotsimg(section):
     Pops first dots-img tag in a section.
     """
     dotsimg = None
-    logger.debug("Searching for <img> tag where src.endswith('_with_dots.png')")
+    #logger.debug("Searching for <img> tag where src.endswith('_with_dots.png')")
     for img in section.find_all("img"):
         if img['src'].endswith("_with_dots.png"):
             dotsimg = img.extract()
-            logger.debug("Dots-image found: %s. Returning.", dotsimg)
+            #logger.debug("Dots-image found: %s. Returning.", dotsimg)
             break
     return dotsimg
 
@@ -127,7 +124,7 @@ def _generate_excerpt_with_icon(soup: BeautifulSoup, *, levels, h_level):
     try:
         icon = section.find('img').extract()['src']
     except AttributeError:
-        logger.info("Unable to find 'img' in '%s' section.", h1)
+        #logger.info("Unable to find 'img' in '%s' section.", h1)
         icon = None
     return (h1, icon, section)
 
@@ -148,23 +145,23 @@ def generate_blendingmodes_excerpt(soup: BeautifulSoup):
     This works for all subsections except for HSX.
     """
     sections = []
-    logger.debug("Compiling list of (header, icon, section_html) objects.")
+    #logger.debug("Compiling list of (header, icon, section_html) objects.")
     for section in soup.css.select("section[id]")[1:]:
         _reset_anchor_tag_sources(section)
         _replace_img_sources(section, levels=3)
         try:
             h_tag = _extract_h_tag(section, h_level=2)
         except AttributeError:
-            logger.info("No <h2> tag was found. Getting <h3>.")
+            #logger.info("No <h2> tag was found. Getting <h3>.")
             h_tag = _extract_h_tag(section, h_level=3)
         dotsimg = _extract_dotsimg(section)
         if dotsimg is not None:
             dotsimg_src = dotsimg['src']
         else:
             dotsimg_src = None
-        logger.debug("Header: %s, Dots-Image: %s, Section.Length: %d", h_tag, dotsimg_src, len(section))
+        #logger.debug("Header: %s, Dots-Image: %s, Section.Length: %d", h_tag, dotsimg_src, len(section))
         sections.append((h_tag, dotsimg_src, section))
-    logger.debug("(%d) sections found in soup.", len(sections))
+    #logger.debug("(%d) sections found in soup.", len(sections))
     return sections
 
 def generate_hsx_blendingmode_excerpt(soup: BeautifulSoup):
@@ -204,7 +201,7 @@ def generate_hsx_blendingmode_excerpt(soup: BeautifulSoup):
         """
         name, subsection = namesection
         dots_images = []
-        logger.debug("Getting images and soup for: %s", name)
+        #logger.debug("Getting images and soup for: %s", name)
         num_images = 0
         for img in filter(
             lambda img_: img_['src'].endswith("_with_dots.png"),
@@ -213,7 +210,7 @@ def generate_hsx_blendingmode_excerpt(soup: BeautifulSoup):
             dots_image = img.extract()['src']
             dots_images.append(dots_image)
             num_images += 1
-        logger.debug("(%d) images found.", num_images)
+        #logger.debug("(%d) images found.", num_images)
         return (name, (dots_images, subsection))
     images_and_soup = dict(
         map(
@@ -241,13 +238,13 @@ def generate_hsx_blendingmode_excerpt(soup: BeautifulSoup):
         subsection.attrs['class'] = []
         subsection['class'].append(blending_mode.lower())
         subsection['class'].append(hsx)
-        logger.debug("Compiling (header, dotsimg_src, section) for (%s, %s).", hsx, blending_mode)
+        #logger.debug("Compiling (header, dotsimg_src, section) for (%s, %s).", hsx, blending_mode)
         dotsimg_src = dots_images.pop(0)
         num_figures = 0
         for figure in subsection.find_all("figure"):
             figure.extract()
             num_figures += 1
-        logger.debug("(%d) figures deleted.", num_figures)
+        #logger.debug("(%d) figures deleted.", num_figures)
         h_tag = blending_mode
         subsections.append((h_tag, dotsimg_src, subsection))
     for blending_mode, (dots_images, subsection_) in images_and_soup.items():
@@ -280,7 +277,7 @@ def generate_hsx_blendingmode_excerpt(soup: BeautifulSoup):
             for figure in subsection.find_all("figure"):
                 figure.extract()
                 num_figures += 1
-            logger.debug("(%d) figures deleted.", num_figures)
+            #logger.debug("(%d) figures deleted.", num_figures)
             subsections.append((h_tag, dotsimg_src, subsection))
     return subsections
 
