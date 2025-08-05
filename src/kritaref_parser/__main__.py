@@ -8,6 +8,8 @@ from collections import OrderedDict
 from pathlib import Path
 import re
 import json
+import shutil
+import os
 
 from bs4 import BeautifulSoup
 
@@ -49,6 +51,8 @@ def make_directories(root, reference_sections):
     Creates mirror-directory that replicates structure of reference folder.
     """
     #logger.debug("Making necessary directories.")
+    Path("excerpts").mkdir(exist_ok=True)
+    Path("images").mkdir(exist_ok=True)
     for ref_section in reference_sections:
         path_to_source = Path(root, ref_section)
         path_to_target = Path("excerpts", path_to_source.parts[-1])
@@ -193,7 +197,7 @@ def write_index(buffer, index_name):
         # expect: 5-tuple of the form: directory, (filename, header, icon, soup)
         directory, source, target, header, icon, _ = kernel_item
         fileheadericon = {
-            "dir": directory,
+            "dir": directory.rstrip('/') + "/",
             "file": target,
             "header": header,
             "icon": icon,
@@ -217,17 +221,24 @@ def write_html_output(root, buffer, targetdir):
         #logger.debug("Writing HTML from %s to %s", path_to_source, path_to_target)
         if path_to_target.is_file():
             logger.warning("%s already exists for %s-%s: %s", path_to_target, source, header, soup)
-        else:
-            # clean html
-            html_to_write = "\n".join([line.strip() for line in str(soup).splitlines() if line.strip()])
-            #logger.debug("html: %d", len(html_to_write))
-            path_to_target.write_text(html_to_write, encoding="utf-8")
+        # clean html
+        html_to_write = "\n".join([line.strip() for line in str(soup).splitlines() if line.strip()])
+        #logger.debug("html: %d", len(html_to_write))
+        path_to_target.write_text(html_to_write, encoding="utf-8")
 
 # resources to delete if not referenced:
 # - images
 # excerpts/*/*.html
 # gather image references from all excerpts
 # if image references do not exist, then delete them from the static folder
+
+def transfer_images(root, imagedir_root):
+    """
+    Copies all images from source to output.
+    """
+    #os.chmod(imagedir_root, 0o555)
+    for imagefile in Path(root, "..", "_images").iterdir():
+        shutil.copyfile(imagefile, Path(imagedir_root, imagefile.name))
 
 # delete unused images
 def delete_unused_images(excerptdir_root, imagedir_root, og_dots_image, index_name):
@@ -278,7 +289,7 @@ def halve_blendingmode_dots_images(og_dots_image, imagedir):
 
 if __name__ == "__main__":
     # CONSTANTS
-    ROOT = "_src-html/reference_manual/"
+    ROOT = "_src/reference_manual/"
     INDEX_NAME = "index.json"
     OG_DOTS_IMAGE = "og_dots_image.png"
     EXCERPTDIR_ROOT = "./excerpts/"
@@ -303,6 +314,7 @@ if __name__ == "__main__":
     buffer = compile_items(ROOT, REFERENCE_SECTIONS)
     write_index(buffer, INDEX_NAME)
     write_html_output(ROOT, buffer, EXCERPTDIR_ROOT)
+    transfer_images(ROOT, IMAGEDIR_ROOT)
     delete_unused_images(EXCERPTDIR_ROOT, IMAGEDIR_ROOT, OG_DOTS_IMAGE, INDEX_NAME)
     halve_blendingmode_dots_images(OG_DOTS_IMAGE, IMAGEDIR_ROOT)
     #exit()

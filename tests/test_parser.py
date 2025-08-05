@@ -65,7 +65,7 @@ class ToolsTests(BaseSoupTestCase):
         """
         For 'generate_tools_excerpt' function.
         """
-        self.htmldir = "_src-html/reference_manual/tools/"
+        self.htmldir = "_src/reference_manual/tools/"
         self.func_to_test = parser.generate_tools_excerpt
         logger.critical("%s", self.id())
 
@@ -129,7 +129,7 @@ class BlendingModeTests(BaseSoupTestCase):
         """
         For 'generate_blendingmodes_excerpt' section.
         """
-        self.htmldir = "_src-html/reference_manual/blending_modes/"
+        self.htmldir = "_src/reference_manual/blending_modes/"
         self.func_to_test = parser.generate_blendingmodes_excerpt
         logger.critical("%s", self.id())
 
@@ -306,7 +306,7 @@ class HSXBlendingModeTests(BaseSoupTestCase):
         """
         Runs various tests.
         """
-        path = "_src-html/reference_manual/blending_modes/hsx.html"
+        path = "_src/reference_manual/blending_modes/hsx.html"
         with open(path, encoding="utf-8") as rfile:
             soup = BeautifulSoup(rfile, 'html.parser')
         subsections = parser.generate_hsx_blendingmode_excerpt(soup)
@@ -369,7 +369,7 @@ class DockersTests(BaseSoupTestCase):
         """
         For 'generate_dockers_excerpt' function.
         """
-        self.htmldir = "_src-html/reference_manual/dockers/"
+        self.htmldir = "_src/reference_manual/dockers/"
         self.func_to_test = parser.generate_dockers_excerpt
         logger.critical("%s", self.id())
 
@@ -399,7 +399,7 @@ class FiltersTests(BaseSoupTestCase):
         """
         For 'generate_filters_excerpt' function.
         """
-        self.htmldir = "_src-html/reference_manual/filters/"
+        self.htmldir = "_src/reference_manual/filters/"
         self.func_to_test = parser.generate_filters_excerpt
         logger.critical("%s", self.id())
 
@@ -429,7 +429,7 @@ class BrushEnginesTests(BaseSoupTestCase):
         """
         For 'generate_brushengines_excerpt' function.
         """
-        self.htmldir = "_src-html/reference_manual/brushes/brush_engines/"
+        self.htmldir = "_src/reference_manual/brushes/brush_engines/"
         self.func_to_test = parser.generate_brushengines_excerpt
         logger.critical("%s", self.id())
 
@@ -455,7 +455,7 @@ class BrushSettingsTests(BaseSoupTestCase):
         """
         For 'generate_brushsettings_excerpt' function.
         """
-        self.htmldir = "_src-html/reference_manual/brushes/brush_settings/"
+        self.htmldir = "_src/reference_manual/brushes/brush_settings/"
         self.func_to_test = parser.generate_brushsettings_excerpt
         logger.critical("%s", self.id())
 
@@ -481,7 +481,7 @@ class LayersAndMasksTests(BaseSoupTestCase):
         """
         For 'generate_layersandmasks_excerpt' function.
         """
-        self.htmldir = "_src-html/reference_manual/layers_and_masks/"
+        self.htmldir = "_src/reference_manual/layers_and_masks/"
         self.func_to_test = parser.generate_layersandmasks_excerpt
         logger.critical("%s", self.id())
 
@@ -510,7 +510,7 @@ class MainMenuTests(BaseSoupTestCase):
         """
         For 'generate_mainmenu_excerpt' function.
         """
-        self.htmldir = "_src-html/reference_manual/main_menu/"
+        self.htmldir = "_src/reference_manual/main_menu/"
         self.func_to_test = parser.generate_mainmenu_excerpt
         logger.critical("%s", self.id())
 
@@ -523,7 +523,7 @@ class PreferencesTests(BaseSoupTestCase):
         """
         For 'generate_preferences_excerpt' function.
         """
-        self.htmldir = "_src-html/reference_manual/preferences/"
+        self.htmldir = "_src/reference_manual/preferences/"
         self.func_to_test = parser.generate_preferences_excerpt
         logger.critical("%s", self.id())
 
@@ -536,7 +536,7 @@ class ResourceManagementTests(BaseSoupTestCase):
         """
         For 'generate_resourcemanagement_excerpt' function.
         """
-        self.htmldir = "_src-html/reference_manual/resource_management/"
+        self.htmldir = "_src/reference_manual/resource_management/"
         self.func_to_test = parser.generate_resourcemanagement_excerpt
         logger.critical("%s", self.id())
 
@@ -544,5 +544,6 @@ if __name__ == "__main__":
     unittest.main(
         defaultTest="HSXBlendingModeTests",
     )
+
 
 

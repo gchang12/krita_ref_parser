@@ -56,10 +56,11 @@ def _reset_anchor_tag_sources(section):
     external_root = 'https://docs.krita.org/en/'
     #logger.debug("Setting <a> hrefs to reference '%s' instead of '../../'.", external_root)
     for a in filter(lambda a_: "internal" in a_['class'], section.find_all('a')):
-        href_path = a['href'].split('/')
-        a['href'] = external_root + '/'.join(href_path[2:])
-        a['class'].remove("internal")
-        a['class'].append(CLASS_FOR_LINKS_TO_OFFICIAL_DOCS)
+        #href_path = a['href'].split('/')
+        #a['href'] = external_root + '/'.join(href_path[2:])
+        #a['class'].remove("internal")
+        #a['class'].append(CLASS_FOR_LINKS_TO_OFFICIAL_DOCS)
+        pass
 
 def _extract_h_tag(section, *, h_level: int):
     """
@@ -89,7 +90,7 @@ def _replace_img_sources(section, *, levels):
         img_src = img['src'].split('/')
         #logger.debug("Found `img-src`: %s", img['src'])
         # TODO: Delete leading './'
-        new_img_src = "./images/" + '/'.join(img_src[levels:])
+        new_img_src = "../../images/" + '/'.join(img_src[levels:])
         img['src'] = new_img_src
         #logger.debug("Set `img-src`: %s", new_img_src)
 
@@ -360,12 +361,13 @@ def generate_resourcemanagement_excerpt(soup: BeautifulSoup):
     return _generate_excerpt_with_icon(soup, levels=3, h_level=1)
 
 if __name__ == "__main__":
-    path = "_src-html/reference_manual/blending_modes/hsx.html"
+    path = "_src/reference_manual/blending_modes/hsx.html"
     with open(path, encoding="utf-8") as rfile:
         soup = BeautifulSoup(rfile, 'html.parser')
     subsections = generate_hsx_blendingmode_excerpt(soup)
     for h_tag, icon, subsection in subsections:
         print(subsection)
         break
+
 
 
