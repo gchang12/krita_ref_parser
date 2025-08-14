@@ -55,7 +55,4 @@ MANIFEST
 
 # MY STUFF
 .vim/
-_src-html/
-_my-krita-files/
 node_modules/
-.next/
