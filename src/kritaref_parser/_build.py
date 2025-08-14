@@ -371,7 +371,7 @@ if __name__ == "__main__":
     )
     dirname = "./app/"
     clean_app_directory(dirname)
-    src = "../../python/kritaref_parser/"
+    src = "../../python/kritaref_palette/"
     tgt = "./public/"
     import_parsed_files(src, tgt)
     excerpt_dir = "./public/excerpts/"

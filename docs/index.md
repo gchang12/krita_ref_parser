@@ -1,4 +1,4 @@
-# kritaref_parser
+# kritaref_palette
 
 Add a short description here!
 

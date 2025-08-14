@@ -1,5 +1,5 @@
 """
-    Setup file for kritaref_parser.
+    Setup file for kritaref_palette.
     Use setup.cfg to configure your project.
 
     This file was generated with PyScaffold 4.6.
