@@ -319,4 +319,3 @@ if __name__ == "__main__":
     halve_blendingmode_dots_images(OG_DOTS_IMAGE, IMAGEDIR_ROOT)
     #exit()
 
-
