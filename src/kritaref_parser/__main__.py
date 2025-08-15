@@ -46,16 +46,16 @@ def _format_target_filename(filename_root, header):
 
 # BUILD
 
-def make_directories(root, reference_sections):
+def make_directories(root, reference_sections, excerptdir_root, imagedir_root):
     """
     Creates mirror-directory that replicates structure of reference folder.
     """
     #logger.debug("Making necessary directories.")
-    Path("excerpts").mkdir(exist_ok=True)
-    Path("images").mkdir(exist_ok=True)
+    Path(excerptdir_root).mkdir(exist_ok=True)
+    Path(imagedir_root).mkdir(exist_ok=True)
     for ref_section in reference_sections:
         path_to_source = Path(root, ref_section)
-        path_to_target = Path("excerpts", path_to_source.parts[-1])
+        path_to_target = Path(excerptdir_root, path_to_source.parts[-1])
         #logger.debug("Checking if %s ought to be made.", path_to_excerpt)
         if not path_to_target.is_dir() and path_to_source.is_dir():
             #logger.debug("Creating %s directory.", path_to_target)
@@ -65,6 +65,8 @@ def compile_item(root, ref_section, processing_func):
     """
     Compiles list of 4-tuples.
     """
+    print('compile_item')
+    print(root, ref_section)
     path_to_source = Path(root, ref_section)
     #logger.debug("Compiling items from: %s", path_to_source)
     if path_to_source.is_dir():
@@ -112,16 +114,20 @@ def compile_item(root, ref_section, processing_func):
             ),
         )
     else:
-        #logger.warning("What the hell kinda file is %s!?", ref_section)
+        print("What the hell kinda file is %s!?" % ref_section)
+        logger.warning("What the hell kinda file is %s!?", ref_section)
         h_icon_html_list = None
+    print(h_icon_html_list)
     return h_icon_html_list
 
 def compile_item_from_list(root, ref_section, processing_func):
     """
     Compiles list of 4-tuples.
     """
+    print('compile_item_from_list')
     path_to_source = Path(root, ref_section)
     #logger.debug("Compiling items from: %s", path_to_source)
+    print(root, ref_section)
     h_icon_html_list = []
     def extend_3tuple_list(path, headericonhtml_list):
         """
@@ -154,8 +160,10 @@ def compile_item_from_list(root, ref_section, processing_func):
             soup = BeautifulSoup(rfile, "html.parser")
         h_icon_html_list.extend(list(map(convert_path_to_headericonhtml, processing_func(soup))))
     else:
+        print("What the hell kinda file is %s!?" % ref_section)
         #logger.warning("What the hell kinda file is %s!?", ref_section)
         h_icon_html_list = None
+    print(h_icon_html_list)
     return h_icon_html_list
 
 def compile_items(root, reference_sections):
@@ -173,6 +181,7 @@ def compile_items(root, reference_sections):
             directory = ref_section
         else:
             directory = ref_section.split('/')[-2]
+        print(root, reference_sections, fileheadericonhtml_list)
         for value in fileheadericonhtml_list:
             #logger.debug("Must unpack value into %d arguments: %r", len(value), [type(attr) for attr in value])
             (source, target, header, icon, soup) = value
@@ -293,8 +302,8 @@ if __name__ == "__main__":
     ROOT = "../../krita-docs/_build/html/reference_manual/"
     INDEX_NAME = "index.json"
     OG_DOTS_IMAGE = "og_dots_image.png"
-    EXCERPTDIR_ROOT = "../../static/excerpts/"
-    IMAGEDIR_ROOT = "../../static/images/"
+    EXCERPTDIR_ROOT = "./static/excerpts/"
+    IMAGEDIR_ROOT = "./static/images/"
     REFERENCE_SECTIONS = OrderedDict(
         {
             "blending_modes/": generate_blendingmodes_excerpt,
@@ -311,12 +320,10 @@ if __name__ == "__main__":
         }
     )
     # And... go!
-    make_directories(ROOT, REFERENCE_SECTIONS)
+    make_directories(ROOT, REFERENCE_SECTIONS, EXCERPTDIR_ROOT, IMAGEDIR_ROOT)
     buffer = compile_items(ROOT, REFERENCE_SECTIONS)
     write_index(buffer, INDEX_NAME)
     write_html_output(ROOT, buffer, EXCERPTDIR_ROOT)
     transfer_images(ROOT, IMAGEDIR_ROOT)
     delete_unused_images(EXCERPTDIR_ROOT, IMAGEDIR_ROOT, OG_DOTS_IMAGE, INDEX_NAME)
     halve_blendingmode_dots_images(OG_DOTS_IMAGE, IMAGEDIR_ROOT)
-    #exit()
-
