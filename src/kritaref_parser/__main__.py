@@ -289,11 +289,12 @@ def halve_blendingmode_dots_images(og_dots_image, imagedir):
 
 if __name__ == "__main__":
     # CONSTANTS
-    ROOT = "_src/reference_manual/"
+    #ROOT = "_src/reference_manual/"
+    ROOT = "../../krita-docs/_build/html/reference_manual/"
     INDEX_NAME = "index.json"
     OG_DOTS_IMAGE = "og_dots_image.png"
-    EXCERPTDIR_ROOT = "./excerpts/"
-    IMAGEDIR_ROOT = "./images/"
+    EXCERPTDIR_ROOT = "../../static/excerpts/"
+    IMAGEDIR_ROOT = "../../static/images/"
     REFERENCE_SECTIONS = OrderedDict(
         {
             "blending_modes/": generate_blendingmodes_excerpt,
