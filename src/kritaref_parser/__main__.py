@@ -160,7 +160,7 @@ def compile_item_from_list(root, ref_section, processing_func):
             soup = BeautifulSoup(rfile, "html.parser")
         h_icon_html_list.extend(list(map(convert_path_to_headericonhtml, processing_func(soup))))
     else:
-        print("What the hell kinda file is %s!?" % ref_section)
+        print("What the hell kinda file is %s!?" % path_to_source)
         #logger.warning("What the hell kinda file is %s!?", ref_section)
         h_icon_html_list = None
     print(h_icon_html_list)
@@ -299,7 +299,7 @@ def halve_blendingmode_dots_images(og_dots_image, imagedir):
 if __name__ == "__main__":
     # CONSTANTS
     #ROOT = "_src/reference_manual/"
-    ROOT = "../../krita-docs/_build/html/reference_manual/"
+    ROOT = "./krita-docs/_build/html/reference_manual/"
     INDEX_NAME = "index.json"
     OG_DOTS_IMAGE = "og_dots_image.png"
     EXCERPTDIR_ROOT = "./static/excerpts/"
