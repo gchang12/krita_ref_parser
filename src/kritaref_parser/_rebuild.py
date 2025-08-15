@@ -108,7 +108,7 @@ if __name__ == "__main__":
     logging.basicConfig(
         level=logging.DEBUG,
     )
-    excerpt_dir = "./public/excerpts/"
+    excerpt_dir = "./frontend/kritaref_palette/public/excerpts/"
     #have_anchor_tags_reference_source(excerpt_dir)
     have_anchor_tags_reference_source2(excerpt_dir)
 
