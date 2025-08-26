@@ -112,7 +112,7 @@ def _extract_dotsimg(section):
             break
     return dotsimg
 
-def _generate_excerpt_with_icon(soup: BeautifulSoup, *, levels, h_level):
+def _generate_excerpt_with_icon(soup: BeautifulSoup, *, levels, h_level, exclude=()):
     """
     Given a BS object, returns a tuple (header: str, icon: str, section_html: bs4.Tag)
 
@@ -122,11 +122,14 @@ def _generate_excerpt_with_icon(soup: BeautifulSoup, *, levels, h_level):
     _reset_anchor_tag_sources(section)
     h1 = _extract_h_tag(section, h_level=h_level)
     _replace_img_sources(section, levels=levels)
-    try:
-        icon = section.find('img').extract()['src']
-    except AttributeError:
-        #logger.info("Unable to find 'img' in '%s' section.", h1)
+    if section['id'] in exclude:
         icon = None
+    else:
+        try:
+            icon = section.find('img').extract()['src']
+        except AttributeError:
+            #logger.info("Unable to find 'img' in '%s' section.", h1)
+            icon = None
     return (h1, icon, section)
 
 # TOOLS
@@ -135,7 +138,7 @@ def generate_tools_excerpt(soup: BeautifulSoup):
     """
     Generates HTML excerpt and returns it alongside header and icon.
     """
-    return _generate_excerpt_with_icon(soup, h_level=1, levels=3)
+    return _generate_excerpt_with_icon(soup, h_level=1, levels=3, exclude=['color-sampler-tool'])
 
 # BLENDING MODES
 
@@ -318,7 +321,7 @@ def generate_brushengines_excerpt(soup: BeautifulSoup):
     """
     For 'Brush Engines' section.
     """
-    return _generate_excerpt_with_icon(soup, levels=4, h_level=1)
+    return _generate_excerpt_with_icon(soup, levels=4, h_level=1, exclude=['chalk-brush-engine'])
 
 # BRUSH SETTINGS
 
