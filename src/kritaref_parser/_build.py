@@ -372,13 +372,13 @@ if __name__ == "__main__":
     logging.basicConfig(
         level=logging.DEBUG,
     )
-    dirname = "./frontend/kritaref_palette/app/"
+    dirname = "./frontend/kritaref_palette/_app/"
     clean_app_directory(dirname)
     src = "./static/"
     tgt = "./frontend/kritaref_palette/public/"
     import_parsed_files(src, tgt)
     excerpt_dir = "./static/excerpts/"
-    app_dir = "./frontend/kritaref_palette/app/"
+    app_dir = "./frontend/kritaref_palette/_app/"
     tgt_dir = "./frontend/kritaref_palette/public/excerpts/"
     tgt_imgdir = "./frontend/kritaref_palette/public/images/"
     index = get_index("./static/index.json")

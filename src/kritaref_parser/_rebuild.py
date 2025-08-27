@@ -136,8 +136,8 @@ if __name__ == "__main__":
     logging.basicConfig(
         level=logging.DEBUG,
     )
-    excerpt_dir = "./public/excerpts/"
+    excerpt_dir = "./static/excerpts/"
     #have_anchor_tags_reference_source(excerpt_dir)
-    #have_anchor_tags_reference_source2(excerpt_dir)
+    have_anchor_tags_reference_source2(excerpt_dir)
     delete_orphaned_figcaption(excerpt_dir)
 
