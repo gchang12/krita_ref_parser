@@ -345,7 +345,7 @@ def generate_mainmenu_excerpt(soup: BeautifulSoup):
     """
     For 'Main Menu' section.
     """
-    return _generate_excerpt_with_icon(soup, levels=3, h_level=1)
+    return _generate_excerpt_without_icon(soup, levels=3, h_level=1)
 
 # PREFERENCES
 
@@ -353,7 +353,7 @@ def generate_preferences_excerpt(soup: BeautifulSoup):
     """
     For 'Preferences' section.
     """
-    return _generate_excerpt_with_icon(soup, levels=3, h_level=1)
+    return _generate_excerpt_without_icon(soup, levels=3, h_level=1)
 
 # RESOURCE MANAGEMENT
 
@@ -361,7 +361,7 @@ def generate_resourcemanagement_excerpt(soup: BeautifulSoup):
     """
     For 'Resource Management' section.
     """
-    return _generate_excerpt_with_icon(soup, levels=3, h_level=1)
+    return _generate_excerpt_without_icon(soup, levels=3, h_level=1)
 
 if __name__ == "__main__":
     path = "_src/reference_manual/blending_modes/hsx.html"
@@ -369,7 +369,5 @@ if __name__ == "__main__":
         soup = BeautifulSoup(rfile, 'html.parser')
     subsections = generate_hsx_blendingmode_excerpt(soup)
     for h_tag, icon, subsection in subsections:
-        print(subsection)
         break
-
 
