@@ -132,12 +132,41 @@ def delete_orphaned_figcaption(excerpt_dir):
 
 # specially mark blending mode subsections
 
+def set_rel_attribute(excerpt_dir):
+    """
+    """
+    sections = (
+        "brush_engines/",
+        "tools/",
+        "brush_settings/",
+        "dockers/",
+        "filters/",
+        "layers_and_masks/",
+        "main_menu/",
+        "preferences/",
+        "resource_management/",
+        "blending_modes/",
+    )
+    for section in sections:
+        path_to_section = Path(excerpt_dir, section)
+        file_count = 0
+        for htmlfile in filter(lambda path: path.is_file(), path_to_section.iterdir()):
+            htmltext = htmlfile.read_text(encoding='utf-8')
+            soup = BeautifulSoup(htmltext, 'html.parser')
+            for a in soup.find_all("a"):
+                if "external" in a['class']:
+                    a['class'].remove("external")
+                if a['href'].startswith('http'):
+                    a['rel'] = "external"
+            htmlfile.write_text(str(soup), encoding="utf-8")
+
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.DEBUG,
     )
-    excerpt_dir = "./static/excerpts/"
+    excerpt_dir = "./frontend/kritaref_palette/public/excerpts/"
     #have_anchor_tags_reference_source(excerpt_dir)
     have_anchor_tags_reference_source2(excerpt_dir)
     delete_orphaned_figcaption(excerpt_dir)
+    set_rel_attribute(excerpt_dir)
 
