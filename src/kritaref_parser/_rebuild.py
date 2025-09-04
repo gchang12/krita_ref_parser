@@ -33,8 +33,12 @@ def have_anchor_tags_reference_source(excerpt_dir):
                     #a['class'].append('external')
                     continue
                 a['href'] = root + "/" + a['href'].lstrip('./')
-                a['class'].remove('internal')
-                a['class'].append('link-to-official-docs')
+                try:
+                    a['class'].remove('internal')
+                except ValueError:
+                    pass
+                if 'link-to-official-docs' not in a['class']:
+                    a['class'].append('link-to-official-docs')
             htmlfile.write_text(str(soup), encoding='utf-8')
             file_count += 1
         logging.debug("%d files have been modified for '%s'.", file_count, section)
@@ -97,7 +101,10 @@ def have_anchor_tags_reference_source2(excerpt_dir):
                 if ".." in new_href:
                     new_href = new_href.replace('..', '')
                 #print(new_href)
-                a['class'].remove('internal')
+                try:
+                    a['class'].remove('internal')
+                except ValueError:
+                    pass
                 a['class'].append('link-to-official-docs')
                 a['href'] = new_href
             htmlfile.write_text(str(soup), encoding='utf-8')

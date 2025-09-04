@@ -373,6 +373,12 @@ if __name__ == "__main__":
         level=logging.DEBUG,
     )
     dirname = "./frontend/kritaref_palette/_app/"
+    old_dirname = "./frontend/kritaref_palette/app/"
+    try:
+        shutil.rmtree(dirname)
+    except FileNotFoundError:
+        pass
+    shutil.copytree(old_dirname, dirname)
     clean_app_directory(dirname)
     src = "./static/"
     tgt = "./frontend/kritaref_palette/public/"
@@ -388,6 +394,6 @@ if __name__ == "__main__":
     generate_menu_for_blending_modes_with_dots(excerpt_dir, index, app_dir)
     prepend_lines_to_all_section_excerpts(excerpt_dir, index, tgt_dir)
     append_filler_files(excerpt_dir, tgt_imgdir)
-    have_excerpt_anchors_open_new_tab(excerpt_dir)
+    #have_excerpt_anchors_open_new_tab(excerpt_dir)
     #have_anchor_tags_reference_source(excerpt_dir)
 
