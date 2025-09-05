@@ -381,10 +381,10 @@ if __name__ == "__main__":
     tgt = "./frontend/kritaref_palette/public/"
     import_parsed_files(src, tgt)
     excerpt_dir = "./static/excerpts/"
-    app_dir = "./frontend/kritaref_palette/_app/"
+    #app_dir = "./frontend/kritaref_palette/_app/"
     tgt_dir = "./frontend/kritaref_palette/public/excerpts/"
     tgt_imgdir = "./frontend/kritaref_palette/public/images/"
-    index = get_index("./static/index.json")
+    #index = get_index("./static/index.json")
     #generate_menu_for_sections_without_icons(excerpt_dir, index, app_dir)
     #generate_menu_for_sections_with_icons(excerpt_dir, index, app_dir)
     #generate_menu_for_blending_modes_without_dots(excerpt_dir, index, app_dir)
