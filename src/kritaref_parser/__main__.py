@@ -300,7 +300,7 @@ if __name__ == "__main__":
     # CONSTANTS
     #ROOT = "_src/reference_manual/"
     ROOT = "./krita-docs/_build/html/reference_manual/"
-    INDEX_NAME = "index.json"
+    INDEX_NAME = "./static/index.json"
     OG_DOTS_IMAGE = "og_dots_image.png"
     EXCERPTDIR_ROOT = "./static/excerpts/"
     IMAGEDIR_ROOT = "./static/images/"
@@ -327,3 +327,4 @@ if __name__ == "__main__":
     transfer_images(ROOT, IMAGEDIR_ROOT)
     delete_unused_images(EXCERPTDIR_ROOT, IMAGEDIR_ROOT, OG_DOTS_IMAGE, INDEX_NAME)
     halve_blendingmode_dots_images(OG_DOTS_IMAGE, IMAGEDIR_ROOT)
+

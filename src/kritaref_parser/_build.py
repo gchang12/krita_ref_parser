@@ -384,13 +384,13 @@ if __name__ == "__main__":
     #app_dir = "./frontend/kritaref_palette/_app/"
     tgt_dir = "./frontend/kritaref_palette/public/excerpts/"
     tgt_imgdir = "./frontend/kritaref_palette/public/images/"
-    #index = get_index("./static/index.json")
+    index = get_index("./static/index.json")
     #generate_menu_for_sections_without_icons(excerpt_dir, index, app_dir)
     #generate_menu_for_sections_with_icons(excerpt_dir, index, app_dir)
     #generate_menu_for_blending_modes_without_dots(excerpt_dir, index, app_dir)
     #generate_menu_for_blending_modes_with_dots(excerpt_dir, index, app_dir)
     prepend_lines_to_all_section_excerpts(excerpt_dir, index, tgt_dir)
     append_filler_files(excerpt_dir, tgt_imgdir)
-    #have_excerpt_anchors_open_new_tab(excerpt_dir)
+    have_excerpt_anchors_open_new_tab(excerpt_dir)
     #have_anchor_tags_reference_source(excerpt_dir)
 
