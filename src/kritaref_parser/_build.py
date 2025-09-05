@@ -74,14 +74,6 @@ def generate_list_items_for_section_without_icon(section, index):
     list_items = list(filter(lambda record_: record_['dir'] == section, index))
     return list_items
 
-def get_index(filename):
-    """
-    Returns a dict-object from file.
-    """
-    with open(filename, encoding="utf-8") as rfile:
-        index = json.load(rfile)
-    return index
-
 def generate_menu(list_items):
     """
     Generates an HTML string containing a menu.
@@ -213,96 +205,6 @@ def generate_menu_for_blending_modes_with_dots(excerpt_dir, index, app_dir):
     logging.debug("Moved files to: %s", target_dir)
     '''
 
-def prepend_lines_to_section_excerpt(excerpt_dir, section, lines):
-    """
-    Prepends CSS links to HTML excerpt files.
-    """
-    for htmlfile in filter(
-        lambda filepath: filepath.is_file(),
-        Path(excerpt_dir, section).iterdir(),
-    ):
-        filetext = htmlfile.read_text(encoding='utf-8')
-        soup = BeautifulSoup(filetext, 'html.parser')
-        if soup.css.select('link[rel="stylesheet"][href][type="text/css"]') is None:
-            continue
-        new_filetext = lines + filetext.splitlines()
-        htmlfile.write_text(
-            "\n".join(new_filetext),
-            encoding="utf-8",
-        )
-
-def prepend_lines_to_all_section_excerpts(excerpt_dir, index, tgt_dir):
-    """
-    Prepends CSS links to all HTML excerpt files.
-    """
-    sections_without_icons = (
-        #"brush_engines/",
-        #"tools/",
-        "brush_settings/",
-        "dockers/",
-        "filters/",
-        "layers_and_masks/",
-        "main_menu/",
-        "preferences/",
-        "resource_management/",
-        #"blending_modes/",
-    )
-    lines = [
-        '<link rel="stylesheet" href="../../stylesheets/iframe/style.css" type="text/css" />',
-        '<link rel="stylesheet" href="../../stylesheets/iframe/without-icon.css" type="text/css" />',
-    ]
-    logging.debug("Prepending <link ...> lines to sans-icon sections.")
-    for section in sections_without_icons:
-        prepend_lines_to_section_excerpt(excerpt_dir, section, lines)
-    sections_with_icons = (
-        "tools/",
-        "brush_engines/",
-        #"brush_settings/",
-        #"dockers/",
-        #"filters/",
-        #"layers_and_masks/",
-        #"main_menu/",
-        #"preferences/",
-        #"resource_management/",
-        #"blending_modes/",
-    )
-    lines = [
-        '<link rel="stylesheet" href="../../stylesheets/iframe/style.css" type="text/css" />',
-        '<link rel="stylesheet" href="../../stylesheets/iframe/with-icon.css" type="text/css" />',
-    ]
-    logging.debug("Prepending <link ...> lines to sections with icons.")
-    for section in sections_with_icons:
-        prepend_lines_to_section_excerpt(excerpt_dir, section, lines)
-    bm_index1 = filter(lambda record: record['dir'] == "blending_modes/", index)
-    logging.debug("Prepending <link ...> lines to files in 'blending_modes/*'.")
-    lines = [
-        '<link rel="stylesheet" href="../../stylesheets/iframe/style.css" type="text/css" />',
-        '<link rel="stylesheet" href="../../stylesheets/iframe/without-icon.css" type="text/css" />',
-    ]
-    for record in filter(lambda record: record['icon'] is None, bm_index1):
-        htmlfile = Path(tgt_dir, "blending_modes", record['file'])
-        filetext = htmlfile.read_text(encoding='utf-8').splitlines()
-        new_filetext = lines + filetext
-        htmlfile.write_text(
-            "\n".join(new_filetext),
-            encoding="utf-8",
-        )
-    lines = [
-        '<link rel="stylesheet" href="../../stylesheets/iframe/style.css" type="text/css" />',
-        '<link rel="stylesheet" href="../../stylesheets/iframe/blending_modes.css" type="text/css" />',
-    ]
-    #print(list(index))
-    bm_index2 = filter(lambda record: record['icon'] is not None and record['dir'] == "blending_modes/", index)
-    for record in bm_index2:
-        #print(record)
-        htmlfile = Path(tgt_dir, "blending_modes", record['file'])
-        filetext = htmlfile.read_text(encoding='utf-8').splitlines()
-        new_filetext = lines + filetext
-        htmlfile.write_text(
-            "\n".join(new_filetext),
-            encoding="utf-8",
-        )
-
 def append_filler_files(excerpt_dir, tgt_imgdir):
     """
     Writes placeholder files.
@@ -315,32 +217,6 @@ def append_filler_files(excerpt_dir, tgt_imgdir):
         filler_imgpath = Path(tgt_imgdir, f"_{section}-not-found.svg")
         filler_imgpath.write_text("")
         logging.debug("Making filler image file: %s", filler_imgpath)
-
-def have_excerpt_anchors_open_new_tab(excerpt_dir):
-    """
-    Hacks into anchor tags and changes the 'target' of each one to '_blank'.
-    """
-    sections = (
-        "brush_engines/",
-        "tools/",
-        "brush_settings/",
-        "dockers/",
-        "filters/",
-        "layers_and_masks/",
-        "main_menu/",
-        "preferences/",
-        "resource_management/",
-        "blending_modes/",
-    )
-    logging.debug("Changing a[target='_blank'] for all a.")
-    for section in sections:
-        path_to_section = Path(excerpt_dir, section)
-        for htmlfile in filter(lambda path: path.is_file(), path_to_section.iterdir()):
-            htmltext = htmlfile.read_text(encoding='utf-8')
-            soup = BeautifulSoup(htmltext, 'html.parser')
-            for a in soup.find_all("a"):
-                a['target'] = "_blank"
-            htmlfile.write_text(str(soup), encoding='utf-8')
 
 def have_anchor_tags_reference_source(excerpt_dir):
     """
@@ -382,15 +258,11 @@ if __name__ == "__main__":
     import_parsed_files(src, tgt)
     excerpt_dir = "./static/excerpts/"
     #app_dir = "./frontend/kritaref_palette/_app/"
-    tgt_dir = "./frontend/kritaref_palette/public/excerpts/"
     tgt_imgdir = "./frontend/kritaref_palette/public/images/"
-    index = get_index("./static/index.json")
     #generate_menu_for_sections_without_icons(excerpt_dir, index, app_dir)
     #generate_menu_for_sections_with_icons(excerpt_dir, index, app_dir)
     #generate_menu_for_blending_modes_without_dots(excerpt_dir, index, app_dir)
     #generate_menu_for_blending_modes_with_dots(excerpt_dir, index, app_dir)
-    prepend_lines_to_all_section_excerpts(excerpt_dir, index, tgt_dir)
     append_filler_files(excerpt_dir, tgt_imgdir)
-    have_excerpt_anchors_open_new_tab(excerpt_dir)
     #have_anchor_tags_reference_source(excerpt_dir)
 
