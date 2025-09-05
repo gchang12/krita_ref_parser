@@ -88,7 +88,7 @@ def generate_menu(list_items):
     """
     return "const menuItems = " + json.dumps(list_items, indent=4) + ";\nexport default menuItems;"
 
-def generate_menu_for_sections(excerpt_dir, index, generate_list_items, sections, app_dir):
+def generate_menu_for_sections(index, generate_list_items, sections, app_dir):
     """
     Generates HTML files for sections.
     """
@@ -97,11 +97,11 @@ def generate_menu_for_sections(excerpt_dir, index, generate_list_items, sections
         Path(app_dir, section).mkdir(exist_ok=True)
         list_items = generate_list_items(section, index)
         menu = generate_menu(list_items)
-        menu_file = Path(app_dir, section, "menuItems.tsx")
-        logging.debug("Writing to: %s", menu_file)
-        menu_file.write_text(menu, encoding="utf-8")
+        #menu_file = Path(app_dir, section, "menuItems.tsx")
+        #logging.debug("Writing to: %s", menu_file)
+        #menu_file.write_text(menu, encoding="utf-8")
 
-def generate_menu_for_sections_without_icons(excerpt_dir, index, app_dir):
+def generate_menu_for_sections_without_icons(index, app_dir):
     """
     Generates HTML files for sections without icons.
     """
@@ -118,7 +118,7 @@ def generate_menu_for_sections_without_icons(excerpt_dir, index, app_dir):
         #"blending_modes/",
     )
     generate_list_items = generate_list_items_for_section_without_icon
-    return generate_menu_for_sections(excerpt_dir, index, generate_list_items, sections, app_dir)
+    return generate_menu_for_sections(index, generate_list_items, sections, app_dir)
 
 def generate_menu_for_sections_with_icons(excerpt_dir, index, app_dir):
     """
@@ -201,6 +201,7 @@ def generate_menu_for_blending_modes_with_dots(excerpt_dir, index, app_dir):
         repl = 'src="/images/'
         excerpt_text = re.sub(pattern, repl, excerpt_text)
         list_items.append(record)
+    '''
     target_dir = Path(app_dir, section, "with-dots")
     target_dir.mkdir(exist_ok=True)
     target_file = target_dir.joinpath("menuItems.tsx")
@@ -210,6 +211,7 @@ def generate_menu_for_blending_modes_with_dots(excerpt_dir, index, app_dir):
     #lines = ( '<link rel="stylesheet" href="../../stylesheets/iframe/style.css" type="text/css" />' '<link rel="stylesheet" href="../../stylesheets/iframe/without-icons.css" type="text/css" />')
     #prepend_lines_to_section_excerpts(excerpt_dir, section, lines)
     logging.debug("Moved files to: %s", target_dir)
+    '''
 
 def prepend_lines_to_section_excerpt(excerpt_dir, section, lines):
     """
@@ -374,12 +376,7 @@ if __name__ == "__main__":
     )
     dirname = "./frontend/kritaref_palette/_app/"
     old_dirname = "./frontend/kritaref_palette/app/"
-    try:
-        shutil.rmtree(dirname)
-    except FileNotFoundError:
-        pass
-    shutil.copytree(old_dirname, dirname)
-    clean_app_directory(dirname)
+    #clean_app_directory(dirname)
     src = "./static/"
     tgt = "./frontend/kritaref_palette/public/"
     import_parsed_files(src, tgt)
@@ -388,10 +385,10 @@ if __name__ == "__main__":
     tgt_dir = "./frontend/kritaref_palette/public/excerpts/"
     tgt_imgdir = "./frontend/kritaref_palette/public/images/"
     index = get_index("./static/index.json")
-    generate_menu_for_sections_without_icons(excerpt_dir, index, app_dir)
-    generate_menu_for_sections_with_icons(excerpt_dir, index, app_dir)
-    generate_menu_for_blending_modes_without_dots(excerpt_dir, index, app_dir)
-    generate_menu_for_blending_modes_with_dots(excerpt_dir, index, app_dir)
+    #generate_menu_for_sections_without_icons(excerpt_dir, index, app_dir)
+    #generate_menu_for_sections_with_icons(excerpt_dir, index, app_dir)
+    #generate_menu_for_blending_modes_without_dots(excerpt_dir, index, app_dir)
+    #generate_menu_for_blending_modes_with_dots(excerpt_dir, index, app_dir)
     prepend_lines_to_all_section_excerpts(excerpt_dir, index, tgt_dir)
     append_filler_files(excerpt_dir, tgt_imgdir)
     #have_excerpt_anchors_open_new_tab(excerpt_dir)
