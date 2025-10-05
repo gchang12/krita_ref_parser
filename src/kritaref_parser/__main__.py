@@ -35,7 +35,6 @@ def _format_target_filename(filename_root, header):
     """
     """
     #filename_root = path_to_source.name
-    #logger.debug("filename: %s, header: %s", filename, header)
     filename =  filename_root.replace('.html', '') \
         + "_" \
         + header.replace(' - ', '-').replace(' ', '-') \
@@ -50,38 +49,28 @@ def make_directories(root, reference_sections, excerptdir_root, imagedir_root):
     """
     Creates mirror-directory that replicates structure of reference folder.
     """
-    #logger.debug("Making necessary directories.")
     Path(excerptdir_root).mkdir(exist_ok=True)
     Path(imagedir_root).mkdir(exist_ok=True)
     for ref_section in reference_sections:
         path_to_source = Path(root, ref_section)
         path_to_target = Path(excerptdir_root, path_to_source.parts[-1])
-        #logger.debug("Checking if %s ought to be made.", path_to_excerpt)
         if not path_to_target.is_dir() and path_to_source.is_dir():
-            #logger.debug("Creating %s directory.", path_to_target)
             path_to_target.mkdir()
 
 def compile_item(root, ref_section, processing_func):
     """
     Compiles list of 4-tuples.
     """
-    print('compile_item')
-    print(root, ref_section)
     path_to_source = Path(root, ref_section)
-    #logger.debug("Compiling items from: %s", path_to_source)
     if path_to_source.is_dir():
-        #logger.debug("%s is a directory.", path_to_source)
         def convert_path_to_headericonhtml(ref_file):
             """
             """
             with open(ref_file, encoding="utf-8") as rfile:
                 soup = BeautifulSoup(rfile, "html.parser")
             header_icon_html = processing_func(soup)
-            #logger.debug("header_icon_html: %r", header_icon_html)
             header, icon, soup = header_icon_html
             #header = header_icon_html[0]
-            #logger.debug("filename: %s", filename)
-            #logger.debug('header: %s', header)
             filename = ref_file.name
             return filename, filename, *header_icon_html
         h_icon_html_list = list(
@@ -94,15 +83,12 @@ def compile_item(root, ref_section, processing_func):
             )
         )
     elif path_to_source.is_file():
-        #logger.debug("%s is a file.", path_to_ref)
         def convert_path_to_headericonhtml(headericonhtml):
             """
             For each HSX section, creates a pseudonym to use as a filename, then returns the object in the ideal format.
             """
             header, icon, soup = headericonhtml
             filename = filename.lower()
-            #logger.debug('filename: %s', filename)
-            #logger.debug('header: %s', header)
             #assert len(filename, header,icon,html) == 4
             return (filename, filename, header, icon, soup)
         with open(path_to_ref, encoding="utf-8") as rfile:
@@ -114,20 +100,14 @@ def compile_item(root, ref_section, processing_func):
             ),
         )
     else:
-        print("What the hell kinda file is %s!?" % ref_section)
-        logger.warning("What the hell kinda file is %s!?", ref_section)
         h_icon_html_list = None
-    print(h_icon_html_list)
     return h_icon_html_list
 
 def compile_item_from_list(root, ref_section, processing_func):
     """
     Compiles list of 4-tuples.
     """
-    print('compile_item_from_list')
     path_to_source = Path(root, ref_section)
-    #logger.debug("Compiling items from: %s", path_to_source)
-    print(root, ref_section)
     h_icon_html_list = []
     def extend_3tuple_list(path, headericonhtml_list):
         """
@@ -139,15 +119,12 @@ def compile_item_from_list(root, ref_section, processing_func):
             h_icon_html_list.append(
                 (filename_root, filename, header, icon, html_soup),
             )
-            #logger.debug("filename: %s, header: %s", filename_root, header)
     def convert_path_to_headericonhtml(headericonhtml):
         """
         For each HSX section, creates a pseudonym to use as a filename, then returns the object in the ideal format.
         """
         header, icon, soup = headericonhtml
-        #logger.debug("path_to_source: %s", path_to_source)
         filename_root = path_to_source.name
-        #logger.debug("filename: %s, header: %s", filename, header)
         filename = _format_target_filename(filename_root, header)
         return (filename_root, filename, header, icon, soup)
     if path_to_source.is_dir():
@@ -160,10 +137,7 @@ def compile_item_from_list(root, ref_section, processing_func):
             soup = BeautifulSoup(rfile, "html.parser")
         h_icon_html_list.extend(list(map(convert_path_to_headericonhtml, processing_func(soup))))
     else:
-        print("What the hell kinda file is %s!?" % path_to_source)
-        #logger.warning("What the hell kinda file is %s!?", ref_section)
         h_icon_html_list = None
-    print(h_icon_html_list)
     return h_icon_html_list
 
 def compile_items(root, reference_sections):
@@ -172,7 +146,6 @@ def compile_items(root, reference_sections):
     """
     buffer = []
     for ref_section, processing_func in reference_sections.items():
-        #logger.debug("Compiling items for %s.", ref_section)
         if "blending_modes/" not in ref_section:
             fileheadericonhtml_list = compile_item(root, ref_section, processing_func)
         else:
@@ -181,17 +154,13 @@ def compile_items(root, reference_sections):
             directory = ref_section
         else:
             directory = ref_section.split('/')[-2]
-        print(root, reference_sections, fileheadericonhtml_list)
         for value in fileheadericonhtml_list:
-            #logger.debug("Must unpack value into %d arguments: %r", len(value), [type(attr) for attr in value])
             (source, target, header, icon, soup) = value
             #filename = filename.replace('.html', '') + "_" + header.replace(' ', "_") + '.html'
             #filename = filename.lower()
             buffer.append(
                 (directory, source, target, header, icon, soup)
             )
-        #logger.debug("Compilation complete. (%d) items found.", len(fileheadericonhtml_list))
-        #logger.debug("First item: %s", fileheadericonhtml_list[0])
     return buffer
 
 def write_index(buffer, index_name):
@@ -213,7 +182,6 @@ def write_index(buffer, index_name):
         }
         return fileheadericon
     out_kernel = list(map(get_fileheadericon, buffer))
-    #logger.debug("Dumping list into file: %s", index_name)
     with open(index_name, mode="w", encoding="utf-8") as wfile:
         json.dump(out_kernel, wfile, indent=4)
 
@@ -222,17 +190,14 @@ def write_html_output(root, buffer, targetdir):
     Formats and then writes HTML output.
     """
     # write HTML output
-    #logger.debug("Writing HTML to file.")
     for directory, source, target, header, _, soup in buffer:
         # generate dict of sort: {source: ref_section/[filename], header: h, icon: icon}
         path_to_source = Path(root, directory, source)
         path_to_target = Path(targetdir, directory, target)
-        #logger.debug("Writing HTML from %s to %s", path_to_source, path_to_target)
         if path_to_target.is_file():
-            logger.warning("%s already exists for %s-%s: %s", path_to_target, source, header, soup)
+            pass
         # clean html
         html_to_write = "\n".join([line.strip() for line in str(soup).splitlines() if line.strip()])
-        #logger.debug("html: %d", len(html_to_write))
         path_to_target.write_text(html_to_write, encoding="utf-8")
 
 # resources to delete if not referenced:
@@ -254,14 +219,10 @@ def delete_unused_images(excerptdir_root, imagedir_root, og_dots_image, index_na
     """
     Deletes images that are not referenced by the compiled HTML files.
     """
-    #logger.debug("Compiling list of unused images.")
     #used_images = set()
     with open(index_name, encoding="utf-8") as rfile:
         index = json.load(rfile)
-    #print(index)
     used_images = set(Path(record['icon']).name for record in index if record['icon'] is not None)
-    #logger.debug("List has been compiled. Count: %d", len(used_images))
-    #print(used_images)
     for excerpt_dir in Path(excerptdir_root).iterdir():
         for excerpt_file in excerpt_dir.iterdir():
             with open(excerpt_file, encoding="utf-8") as rfile:
@@ -282,17 +243,14 @@ def halve_blendingmode_dots_images(og_dots_image, imagedir):
     """
     Produces collection of dot-images by blending mode.
     """
-    #logger.debug("Halving blending-mode dots-images.")
     for imagefile in Path(imagedir).iterdir():
         if not str(imagefile).endswith("_with_dots.png"):
             continue
         if imagefile.name == og_dots_image:
             continue
         if not Path(imagedir, og_dots_image).exists():
-            #logger.debug("OG dot image (%s) not found. Parsing from %s, then saving.", og_dots_image, imagefile)
             og_image = halve_image(imagefile, get_first_half=True)
             og_image.save('/'.join([imagedir, og_dots_image]))
-        #logger.debug("Saving: %s", imagefile)
         blended_image = halve_image(imagefile, get_first_half=False)
         blended_image.save(imagefile)
 
@@ -300,7 +258,7 @@ if __name__ == "__main__":
     # CONSTANTS
     #ROOT = "_src/reference_manual/"
     ROOT = "./krita-docs/_build/html/reference_manual/"
-    INDEX_NAME = "index.json"
+    INDEX_NAME = "./static/index.json"
     OG_DOTS_IMAGE = "og_dots_image.png"
     EXCERPTDIR_ROOT = "./static/excerpts/"
     IMAGEDIR_ROOT = "./static/images/"
@@ -327,3 +285,4 @@ if __name__ == "__main__":
     transfer_images(ROOT, IMAGEDIR_ROOT)
     delete_unused_images(EXCERPTDIR_ROOT, IMAGEDIR_ROOT, OG_DOTS_IMAGE, INDEX_NAME)
     halve_blendingmode_dots_images(OG_DOTS_IMAGE, IMAGEDIR_ROOT)
+

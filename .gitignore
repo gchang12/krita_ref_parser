@@ -56,3 +56,4 @@ MANIFEST
 # MY STUFF
 .vim/
 node_modules/
+static/
