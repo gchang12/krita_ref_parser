@@ -30,7 +30,8 @@ input/docs-krita-org/_build/html/: $(VENV_NAME)/ input/docs-krita-org/
 .OUTPUT_FILES: \
 	output/ \
 	output/excerpts/ \
-	output/images/
+	output/images/ \
+	.SEARCH_FOR_HIDDEN_OUTPUT
 
 ## 1: Create folder to store output.
 output/:
@@ -50,7 +51,7 @@ output/images/: output/excerpts/
 	python3 src/krita_ref_generator/image_generator.py;
 	echo "There are a total of (`ls output/images/ | wc -l`) output images.";
 
-# C: Search for hidden files.
+# 4: Search for hidden files.
 .SEARCH_FOR_HIDDEN_OUTPUT:
 	echo "The following files are hidden: `find output/ -name \.\*`";
 

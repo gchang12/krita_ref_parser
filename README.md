@@ -18,16 +18,21 @@
 
 For use in Krita Reference Palette, an alternative online interface for perusing the Krita documentation.
 
-1. `mkdir input/; cd input/;`
-1. Get [source](https://invent.kde.org/documentation/docs-krita-org/) via `git clone https://invent.kde.org/documentation/docs-krita-org.git`.
-2. Extract to HTML.
-3. Parse source and section into different HTML files.
-4. Clean up files:
-  1. Extract header.
-  2. Extract header image.
-  3. Replace links where appropriate.
-  4. Log exceptions.
+# HOW TO USE
 
+## Generate input.
+1. Create Python virtual environment and install requirements.
+2. Create `input/` directory.
+3. Navigate to `input/` and fetch official Krita documentation [source](https://invent.kde.org/documentation/docs-krita-org/) via `git clone https://invent.kde.org/documentation/docs-krita-org.git`.
+4. Navigate to `input/docs-krita-org/` and invoke `make html`.
+
+## Generate output.
+1. Create `output/` directory.
+2. Create `output/excerpts` directory and its contents via `excerpt_generator.py` script.
+3. Create `output/image` directory and its contents via `image_generator.py` script.
+4. Search for hidden output files.
+
+## 
 
 <!-- pyscaffold-notes -->
 
