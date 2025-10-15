@@ -1,17 +1,26 @@
+## The following requirements were added by pip freeze:
 alabaster==1.0.0
 babel==2.17.0
 beautifulsoup4==4.13.4
 bs4==0.0.2
+cachetools==6.2.1
 certifi==2025.8.3
+chardet==5.2.0
 charset-normalizer==3.4.3
+colorama==0.4.6
+distlib==0.4.0
 docutils==0.21.2
+filelock==3.20.0
 idna==3.10
 imagesize==1.4.1
 Jinja2==3.1.6
 MarkupSafe==3.0.2
 packaging==25.0
 pillow==11.3.0
+platformdirs==4.5.0
+pluggy==1.6.0
 Pygments==2.19.2
+pyproject-api==1.10.0
 requests==2.32.4
 snowballstemmer==3.0.1
 soupsieve==2.7
@@ -22,6 +31,8 @@ sphinxcontrib-htmlhelp==2.1.0
 sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==2.0.0
 sphinxcontrib-serializinghtml==2.0.0
-tomli==2.2.1
-typing_extensions==4.14.1
+tomli==2.3.0
+tox==4.31.0
+typing_extensions==4.15.0
 urllib3==2.5.0
+virtualenv==20.35.3
