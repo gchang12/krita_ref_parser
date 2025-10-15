@@ -55,7 +55,5 @@ MANIFEST
 
 # MY STUFF
 .vim/
-node_modules/
-static/
-krita-docs/
-frontend/kritaref_palette/public/
+input/
+output/
