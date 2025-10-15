@@ -28,9 +28,12 @@ input/docs-krita-org/_build/html/: $(VENV_NAME)/ input/docs-krita-org/
 # B: Parse raw HTML for text and images to insert into logical sections.
 
 .OUTPUT_FILES: \
+	.INPUT_FILES \
 	output/ \
-	output/excerpts/ \
+	output/raw-excerpts/ \
 	output/images/ \
+	output/index.json \
+	output/excerpts/ \
 	.SEARCH_FOR_HIDDEN_OUTPUT
 
 ## 1: Create folder to store output.
@@ -38,20 +41,26 @@ output/:
 	mkdir output/;
 
 ## 2: Search raw HTML for text-content to store in excerpt files.
-output/excerpts/: output/
-	mkdir output/excerpts/;
-	python3 src/krita_ref_generator/excerpt_generator.py;
-	#python3 src/krita_ref_generator/__main__.py;
-	#python3 src/krita_ref_generator/_build.py;
-	#python3 src/krita_ref_generator/_rebuild.py;
+output/raw-excerpts/: output/
+	mkdir output/raw-excerpts/;
+	python3 src/krita_ref_generator/excerpt_extractor.py;
 
 ## 3: Import images, then reference excerpt files to determine which to keep.
-output/images/: output/excerpts/
+output/images/: output/raw-excerpts/
 	mkdir output/images/;
-	python3 src/krita_ref_generator/image_generator.py;
+	python3 src/krita_ref_generator/image_name_compiler.py;
 	echo "There are a total of (`ls output/images/ | wc -l`) output images.";
 
-# 4: Search for hidden files.
+## 4: Generate index of: (directory, file, header, header-image)
+output/index.json: output/
+	python3 src/krita_ref_generator/index_compiler.py;
+
+## 5: Format and clean generated HTML files.
+output/excerpts/: output/raw-excerpts/
+	mkdir output/excerpts/;
+	python3 src/krita_ref_generator/excerpt_formatter.py;
+
+# 6: Search for hidden output.
 .SEARCH_FOR_HIDDEN_OUTPUT:
 	echo "The following files are hidden: `find output/ -name \.\*`";
 

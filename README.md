@@ -16,7 +16,7 @@
 
 > Parses Krita Docs sections into HTML files.
 
-For use in Krita Reference Palette, an alternative online interface for perusing the Krita documentation.
+This builds HTML and image files to be consumed by the Krita Reference Palette.
 
 # HOW TO USE
 
@@ -32,7 +32,8 @@ For use in Krita Reference Palette, an alternative online interface for perusing
 3. Create `output/image` directory and its contents via `image_generator.py` script.
 4. Search for hidden output files.
 
-## 
+> [!NOTE]
+> It will suffice to run `make .OUTPUT_FILES` to execute all these steps automatically.
 
 <!-- pyscaffold-notes -->
 
