@@ -1,5 +1,5 @@
 """
-    Setup file for kritaref_palette.
+    Setup file for krita_ref_generator.
     Use setup.cfg to configure your project.
 
     This file was generated with PyScaffold 4.6.

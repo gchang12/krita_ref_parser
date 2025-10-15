@@ -1,4 +1,4 @@
-# kritaref_palette
+# krita_ref_generator
 
 Add a short description here!
 
