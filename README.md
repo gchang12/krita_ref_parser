@@ -14,9 +14,19 @@
 
 # krita_ref_generator
 
-> Add a short description here!
+> Parses Krita Docs sections into HTML files.
 
-A longer description of your project goes here...
+For use in Krita Reference Palette, an alternative online interface for perusing the Krita documentation.
+
+1. `mkdir input/; cd input/;`
+1. Get [source](https://invent.kde.org/documentation/docs-krita-org/) via `git clone https://invent.kde.org/documentation/docs-krita-org.git`.
+2. Extract to HTML.
+3. Parse source and section into different HTML files.
+4. Clean up files:
+  1. Extract header.
+  2. Extract header image.
+  3. Replace links where appropriate.
+  4. Log exceptions.
 
 
 <!-- pyscaffold-notes -->
