@@ -8,3 +8,4 @@ krfpl
 -segregate build and deployment
 Make sure to convert those things to Link objects.
 Grouping of different blending modes.
+Delay: Krita Shortcut menu.
