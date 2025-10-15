@@ -15,4 +15,4 @@ except PackageNotFoundError:  # pragma: no cover
 finally:
     del version, PackageNotFoundError
 
-SOURCE_DIR = "../../krita-docs/_build/html/reference_manual/"
+SOURCE_DIR = "../../input/docs-krita-org/_build/html/reference_manual/"
