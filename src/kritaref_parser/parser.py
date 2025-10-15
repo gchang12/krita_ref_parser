@@ -73,11 +73,10 @@ def _extract_h_tag(section, *, h_level: int):
     h = section.find('h%d' % h_level).extract().text
     #logger.debug("Searching for pilcrow in: '%s'", h)
     pilcrow_loc = h.index(PILCROW)
-    h = h[:pilcrow_loc]
     #logger.debug("Returning: %r", h)
-    return h
+    return h[:pilcrow_loc]
 
-def _replace_img_sources(section, *, levels):
+def _replace_img_sources(section, *, levels, img_root="../../images/"):
     """
     Replaces src attributes in <img> tags to match new filetree.
     """
@@ -90,7 +89,7 @@ def _replace_img_sources(section, *, levels):
         img_src = img['src'].split('/')
         #logger.debug("Found `img-src`: %s", img['src'])
         # TODO: Delete leading './'
-        new_img_src = "../../images/" + '/'.join(img_src[levels:])
+        new_img_src = img_root + '/'.join(img_src[levels:])
         img['src'] = new_img_src
         #logger.debug("Set `img-src`: %s", new_img_src)
 
