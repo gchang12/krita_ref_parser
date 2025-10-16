@@ -14,5 +14,3 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 finally:
     del version, PackageNotFoundError
-
-SOURCE_DIR = "../../input/docs-krita-org/_build/html/reference_manual/"

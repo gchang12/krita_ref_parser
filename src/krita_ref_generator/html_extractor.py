@@ -1,5 +1,5 @@
-3. Parse source and section into different HTML files.
-4. Clean up files:
-  1. Extract header.
-  2. Extract header image.
-  3. Replace links where appropriate.
+"""
+Compiles sections of documentation and saves them as raw HTML.
+"""
+
+SOURCE_DIR = "../../input/docs-krita-org/_build/html/reference_manual/"
