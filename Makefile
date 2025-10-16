@@ -28,7 +28,6 @@ input/docs-krita-org/_build/html/: $(VENV_NAME)/ input/docs-krita-org/
 # B: Parse raw HTML for text and images to insert into logical sections.
 
 .OUTPUT_FILES: \
-	.INPUT_FILES \
 	output/ \
 	output/raw-excerpts/ \
 	output/images/ \
@@ -41,7 +40,7 @@ output/:
 	mkdir output/;
 
 ## 2: Search raw HTML for text-content to store in excerpt files.
-output/raw-excerpts/: output/
+output/raw-excerpts/: output/ .INPUT_FILES
 	mkdir output/raw-excerpts/;
 	python3 src/krita_ref_generator/excerpt_extractor.py;
 
@@ -52,7 +51,7 @@ output/images/: output/raw-excerpts/
 	echo "There are a total of (`ls output/images/ | wc -l`) output images.";
 
 ## 4: Generate index of: (directory, file, header, header-image)
-output/index.json: output/
+output/index.json: output/raw-excerpts/
 	python3 src/krita_ref_generator/index_compiler.py;
 
 ## 5: Format and clean generated HTML files.
