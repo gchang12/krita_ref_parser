@@ -4,6 +4,9 @@ Determines which images are unneeded, and performs image-related manipulations.
 
 from PIL import Image
 
+SOURCE_DIR = "../../input/docs-krita-org/_build/html/_images/"
+TARGET_DIR = "../../output/images/"
+
 def halve_image(filename: str, *, get_first_half: bool):
     """
     Returns one of two halves of image specified by `filename`.

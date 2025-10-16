@@ -4,7 +4,7 @@ Logging configuration.
 
 import logging
 
-logger = logging.getLogger(name="kritaref_palette")
+logger = logging.getLogger(name="krita_ref_generator")
 
 logging.basicConfig(
     level=logging.DEBUG,

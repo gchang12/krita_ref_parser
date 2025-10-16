@@ -2,6 +2,9 @@
 Modifies compiled HTML documents, yields various output.
 """
 
+SOURCE_DIR = "../../output/raw-excerpts/"
+TARGET_DIR = "../../output/excerpts/"
+
 CLASS_FOR_LINKS_TO_OFFICIAL_DOCS = "link-to-official-docs"
 PILCROW = "¶"
 

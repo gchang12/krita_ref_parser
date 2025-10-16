@@ -4,6 +4,9 @@ Compiles index of documentation entries to include in web interface.
 
 import json
 
+SOURCE_DIR = "../../output/raw-excerpts/"
+TARGET_DIR = "../../output/"
+
 def get_index(filename):
     """
     Returns a dict-object from file.
