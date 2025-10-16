@@ -14,3 +14,9 @@ Modify only when you want support from others.
 - CONTRIBUTING.md
 - AUTHORS.md
 - CHANGELOG.md
+
+3. Parse source and section into different HTML files.
+4. Clean up files:
+  1. Extract header.
+  2. Extract header image.
+  3. Replace links where appropriate.
