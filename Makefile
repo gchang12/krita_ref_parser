@@ -57,7 +57,7 @@ output/index.json: output/raw-excerpts/
 ## 5: Format and clean generated HTML files.
 output/excerpts/: output/raw-excerpts/
 	mkdir output/excerpts/;
-	python3 src/krita_ref_generator/excerpt_formatter.py;
+	python3 src/krita_ref_generator/excerpt_operator.py;
 
 # 6: Search for hidden output.
 .SEARCH_FOR_HIDDEN_OUTPUT:

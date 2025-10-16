@@ -1,5 +1,5 @@
 """
-    Dummy conftest.py for kritaref_palette.
+    Dummy conftest.py for krita_ref_generator.
 
     If you don't know what this is for, just leave it empty.
     Read more about conftest.py under:
