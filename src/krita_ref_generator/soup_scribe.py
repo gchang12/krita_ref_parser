@@ -3,7 +3,7 @@
 
 from bs4 import BeautifulSoup
 
-def format_target_filename(filename: str, h2_text: str):
+def format_filename_of_target(filename: str, h2_text: str):
     """
     """
     new_filename = filename.replace('.html', '') \
