@@ -337,3 +337,18 @@ def compile_items(root, reference_sections):
                 (directory, source, target, header, icon, soup)
             )
     return buffer
+
+def compile_used_images():
+    """
+    """
+    raise NotImplementedError
+    with open(index_name, encoding="utf-8") as rfile:
+        index = json.load(rfile)
+    used_images = set(Path(record['icon']).name for record in index if record['icon'] is not None)
+    for excerpt_dir in Path(excerptdir_root).iterdir():
+        for excerpt_file in excerpt_dir.iterdir():
+            with open(excerpt_file, encoding="utf-8") as rfile:
+                soup = BeautifulSoup(rfile, "html.parser")
+            for img in soup.find_all('img'):
+                img_src = Path(img['src']).name
+                used_images.add(img_src)
