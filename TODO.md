@@ -20,3 +20,15 @@ Modify only when you want support from others.
   1. Extract header.
   2. Extract header image.
   3. Replace links where appropriate.
+
+DONE
+====
+extract_excerpts.py
+soup_scribe.py
+logging.py
+
+NOT FINISHED
+============
+image_amputator.py
+index_compiler.py
+parse_excerpts.py

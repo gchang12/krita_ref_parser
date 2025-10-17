@@ -1,5 +1,5 @@
 """
-Logging configuration.
+Defines logging configuration.
 """
 
 import logging
