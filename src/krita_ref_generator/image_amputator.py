@@ -8,7 +8,16 @@ from PIL import Image
 SOURCE_DIR = "../../input/docs-krita-org/_build/html/_images/"
 TARGET_DIR = "../../output/images/"
 
-OG_DOTS_IMAGE = "._with_dots.png"
+class SampleImage(enum.StrEnum):
+    """
+    """
+    WITH_DOTS = "_Sample_image_with_dots.png"
+    GREY_04_05 = "_Gray_0.4_and_Gray_0.5_n.png"
+    LIGHT_BLUE_AND_ORANGE = "_Light_blue_and_orange.png"
+    GRADIENT_COMPARISON = "_Gradient_Comparison.png"
+    MAP = "_map.png"
+    GRADIENTS = "_Gradients.png"
+
 # TODO: Figure out the rest of the constants.
 
 def get_half_of_image_file(filename: str, *, get_first_half: bool):
