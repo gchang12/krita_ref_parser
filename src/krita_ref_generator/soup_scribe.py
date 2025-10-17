@@ -1,4 +1,5 @@
 """
+Defines function for rewriting soup objects to HTML files.
 """
 
 from bs4 import BeautifulSoup
@@ -16,7 +17,7 @@ def format_filename_of_target(filename: str, h2_text: str):
     logger.debug("Filename after appending header: '%s'", new_filename)
     new_filename = new_filename.replace(' ', '_').lower()
     logger.debug("Filename after replacing ' ' with '_': '%s'", new_filename)
-    # remove any characters that are invalid
+    # remove invalid filename characters
     new_filename = re.sub("[^a-z0-9_.-]", "", new_filename)
     logger.debug("Filename after erasing invalid characters: '%s'. Returning: '%s'", new_filename, new_filename)
     return new_filename
@@ -30,5 +31,5 @@ def write_stripped_soup(soup: BeautifulSoup, filename: str):
     logger.debug("(%d) lines were found in soup. Writing.", len(soup_as_lines))
     Path(filename).write_text(soup_as_str, encoding="utf-8") # returns number of bytes written; unneeded.
     logger.debug("Write operation successful.")
-    return write_result
+    return
 
