@@ -1,4 +1,5 @@
 """
+Models sample-image types, partitions images, and deletes images.
 """
 
 import enum

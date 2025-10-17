@@ -26,9 +26,9 @@ DONE
 extract_excerpts.py
 soup_scribe.py
 logging.py
+image_amputator.py
 
 NOT FINISHED
 ============
-image_amputator.py
 index_compiler.py
 parse_excerpts.py
