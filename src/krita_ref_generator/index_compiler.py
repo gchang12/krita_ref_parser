@@ -231,3 +231,109 @@ def generate_menu_for_blending_modes_with_dots(excerpt_dir, index, app_dir):
     '''
     json.dump(out_kernel, wfile, indent=4)
 
+def compile_item(root, ref_section, processing_func):
+    """
+    Compiles list of 4-tuples.
+    """
+    path_to_source = Path(root, ref_section)
+    if path_to_source.is_dir():
+        def convert_path_to_headericonhtml(ref_file):
+            """
+            """
+            with open(ref_file, encoding="utf-8") as rfile:
+                soup = BeautifulSoup(rfile, "html.parser")
+            header_icon_html = processing_func(soup)
+            header, icon, soup = header_icon_html
+            #header = header_icon_html[0]
+            filename = ref_file.name
+            return filename, filename, *header_icon_html
+        h_icon_html_list = list(
+            map(
+                convert_path_to_headericonhtml,
+                filter(
+                    lambda ref_file: ref_file.is_file(),
+                    path_to_source.iterdir(),
+                ),
+            )
+        )
+    elif path_to_source.is_file():
+        def convert_path_to_headericonhtml(headericonhtml):
+            """
+            For each HSX section, creates a pseudonym to use as a filename, then returns the object in the ideal format.
+            """
+            header, icon, soup = headericonhtml
+            filename = filename.lower()
+            #assert len(filename, header,icon,html) == 4
+            return (filename, filename, header, icon, soup)
+        with open(path_to_ref, encoding="utf-8") as rfile:
+            soup = BeautifulSoup(rfile, "html.parser")
+        h_icon_html_list = list(
+            map(
+                convert_path_to_headericonhtml,
+                processing_func(soup),
+            ),
+        )
+    else:
+        h_icon_html_list = None
+    return h_icon_html_list
+
+
+def compile_item_from_list(root, ref_section, processing_func):
+    """
+    Compiles list of 4-tuples.
+    """
+    path_to_source = Path(root, ref_section)
+    h_icon_html_list = []
+    def extend_3tuple_list(path, headericonhtml_list):
+        """
+        Extends local list variable with 4-tuples using pathlib.Path and list[(..., ..., ...)] as arguments.
+        """
+        filename_root = path.parts[-1]
+        for header, icon, html_soup in headericonhtml_list:
+            filename = _format_target_filename(filename_root, header)
+            h_icon_html_list.append(
+                (filename_root, filename, header, icon, html_soup),
+            )
+    def convert_path_to_headericonhtml(headericonhtml):
+        """
+        For each HSX section, creates a pseudonym to use as a filename, then returns the object in the ideal format.
+        """
+        header, icon, soup = headericonhtml
+        filename_root = path_to_source.name
+        filename = _format_target_filename(filename_root, header)
+        return (filename_root, filename, header, icon, soup)
+    if path_to_source.is_dir():
+        for itemfile in path_to_source.iterdir():
+            with open(itemfile, encoding="utf-8") as rfile:
+                soup = BeautifulSoup(rfile, "html.parser")
+            extend_3tuple_list(itemfile, processing_func(soup))
+    elif path_to_source.is_file():
+        with open(path_to_source, encoding="utf-8") as rfile:
+            soup = BeautifulSoup(rfile, "html.parser")
+        h_icon_html_list.extend(list(map(convert_path_to_headericonhtml, processing_func(soup))))
+    else:
+        h_icon_html_list = None
+    return h_icon_html_list
+
+def compile_items(root, reference_sections):
+    """
+    Compiles all page items.
+    """
+    buffer = []
+    for ref_section, processing_func in reference_sections.items():
+        if "blending_modes/" not in ref_section:
+            fileheadericonhtml_list = compile_item(root, ref_section, processing_func)
+        else:
+            fileheadericonhtml_list = compile_item_from_list(root, ref_section, processing_func)
+        if ref_section.count('/') == 1 and "hsx.html" not in ref_section:
+            directory = ref_section
+        else:
+            directory = ref_section.split('/')[-2]
+        for value in fileheadericonhtml_list:
+            (source, target, header, icon, soup) = value
+            #filename = filename.replace('.html', '') + "_" + header.replace(' ', "_") + '.html'
+            #filename = filename.lower()
+            buffer.append(
+                (directory, source, target, header, icon, soup)
+            )
+    return buffer
