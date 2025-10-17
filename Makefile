@@ -42,7 +42,7 @@ output/:
 ## 2: Search raw HTML for text-content to store in excerpt files.
 output/raw-excerpts/: output/ .INPUT_FILES
 	mkdir output/raw-excerpts/;
-	python3 src/krita_ref_generator/html_extractor.py;
+	python3 src/krita_ref_generator/extract_excerpts.py;
 
 ## 3: Import images, then reference excerpt files to determine which to keep.
 output/images/: output/raw-excerpts/
@@ -53,8 +53,8 @@ output/images/: output/raw-excerpts/
 ## 4: Format and clean generated HTML files.
 output/excerpts/: output/raw-excerpts/
 	mkdir output/excerpts/;
-	python3 src/krita_ref_generator/excerpt_mutator.py;
-	python3 src/krita_ref_generator/excerpt_writer.py;
+	python3 src/krita_ref_generator/parse_excerpts.py;
+	python3 src/krita_ref_generator/soup_scribe.py;
 
 ## 5: Generate index of: (directory, file, header, header-image)
 output/index.json: output/raw-excerpts/
