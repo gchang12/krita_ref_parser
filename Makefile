@@ -42,7 +42,7 @@ output/:
 ## 2: Search raw HTML for text-content to store in excerpt files.
 output/raw-excerpts/: output/ .INPUT_FILES
 	mkdir output/raw-excerpts/;
-	python3 src/krita_ref_generator/extract_excerpts.py;
+	python3 src/krita_ref_generator/split_docs.py;
 
 ## 3: Import images, then reference excerpt files to determine which to keep.
 output/images/: output/raw-excerpts/

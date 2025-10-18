@@ -2,28 +2,30 @@
 Extracts raw excerpts from HTML copy of Krita documentation and splits them.
 """
 
+from pathlib import Path
+
 from bs4 import BeautifulSoup
 
-from krita_ref_generator.logging import logger
+from krita_ref_generator._logging import logger
 
-SOURCE_DIR = "../../input/docs-krita-org/_build/html/reference_manual/"
-TARGET_DIR = "../../output/excerpts/"
+SOURCE_DIR = "./input/docs-krita-org/_build/html/reference_manual/"
+TARGET_DIR = "./output/excerpts/"
 
-def from_page(soup: BeautifulSoup):
+def split_from_page(soup: BeautifulSoup):
     """
     """
     sections = [soup.css.select_one("section[id]")]
     logger.debug("(%d) sections found. Returning as list.", len(sections))
     return sections
 
-def from_blendingmodes_page(soup: BeautifulSoup):
+def split_from_blendingmodes_page(soup: BeautifulSoup):
     """
     """
     sections = list(soup.css.select("section[id]")[1:])
     logger.debug("(%d) sections found. Returning as list.", len(sections))
     return sections
 
-def from_hsx_blendingmodes_page(soup: BeautifulSoup):
+def split_from_hsx_blendingmodes_page(soup: BeautifulSoup):
     """
     """
     sections = list(section.css.select("#hsx-blending-modes > section[id]"))
@@ -52,8 +54,74 @@ def write_stripped_soup(soup: BeautifulSoup, filename: str):
     logger.debug("Writing lines to '%s'. Calculating number of lines.", filename)
     soup_as_lines = [line.strip() for line in str(soup).splitlines() if line.strip()]
     soup_as_str = "\n".join(soup_as_lines)
-    logger.debug("(%d) lines were found in soup. Writing.", len(soup_as_lines))
+    num_lines = len(soup_as_lines)
+    logger.debug("(%d) lines were found in soup. Writing.", num_lines)
     Path(filename).write_text(soup_as_str, encoding="utf-8") # returns number of bytes written; unneeded.
     logger.debug("Write operation successful.")
-    return
+    return num_lines
 
+if __name__ == "__main__":
+    def create_indices_and_main_directories():
+        """
+        Creates main directories and their corresponding index files.
+        """
+        # create folders, then create index files
+        num_directories = 0
+        for dirpath in filter(lambda path_: path_.is_dir(), Path(SOURCE_DIR).iterdir()):
+            target_subdir = Path(TARGET_DIR, dirpath.name)
+            index_path = dirpath.with_suffix(".html")
+            # check if directory should be made.
+            if not index_path.exists():
+                logger.warning("'%s' does not exist. Skipping.", index_path)
+                continue
+            # create folder
+            target_subdir.mkdir(exist_ok=True)
+            logger.debug("'%s' now exists.", target_subdir)
+            # create index file
+            # - get file content
+            soup = BeautifulSoup(index_path.read_text(), 'html.parser')
+            index_section = split_from_page(soup).pop()
+            # - declare filename
+            target_indexfile = Path(TARGET_DIR, index_path.name)
+            # - write
+            num_lines = write_stripped_soup(soup, target_indexfile)
+            logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_indexfile)
+            num_directories += 1
+        logger.info("Created (%d) directories.", num_directories)
+    def create_main_content():
+        """
+        """
+        for dirpath in filter(lambda path_: path_.is_dir(), Path(SOURCE_DIR).iterdir()):
+            logger.info("Populating '%s'.", dirpath)
+            num_files = 0
+            for filepath in filter(lambda path_: path_.is_file(), dirpath.iterdir()):
+                if not filepath.name.endswith(".html"):
+                    logger.warning("'%s' is not an HTML file. Skipping.", filepath)
+                    continue
+                soup = BeautifulSoup(filepath.read_text(), 'html.parser')
+                target_file = Path(TARGET_DIR, dirpath.name, filepath.name)
+                num_lines = write_stripped_soup(soup, target_file)
+                logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
+                num_files += 1
+            logger.info("(%d) HTML files have been created.", num_files)
+    def create_indices_and_main_subdirectories():
+        """
+        """
+        for dir_path in filter(lambda path_: path_.is_dir(), Path(SOURCE_DIR).iterdir()):
+            # brushes/
+            for subdir_path in filter(lambda path_: path_.is_dir(), dir_path.iterdir()):
+                # brush_settings/
+                target_subsubdir = Path(TARGET_DIR, dir_path.name, subdir_path.name)
+                target_subsubdir.mkdir(exist_ok=True)
+                logger.info("Populating '%s'.", target_subsubdir)
+                num_files = 0
+                for filepath in filter(lambda path_: path_.is_file(), subdir_path.iterdir()):
+                    if not filepath.name.endswith(".html"):
+                        logger.warning("'%s' is not an HTML file. Skipping.", filepath)
+                        continue
+                    soup = BeautifulSoup(filepath.read_text(), 'html.parser')
+                    target_file = target_subsubdir.joinpath(filepath.name)
+                    num_lines = write_stripped_soup(soup, target_file)
+                    logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
+                    num_files += 1
+                logger.info("(%d) HTML files have been created.", num_files)
