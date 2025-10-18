@@ -30,5 +30,6 @@ image_amputator.py
 
 NOT FINISHED
 ============
+* Upon completion mark by invoking `chmod -x %`
 index_compiler.py
 parse_excerpts.py
