@@ -35,22 +35,6 @@ def split_from_hsx_blendingmodes_page(soup: BeautifulSoup):
     logger.debug("(%d) sections found. Returning as list.", len(sections))
     return sections
 
-def format_filename_of_target(filename: str, h2_text: str):
-    """
-    """
-    logger.debug("Old filename: '%s'", filename)
-    new_filename = filename.replace('.html', '') \
-        + "_" \
-        + h2_text.replace(' - ', '-').replace(' ', '-') \
-        + ".html"
-    logger.debug("Filename after appending header: '%s'", new_filename)
-    new_filename = new_filename.replace(' ', '_').lower()
-    logger.debug("Filename after replacing ' ' with '_': '%s'", new_filename)
-    # remove invalid filename characters
-    new_filename = re.sub("[^a-z0-9_.-]", "", new_filename)
-    logger.debug("Filename after erasing invalid characters: '%s'. Returning: '%s'", new_filename, new_filename)
-    return new_filename
-
 def write_stripped_soup(soup: BeautifulSoup, filename: str):
     """
     """
