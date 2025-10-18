@@ -31,7 +31,7 @@ def split_from_blendingmodes_page(soup: BeautifulSoup):
 def split_from_hsx_blendingmodes_page(soup: BeautifulSoup):
     """
     """
-    sections = list(section.css.select("#hsx-blending-modes > section[id]"))
+    sections = list(soup.css.select("#hsx-blending-modes > section[id]"))
     logger.debug("(%d) sections found. Returning as list.", len(sections))
     return sections
 
@@ -83,11 +83,11 @@ if __name__ == "__main__":
             # create index file
             # - get file content
             soup = BeautifulSoup(index_path.read_text(), 'html.parser')
-            index_section = split_from_page(soup).pop()
+            section = split_from_page(soup).pop()
             # - declare filename
             target_indexfile = Path(TARGET_DIR, index_path.name)
             # - write
-            num_lines = write_stripped_soup(soup, target_indexfile)
+            num_lines = write_stripped_soup(section, target_indexfile)
             logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_indexfile)
             num_directories += 1
         logger.info("Created (%d) directories.", num_directories)
@@ -166,5 +166,62 @@ if __name__ == "__main__":
                 logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
                 num_files += 1
             logger.info("(%d) HTML files have been created.", num_files)
-    # TODO: Take care of TARGET_DIR/blending_modes/hsx.html
+    def populate_hsx_blendingmodes_subdirectories():
+        """
+        """
+        hsx_blendingmode_dict = {
+            "Color, HSV, HSI, HSL, HSY": "color_hsv-hsi-hsl-hsy",
+            "Hue HSV, HSI, HSL, HSY": "hue_hsv-hsi-hsl-hsy",
+            "Increase Value, Lightness, Intensity or Luminosity.": "increase-value_lightness-intensity-luminosity",
+            "Increase Saturation HSI, HSV, HSL, HSY": "increase-saturation_hsi-hsv-hsl-hsy",
+            "Intensity": "intensity",
+            "Value": "value",
+            "Lightness": "lightness",
+            "Luminosity": "luminosity",
+            "Saturation HSI, HSV, HSL, HSY": "saturation_hsi-hsv-hsl-hsy",
+            "Decrease Value, Lightness, Intensity or Luminosity": "decrease-value_lightness-intensity-luminosity",
+            "Decrease Saturation HSI, HSV, HSL, HSY": "decrease-saturation_hsi-hsv-hsl-hsy",
+        }
+        filepath = Path(TARGET_DIR, "blending_modes", "hsx.html")
+        hsx_blendingmode_subdir = filepath.with_suffix("")
+        hsx_blendingmode_subdir.mkdir(exist_ok=True)
+        logger.info("Populating '%s'.", hsx_blendingmode_subdir)
+        soup = BeautifulSoup(filepath.read_text(), 'html.parser')
+        sections = split_from_hsx_blendingmodes_page(soup)
+        num_files = 0
+        for section in sections:
+            h3_text = section.find("h3").text.replace(PILCROW, "")
+            blending_mode = hsx_blendingmode_dict[h3_text]
+            target_file = hsx_blendingmode_subdir.joinpath(blending_mode + ".html")
+            soup = BeautifulSoup(str(section), 'html.parser')
+            num_lines = write_stripped_soup(section, target_file)
+            logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
+            num_files += 1
+        logger.info("(%d) HTML files have been created.", num_files)
+    def split_docs():
+        """
+        """
+        create_main_directories_and_indices()
+        populate_main_directories()
+        populate_main_subdirectories()
+        populate_blendingmodes_subdirectories()
+        populate_hsx_blendingmodes_subdirectories()
+    def inspect_output():
+        """
+        """
+        args = ["vi"]
+        root_dir = "output/raw-excerpts"
+        filelist = (
+            "dockers.html",
+            "filters/map.html",
+            "brushes/brush_settings/options.html",
+            "blending_modes/arithmetic/addition.html",
+            "blending_modes/hsx/increase-value_lightness-intensity-luminosity.html",
+        )
+        for file in filelist:
+            args.append("/".join([root_dir, file]))
+        import subprocess
+        subprocess.run(args)
+    #split_docs()
+    #inspect_output()
 
