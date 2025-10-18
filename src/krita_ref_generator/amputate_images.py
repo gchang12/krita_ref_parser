@@ -8,8 +8,9 @@ from PIL import Image
 
 from krita_ref_generator._logging import logger
 
-SOURCE_DIR = "../../input/docs-krita-org/_build/html/_images/"
-TARGET_DIR = "../../output/images/"
+SOURCE_DIR = "./input/docs-krita-org/_build/html/_images/"
+TARGET_DIR = "./output/images/"
+EXCERPT_DIR = "./output/raw-excerpts/"
 
 class SampleImageType(enum.Enum):
     """
@@ -101,6 +102,35 @@ def copy_all_images():
     """
     """
     shutil.copytree(SOURCE_DIR, TARGET_DIR)
+
+def compile_used_images():
+    """
+    """
+    raise NotImplementedError
+    with open(index_name, encoding="utf-8") as rfile:
+        index = json.load(rfile)
+    used_images = set(Path(record['icon']).name for record in index if record['icon'] is not None)
+    for excerpt_dir in Path(excerptdir_root).iterdir():
+        for excerpt_file in excerpt_dir.iterdir():
+            with open(excerpt_file, encoding="utf-8") as rfile:
+                soup = BeautifulSoup(rfile, "html.parser")
+            for img in soup.find_all('img'):
+                img_src = Path(img['src']).name
+                used_images.add(img_src)
+
+def delete_unused_images(index):
+    """
+    """
+    logger.debug("Found (%d) filenames in index.", len(index))
+    image_files = tuple(filter(lambda file: file.is_file(), Path(TARGET_DIR).iterdir()))
+    num_image_files = len(image_files)
+    logger.debug("Found (%d) image files in '%s'.", num_image_files, TARGET_DIR)
+    unused_images = tuple(filter(lambda file: file.name not in index, image_files))
+    num_unused_images = len(unused_images)
+    logger.debug("Found (%d) unused image files in '%s'.", num_unused_images, TARGET_DIR)
+    for imagefile in unused_images:
+        imagefile.unlink()
+    logger.debug("Deleted images. Number of images remaining: %d", num_image_files - num_unused_images)
 
 if __name__ == "__main__":
     def halve_blendingmode_dots_images():
