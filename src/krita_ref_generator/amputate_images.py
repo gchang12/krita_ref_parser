@@ -97,19 +97,10 @@ def get_thirds_of_image_file(filename: str, *, get_last_third: bool):
         cropped_image = img.crop(box)
     return cropped_image
 
-def delete_unused_images(index):
+def copy_all_images():
     """
     """
-    logger.debug("Found (%d) filenames in index.", len(index))
-    image_files = tuple(filter(lambda file: file.is_file(), Path(TARGET_DIR).iterdir()))
-    num_image_files = len(image_files)
-    logger.debug("Found (%d) image files in '%s'.", num_image_files, TARGET_DIR)
-    unused_images = tuple(filter(lambda file: file.name not in index, image_files))
-    num_unused_images = len(unused_images)
-    logger.debug("Found (%d) unused image files in '%s'.", num_unused_images, TARGET_DIR)
-    for imagefile in unused_images:
-        imagefile.unlink()
-    logger.debug("Deleted images. Number of images remaining: %d", num_image_files - num_unused_images)
+    shutil.copytree(SOURCE_DIR, TARGET_DIR)
 
 if __name__ == "__main__":
     def halve_blendingmode_dots_images():

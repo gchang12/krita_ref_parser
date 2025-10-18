@@ -8,7 +8,7 @@ SOURCE_DIR = "../../output/raw-excerpts/"
 TARGET_DIR = "../../output/"
 
 # TODO: Index
-# - (directory, filename, header, hero-image=null)
+# - (directory, filename, header, hero-image=null, image-set=null)
 # - ('blending_modes/', filename, header, image-set)
 
 def get_index(filename):
@@ -356,4 +356,18 @@ def compile_used_images():
             for img in soup.find_all('img'):
                 img_src = Path(img['src']).name
                 used_images.add(img_src)
+
+def delete_unused_images(index):
+    """
+    """
+    logger.debug("Found (%d) filenames in index.", len(index))
+    image_files = tuple(filter(lambda file: file.is_file(), Path(TARGET_DIR).iterdir()))
+    num_image_files = len(image_files)
+    logger.debug("Found (%d) image files in '%s'.", num_image_files, TARGET_DIR)
+    unused_images = tuple(filter(lambda file: file.name not in index, image_files))
+    num_unused_images = len(unused_images)
+    logger.debug("Found (%d) unused image files in '%s'.", num_unused_images, TARGET_DIR)
+    for imagefile in unused_images:
+        imagefile.unlink()
+    logger.debug("Deleted images. Number of images remaining: %d", num_image_files - num_unused_images)
 
