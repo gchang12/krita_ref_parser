@@ -57,7 +57,7 @@ output/excerpts/: output/raw-excerpts/
 
 ## 5: Generate index of: (directory, file, header, header-image)
 output/index.json: output/raw-excerpts/
-	python3 src/krita_ref_generator/compile_indices.py;
+	python3 src/krita_ref_generator/compile_index.py;
 
 ## 6: Search for hidden output.
 .SEARCH_FOR_HIDDEN_OUTPUT:
