@@ -130,93 +130,41 @@ if __name__ == "__main__":
                     logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
                     num_files += 1
                 logger.info("(%d) HTML files have been created.", num_files)
-
-    nonalpha_blendingmodes = {
-        "Inverse Subtract": "inverse-subtract",
-        "Divisive Modulo": "divisive-modulo",
-        "Divisive Modulo - Continuous": "divisive-modulo_continuous",
-        "Modulo - Continuous": "modulo_continuous",
-        "Modulo Shift": "modulo-shift",
-        "Modulo Shift - Continuous": "modulo-shift_continuous",
-        "Easy Burn": "easy-burn",
-        "Fog Darken (IFS Illusions)": "fog-darken_ifs-illusions",
-        "Darker Color": "darker-color",
-        "Gamma Dark": "gamma-dark",
-        "Linear Burn": "linear-burn",
-        "Shade (IFS Illusions)": "shade_ifs-illusions",
-        "Freeze-Reflect": "freeze-reflect",
-        "Glow-Heat": "glow-heat",
-        "Heat-Glow": "heat-glow",
-        "Heat-Glow and Freeze-Reflect Hybrid": "heat-glow_and_freeze-reflect-hybrid",
-        "Reflect-Freeze": "reflect-freeze",
-        "Color Dodge": "color-dodge",
-        "Gamma Illumination": "gamma-illumination",
-        "Gamma Light": "gamma-light",
-        "Hard Light": "hard-light",
-        "Lighter Color": "lighter-color",
-        "Linear Dodge": "linear-dodge",
-        "Easy Dodge": "easy-dodge",
-        "Flat Light": "flat-light",
-        "Fog Lighten (IFS Illusions)": "fog-lighten_ifs-illusions",
-        "Linear Light": "linear-light",
-        "Luminosity/Shine (SAI)": "luminosity-shine_sai",
-        "Pin Light": "pin-light",
-        "Soft Light (Photoshop) & Soft Light SVG": "soft-light-photoshop_and_soft-light-svg",
-        "Soft Light (IFS Illusions) & Soft Light (Pegtop-Delphi)":"soft-light-ifs-illusions_and_soft-light-pegtop-delphi",
-        "Super Light": "super-light",
-        "Tint (IFS Illusions)": "tint_ifs-illusions",
-        "Vivid Light": "vivid-light",
-        "Interpolation - 2X": "interpolation_2x",
-        "Alpha Darken": "alpha-darken",
-        "Geometric Mean": "geometric-mean",
-        "Grain Extract": "grain-extract",
-        "Grain Merge": "grain-merge",
-        "Hard Mix": "hard-mix",
-        "Hard Mix (Photoshop)": "hard-mix_photoshop",
-        "Hard Mix Softer (Photoshop)": "hard-mix-softer_photoshop",
-        "Hard Overlay": "hard-overlay",
-        "Penumbra A": "penumbra-a",
-        "Penumbra B": "penumbra-b",
-        "Penumbra C": "penumbra-c",
-        "Penumbra D": "penumbra-d",
-        "Combine Normal Map": "combine-normal-map",
-        "Copy Red, Green, Blue": "copy_red-green-blue",
-        "NOT CONVERSE": "not-converse",
-        "NOT IMPLICATION": "not-implication",
-        "Additive Subtractive": "additive-subtractive",
-        "Arcus Tangent": "arcus-tangent",
-    }
-    nonalpha_blendingmodes = {
-        "Luminosity/Shine (SAI)": "luminosity-shine_sai",
-        "Copy Red, Green, Blue": "copy_red-green-blue",
-        "P-Norm A": "p-norm_a",
-        "P-Norm B": "p-norm_b",
-    }
-    for filepath in filter(lambda path_: path_.is_file() and path_.name != "hsx.html", Path(TARGET_DIR, "blending_modes").iterdir()):
-        # brushes/
-        blendingmodes_subdir = Path(TARGET_DIR, "blending_modes", filepath.with_suffix("").name) # TARGET_DIR/'blending_modes'/blending_mode_type/
-        blendingmodes_subdir.mkdir(exist_ok=True)
-        logger.info("Populating '%s'.", blendingmodes_subdir)
-        soup = BeautifulSoup(filepath.read_text(), 'html.parser')
-        sections = split_from_blendingmodes_page(soup)
-        num_files = 0
-        for section in sections:
-            #print(section, type(section))
-            h2_text = section.find("h2").text.replace(PILCROW, "")
-            try:
-                blending_mode = nonalpha_blendingmodes[h2_text]
-            except KeyError:
-                blending_mode = h2_text \
-                    .replace(" & ", "_and_") \
-                    .replace(" - ", "_")
-                blending_mode = re.sub(r" \((.+?)\)", r"_\1", blending_mode)
-                blending_mode = blending_mode \
-                    .replace(" ", "-") \
-                    .lower()
-            target_file = blendingmodes_subdir.joinpath(blending_mode + ".html")
-            soup = BeautifulSoup(str(section), 'html.parser')
-            num_lines = write_stripped_soup(section, target_file)
-            logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
-            num_files += 1
-        logger.info("(%d) HTML files have been created.", num_files)
+    def populate_blendingmodes_subdirectories():
+        """
+        """
+        nonalpha_blendingmodes = {
+            "Luminosity/Shine (SAI)": "luminosity-shine_sai",
+            "Copy Red, Green, Blue": "copy_red-green-blue",
+            "P-Norm A": "p-norm_a",
+            "P-Norm B": "p-norm_b",
+        }
+        for filepath in filter(lambda path_: path_.is_file() and path_.name != "hsx.html", Path(TARGET_DIR, "blending_modes").iterdir()):
+            # brushes/
+            blendingmodes_subdir = Path(TARGET_DIR, "blending_modes", filepath.with_suffix("").name) # TARGET_DIR/'blending_modes'/blending_mode_type/
+            blendingmodes_subdir.mkdir(exist_ok=True)
+            logger.info("Populating '%s'.", blendingmodes_subdir)
+            soup = BeautifulSoup(filepath.read_text(), 'html.parser')
+            sections = split_from_blendingmodes_page(soup)
+            num_files = 0
+            for section in sections:
+                #print(section, type(section))
+                h2_text = section.find("h2").text.replace(PILCROW, "")
+                try:
+                    blending_mode = nonalpha_blendingmodes[h2_text]
+                except KeyError:
+                    blending_mode = h2_text \
+                        .replace(" & ", "_and_") \
+                        .replace(" - ", "_")
+                    blending_mode = re.sub(r" \((.+?)\)", r"_\1", blending_mode)
+                    blending_mode = blending_mode \
+                        .replace(" ", "-") \
+                        .lower()
+                target_file = blendingmodes_subdir.joinpath(blending_mode + ".html")
+                soup = BeautifulSoup(str(section), 'html.parser')
+                num_lines = write_stripped_soup(section, target_file)
+                logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
+                num_files += 1
+            logger.info("(%d) HTML files have been created.", num_files)
+    # TODO: Take care of TARGET_DIR/blending_modes/hsx.html
 
