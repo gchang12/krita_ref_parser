@@ -48,6 +48,7 @@ def write_stripped_soup(soup: BeautifulSoup, filename: str):
     return num_lines
 
 if __name__ == "__main__":
+
     def create_main_directories_and_indices():
         """
         Creates main directories and their corresponding index files.
@@ -75,6 +76,7 @@ if __name__ == "__main__":
             logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_indexfile)
             num_directories += 1
         logger.info("Created (%d) directories.", num_directories)
+
     def populate_main_directories():
         """
         """
@@ -92,6 +94,7 @@ if __name__ == "__main__":
                 logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
                 num_files += 1
             logger.info("(%d) HTML files have been created.", num_files)
+
     def populate_main_subdirectories():
         """
         """
@@ -114,14 +117,122 @@ if __name__ == "__main__":
                     logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
                     num_files += 1
                 logger.info("(%d) HTML files have been created.", num_files)
+
+    def _get_blendingmode_dict():
+        """
+        """
+        blendingmode_dict = {}
+        for filepath in filter(lambda path_: path_.is_file() and path_.name != "hsx.html", Path(TARGET_DIR, "blending_modes").iterdir()):
+            soup = BeautifulSoup(filepath.read_text(), 'html.parser')
+            sections = split_from_blendingmodes_page(soup)
+            for section in sections:
+                h2_text = section.find("h2").text.replace(PILCROW, "")
+                blending_mode = re.sub(r" \((.+?)\)", r"_\1", h2_text.replace(" & ", "_and_").replace(" - ", "_")).replace(" ", "-").lower()
+                blendingmode_dict[h2_text] = blending_mode
+        import json
+        #import tempfile
+        #import subprocess
+        #with tempfile.NamedTemporaryFile(mode="w", encoding='utf-8') as wfile:
+        bm_dict_as_json = json.dumps(blendingmode_dict, indent=4)
+        print(bm_dict_as_json)
+        #tempfile_name = wfile.name
+        #subprocess.run(["vi", tempfile_name])
+
     def populate_blendingmodes_subdirectories():
         """
         """
-        nonalpha_blendingmodes = {
+        blendingmode_dict = {
             "Luminosity/Shine (SAI)": "luminosity-shine_sai",
             "Copy Red, Green, Blue": "copy_red-green-blue",
             "P-Norm A": "p-norm_a",
             "P-Norm B": "p-norm_b",
+            "Addition": "addition",
+            "Divide": "divide",
+            "Inverse Subtract": "inverse-subtract",
+            "Multiply": "multiply",
+            "Subtract": "subtract",
+            "Divisive Modulo": "divisive-modulo",
+            "Divisive Modulo - Continuous": "divisive-modulo_continuous",
+            "Modulo": "modulo",
+            "Modulo - Continuous": "modulo_continuous",
+            "Modulo Shift": "modulo-shift",
+            "Modulo Shift - Continuous": "modulo-shift_continuous",
+            "Burn": "burn",
+            "Easy Burn": "easy-burn",
+            "Fog Darken (IFS Illusions)": "fog-darken_ifs-illusions",
+            "Darken": "darken",
+            "Darker Color": "darker-color",
+            "Gamma Dark": "gamma-dark",
+            "Linear Burn": "linear-burn",
+            "Shade (IFS Illusions)": "shade_ifs-illusions",
+            "Freeze": "freeze",
+            "Freeze-Reflect": "freeze-reflect",
+            "Glow": "glow",
+            "Glow-Heat": "glow-heat",
+            "Heat": "heat",
+            "Heat-Glow": "heat-glow",
+            "Heat-Glow and Freeze-Reflect Hybrid": "heat-glow-and-freeze-reflect-hybrid",
+            "Reflect": "reflect",
+            "Reflect-Freeze": "reflect-freeze",
+            "Color Dodge": "color-dodge",
+            "Gamma Illumination": "gamma-illumination",
+            "Gamma Light": "gamma-light",
+            "Hard Light": "hard-light",
+            "Lighten": "lighten",
+            "Lighter Color": "lighter-color",
+            "Linear Dodge": "linear-dodge",
+            "Easy Dodge": "easy-dodge",
+            "Flat Light": "flat-light",
+            "Fog Lighten (IFS Illusions)": "fog-lighten_ifs-illusions",
+            "Linear Light": "linear-light",
+            "Pin Light": "pin-light",
+            "Screen": "screen",
+            "Soft Light (Photoshop) & Soft Light SVG": "soft-light_photoshop_and_soft-light-svg",
+            "Soft Light (IFS Illusions) & Soft Light (Pegtop-Delphi)": "soft-light_ifs-illusions_and_soft-light_pegtop-delphi",
+            "Super Light": "super-light",
+            "Tint (IFS Illusions)": "tint_ifs-illusions",
+            "Vivid Light": "vivid-light",
+            "Allanon": "allanon",
+            "Interpolation": "interpolation",
+            "Interpolation - 2X": "interpolation_2x",
+            "Alpha Darken": "alpha-darken",
+            "Behind": "behind",
+            "Erase": "erase",
+            "Geometric Mean": "geometric-mean",
+            "Grain Extract": "grain-extract",
+            "Grain Merge": "grain-merge",
+            "Greater": "greater",
+            "Hard Mix": "hard-mix",
+            "Hard Mix (Photoshop)": "hard-mix_photoshop",
+            "Hard Mix Softer (Photoshop)": "hard-mix-softer_photoshop",
+            "Hard Overlay": "hard-overlay",
+            "Normal": "normal",
+            "Overlay": "overlay",
+            "Parallel": "parallel",
+            "Penumbra A": "penumbra-a",
+            "Penumbra B": "penumbra-b",
+            "Penumbra C": "penumbra-c",
+            "Penumbra D": "penumbra-d",
+            "Bumpmap": "bumpmap",
+            "Combine Normal Map": "combine-normal-map",
+            "Copy": "copy",
+            "Dissolve": "dissolve",
+            "AND": "and",
+            "CONVERSE": "converse",
+            "IMPLICATION": "implication",
+            "NAND": "nand",
+            "NOR": "nor",
+            "NOT CONVERSE": "not-converse",
+            "NOT IMPLICATION": "not-implication",
+            "OR": "or",
+            "XOR": "xor",
+            "XNOR": "xnor",
+            "Additive Subtractive": "additive-subtractive",
+            "Arcus Tangent": "arcus-tangent",
+            "Difference": "difference",
+            "Equivalence": "equivalence",
+            "Exclusion": "exclusion",
+            "Negation": "negation"
         }
         for filepath in filter(lambda path_: path_.is_file() and path_.name != "hsx.html", Path(TARGET_DIR, "blending_modes").iterdir()):
             # brushes/
@@ -132,24 +243,17 @@ if __name__ == "__main__":
             sections = split_from_blendingmodes_page(soup)
             num_files = 0
             for section in sections:
-                #print(section, type(section))
                 h2_text = section.find("h2").text.replace(PILCROW, "")
-                try:
-                    blending_mode = nonalpha_blendingmodes[h2_text]
-                except KeyError:
-                    blending_mode = h2_text \
-                        .replace(" & ", "_and_") \
-                        .replace(" - ", "_")
-                    blending_mode = re.sub(r" \((.+?)\)", r"_\1", blending_mode)
-                    blending_mode = blending_mode \
-                        .replace(" ", "-") \
-                        .lower()
+                blending_mode = blendingmode_dict[h2_text]
                 target_file = blendingmodes_subdir.joinpath(blending_mode + ".html")
                 soup = BeautifulSoup(str(section), 'html.parser')
                 num_lines = write_stripped_soup(section, target_file)
                 logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
                 num_files += 1
             logger.info("(%d) HTML files have been created.", num_files)
+        assert len(set(blendingmode_dict.values())) == len(set(blendingmode_dict.keys()))
+        logger.info("Filenames are unique.")
+
     def populate_hsx_blendingmodes_subdirectories():
         """
         """
@@ -182,6 +286,7 @@ if __name__ == "__main__":
             logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
             num_files += 1
         logger.info("(%d) HTML files have been created.", num_files)
+
     def split_docs():
         """
         """
@@ -190,6 +295,7 @@ if __name__ == "__main__":
         populate_main_subdirectories()
         populate_blendingmodes_subdirectories()
         populate_hsx_blendingmodes_subdirectories()
+
     def inspect_output():
         """
         """
@@ -206,6 +312,8 @@ if __name__ == "__main__":
             args.append("/".join([root_dir, file]))
         import subprocess
         subprocess.run(args)
+
     #split_docs()
     #inspect_output()
+    _get_blendingmode_dict()
 
