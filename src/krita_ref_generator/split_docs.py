@@ -61,7 +61,7 @@ def write_stripped_soup(soup: BeautifulSoup, filename: str):
     return num_lines
 
 if __name__ == "__main__":
-    def create_indices_and_main_directories():
+    def create_main_directories_and_indices():
         """
         Creates main directories and their corresponding index files.
         """
@@ -88,7 +88,7 @@ if __name__ == "__main__":
             logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_indexfile)
             num_directories += 1
         logger.info("Created (%d) directories.", num_directories)
-    def create_main_content():
+    def populate_main_directories():
         """
         """
         for dirpath in filter(lambda path_: path_.is_dir(), Path(SOURCE_DIR).iterdir()):
@@ -99,12 +99,13 @@ if __name__ == "__main__":
                     logger.warning("'%s' is not an HTML file. Skipping.", filepath)
                     continue
                 soup = BeautifulSoup(filepath.read_text(), 'html.parser')
+                section = split_from_page(soup).pop()
                 target_file = Path(TARGET_DIR, dirpath.name, filepath.name)
-                num_lines = write_stripped_soup(soup, target_file)
+                num_lines = write_stripped_soup(section, target_file)
                 logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
                 num_files += 1
             logger.info("(%d) HTML files have been created.", num_files)
-    def create_indices_and_main_subdirectories():
+    def populate_main_subdirectories():
         """
         """
         for dir_path in filter(lambda path_: path_.is_dir(), Path(SOURCE_DIR).iterdir()):
@@ -120,8 +121,9 @@ if __name__ == "__main__":
                         logger.warning("'%s' is not an HTML file. Skipping.", filepath)
                         continue
                     soup = BeautifulSoup(filepath.read_text(), 'html.parser')
+                    section = split_from_page(soup).pop()
                     target_file = target_subsubdir.joinpath(filepath.name)
-                    num_lines = write_stripped_soup(soup, target_file)
+                    num_lines = write_stripped_soup(section, target_file)
                     logger.debug("Wrote (%d) lines to '%s'.", num_lines, target_file)
                     num_files += 1
                 logger.info("(%d) HTML files have been created.", num_files)
