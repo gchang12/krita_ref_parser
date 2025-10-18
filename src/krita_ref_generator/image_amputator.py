@@ -6,7 +6,7 @@ import enum
 
 from PIL import Image
 
-from krita_ref_generator.logging import logger
+from krita_ref_generator._logging import logger
 
 SOURCE_DIR = "../../input/docs-krita-org/_build/html/_images/"
 TARGET_DIR = "../../output/images/"
