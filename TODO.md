@@ -28,6 +28,6 @@ split_docs.py
 NOT FINISHED
 ============
 * Upon completion mark by invoking `chmod -x %`
-amputate_images.py
 compile_indices.py
+amputate_images.py
 modify_dom.py

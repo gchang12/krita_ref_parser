@@ -3,8 +3,10 @@ Models sample-image types, partitions images, and deletes images.
 """
 
 import enum
+from pathlib import Path
 
 from PIL import Image
+from bs4 import BeautifulSoup
 
 from krita_ref_generator._logging import logger
 
@@ -15,8 +17,9 @@ EXCERPT_DIR = "./output/raw-excerpts/"
 class SampleImageType(enum.Enum):
     """
     """
-    # VARIOUS
+    # BLENDING_MODES
     WITH_DOTS = "_Sample_image_with_dots.png"
+    # VARIOUS
     GREY_04_05 = "_Gray_0.4_and_Gray_0.5_n.png"
     LIGHT_BLUE_AND_ORANGE = "_Light_blue_and_orange.png"
     # MODULO
@@ -34,9 +37,9 @@ class SampleImageType(enum.Enum):
             matched_sample_image_type = list(filter(lambda image_type: filename.endswith(image_type.value), cls)).pop()
             logger.debug("'%s' matched the %s SampleImageType enumeration; returning latter.", filename, matched_sample_image_type)
             return matched_sample_image_type
-        except IndexError as idx_err:
-            logger.warning("'%s' does not fall into one of the declared SampleImageType enumerations.", filename)
-            raise idx_err
+        except IndexError:
+            logger.debug("'%s' does not fall into one of the declared SampleImageType enumerations.", filename)
+            return None
 
     def get_filename_for_default(self):
         """
@@ -98,25 +101,13 @@ def get_thirds_of_image_file(filename: str, *, get_last_third: bool):
         cropped_image = img.crop(box)
     return cropped_image
 
-def copy_all_images():
+def compile_images_from_soup(soup: BeautifulSoup):
     """
     """
-    shutil.copytree(SOURCE_DIR, TARGET_DIR)
-
-def compile_used_images():
-    """
-    """
-    raise NotImplementedError
-    with open(index_name, encoding="utf-8") as rfile:
-        index = json.load(rfile)
-    used_images = set(Path(record['icon']).name for record in index if record['icon'] is not None)
-    for excerpt_dir in Path(excerptdir_root).iterdir():
-        for excerpt_file in excerpt_dir.iterdir():
-            with open(excerpt_file, encoding="utf-8") as rfile:
-                soup = BeautifulSoup(rfile, "html.parser")
-            for img in soup.find_all('img'):
-                img_src = Path(img['src']).name
-                used_images.add(img_src)
+    images = set()
+    for img in soup.find_all("img"):
+        images.add(Path(img['src']).name)
+    return images
 
 def delete_unused_images(index):
     """
@@ -125,7 +116,15 @@ def delete_unused_images(index):
     image_files = tuple(filter(lambda file: file.is_file(), Path(TARGET_DIR).iterdir()))
     num_image_files = len(image_files)
     logger.debug("Found (%d) image files in '%s'.", num_image_files, TARGET_DIR)
-    unused_images = tuple(filter(lambda file: file.name not in index, image_files))
+    unused_images = map(
+        lambda file: file.name,
+        tuple(
+            filter(
+                lambda file: file.name not in index,
+                image_files,
+            )
+        )
+    )
     num_unused_images = len(unused_images)
     logger.debug("Found (%d) unused image files in '%s'.", num_unused_images, TARGET_DIR)
     for imagefile in unused_images:
@@ -133,12 +132,66 @@ def delete_unused_images(index):
     logger.debug("Deleted images. Number of images remaining: %d", num_image_files - num_unused_images)
 
 if __name__ == "__main__":
-    def halve_blendingmode_dots_images():
+
+    # Copy images directory from source to target.
+    def copy_all_images():
         """
         """
-        for imagefile in filter(lambda imagefile: not str(imagefile).endswith("_with_dots.png"), Path(TARGET_DIR).iterdir()):
-            blended_image = get_half_of_image_file(imagefile, get_first_half=False)
-            blended_image.save(imagefile)
-        og_image = get_half_of_image_file(imagefile, get_first_half=True)
-        og_image.save(Path(TARGET_DIR, OG_DOTS_IMAGE))
+        shutil.copytree(SOURCE_DIR, TARGET_DIR)
+        logger.info("'%s' has been copied to '%s'", SOURCE_DIR, TARGET_DIR)
+
+    # Compile list of used images and delete them.
+    def compile_and_delete_used_images():
+        """
+        """
+        images = set()
+        for (dirpath, dirs, filenames) in Path(EXCERPT_DIR).walk():
+            logger.info("Looking for image references in '%s'.", dirpath)
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = BeautifulSoup(filepath.read_text(), 'html.parser')
+                images.update(compile_images_from_soup(soup))
+        logger.info("Compiled (%d) images being referenced in HTML.", len(images))
+        delete_unused_images(images)
+
+    # Generate generic blending-mode images
+    def generate_default_blendingmodes_images():
+        """
+        """
+        for sample_image_type in SampleImageType:
+            number_of_partitions = sample_image_type.get_number_of_partitions()
+            logger.debug("%s should be divided into (%d) parts.", sample_image_type, number_of_partitions)
+            partitioning_func, kwds = {
+                2: (get_half_of_image_file, {"get_first_half": True}),
+                3: (get_thirds_of_image_file, {"get_last_third": False}),
+            }[number_of_partitions]
+            sample_img_filename = list(filter(lambda path: path.name.endswith(sample_image_type.value), Path(TARGET_DIR).iterdir())).pop()
+            logger.debug("Extracting generic part from sample file: '%s'.", sample_img_filename)
+            cropped_image = partitioning_func(sample_img_filename, **kwds)
+            target_filename = sample_image_type.get_filename_for_default()
+            target_path = Path(TARGET_DIR, target_filename)
+            cropped_image.save(target_path)
+            logger.info("Generic %s image has been saved to: '%s'", sample_image_type, target_path)
+
+    # Partition the existing images in-place.
+    def partition_blendingmodes_images_inplace():
+        """
+        """
+        partition_log = {}
+        for imgtype in SampleImageType:
+            partition_log[imgtype] = 0
+        for imagefile in filter(
+            lambda path: SampleImageType.get_sample_image_type(path.name) is not None,
+            Path(TARGET_DIR).iterdir(),
+        ):
+            sample_image_type = SampleImageType.get_sample_image_type(imagefile.name)
+            number_of_partitions = sample_image_type.get_number_of_partitions()
+            partitioning_func, kwds = {
+                2: (get_half_of_image_file, {"get_first_half": False}),
+                3: (get_thirds_of_image_file, {"get_last_third": True}),
+            }[number_of_partitions]
+            cropped_image = partitioning_func(imagefile, **kwds)
+            cropped_image.save(imagefile)
+            partition_log[sample_image_type] += 1
+        logger.info("Partition complete. Report: %s", partition_log)
 
