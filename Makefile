@@ -47,18 +47,17 @@ output/raw-excerpts/: output/ .INPUT_FILES
 ## 3: Import images, then reference excerpt files to determine which to keep.
 output/images/: output/raw-excerpts/
 	mkdir output/images/;
-	python3 src/krita_ref_generator/image_amputator.py;
+	python3 src/krita_ref_generator/amputate_images.py;
 	echo "There are a total of (`ls output/images/ | wc -l`) output images.";
 
 ## 4: Format and clean generated HTML files.
 output/excerpts/: output/raw-excerpts/
 	mkdir output/excerpts/;
-	python3 src/krita_ref_generator/parse_excerpts.py;
-	python3 src/krita_ref_generator/soup_scribe.py;
+	python3 src/krita_ref_generator/modify_dom.py;
 
 ## 5: Generate index of: (directory, file, header, header-image)
 output/index.json: output/raw-excerpts/
-	python3 src/krita_ref_generator/index_compiler.py;
+	python3 src/krita_ref_generator/compile_indices.py;
 
 ## 6: Search for hidden output.
 .SEARCH_FOR_HIDDEN_OUTPUT:
