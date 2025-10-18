@@ -23,13 +23,11 @@ Modify only when you want support from others.
 
 DONE
 ====
-extract_excerpts.py
-soup_scribe.py
-logging.py
-image_amputator.py
+split_docs.py
 
 NOT FINISHED
 ============
 * Upon completion mark by invoking `chmod -x %`
-index_compiler.py
-parse_excerpts.py
+amputate_images.py
+compile_indices.py
+modify_dom.py
