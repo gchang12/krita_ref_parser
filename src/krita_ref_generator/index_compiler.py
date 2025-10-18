@@ -1,11 +1,15 @@
 """
-Compiles index of documentation entries to include in web interface.
 """
 
 import json
+from pathlib import Path
 
 SOURCE_DIR = "../../output/raw-excerpts/"
 TARGET_DIR = "../../output/"
+
+# TODO: Index
+# - (directory, filename, header, hero-image=null)
+# - ('blending_modes/', filename, header, image-set)
 
 def get_index(filename):
     """
@@ -352,3 +356,4 @@ def compile_used_images():
             for img in soup.find_all('img'):
                 img_src = Path(img['src']).name
                 used_images.add(img_src)
+

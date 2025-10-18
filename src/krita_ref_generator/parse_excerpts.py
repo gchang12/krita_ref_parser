@@ -8,6 +8,17 @@ TARGET_DIR = "../../output/excerpts/"
 CLASS_FOR_LINKS_TO_OFFICIAL_DOCS = "link-to-official-docs"
 PILCROW = "¶"
 
+# TODO:
+#- Extract H2 tags.
+#- Change image sources
+#- Extract images as necessary.
+#- Prepend CSS link lines.
+#- Mark stuff as external or not.
+#- Have links open new tabs.
+#- Add CSS classes
+#- Delete bad tags.
+#- Set CSS 'rel' attribute
+
 def _extract_h_tag(section, *, h_level: int):
     """
     Pops <h[1-6]> tag from HTML soup `section` and returns it.
