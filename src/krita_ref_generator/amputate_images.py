@@ -3,6 +3,7 @@ Models sample-image types, partitions images, and deletes images.
 """
 
 import enum
+import shutil
 from pathlib import Path
 
 from PIL import Image
@@ -20,8 +21,9 @@ class SampleImageType(enum.Enum):
     # BLENDING_MODES
     WITH_DOTS = "_Sample_image_with_dots.png"
     # VARIOUS
-    GREY_04_05 = "_Gray_0.4_and_Gray_0.5_n.png"
-    LIGHT_BLUE_AND_ORANGE = "_Light_blue_and_orange.png"
+    GREY_04_05 = "_Gray_0.4_and_Gray_0.5.png"
+    GREY_04_05_N = "_Gray_0.4_and_Gray_0.5_n.png"
+    LIGHT_BLUE_AND_ORANGE = "_Light_blue_and_Orange.png"
     # MODULO
     GRADIENT_COMPARISON = "_Gradient_Comparison.png"
     # BINARY
@@ -41,10 +43,9 @@ class SampleImageType(enum.Enum):
             logger.debug("'%s' does not fall into one of the declared SampleImageType enumerations.", filename)
             return None
 
-    def get_filename_for_default(self):
+    def get_filename_for_default(self, *, prefix="."):
         """
         """
-        prefix = "."
         filename_for_default_image = prefix + self.value
         logger.debug("Returning: '%s'", filename_for_default_image)
         return filename_for_default_image
@@ -56,6 +57,7 @@ class SampleImageType(enum.Enum):
             # (various)
             self.WITH_DOTS: 2,
             self.GREY_04_05: 2,
+            self.GREY_04_05_N: 2,
             self.LIGHT_BLUE_AND_ORANGE: 2,
             # MODULO
             self.GRADIENT_COMPARISON: 3,
@@ -70,10 +72,11 @@ def get_half_of_image_file(filename: str, *, get_first_half: bool):
     """
     #logger.debug("Now halving: %s", filename)
     logger.debug("Halving: '%s'.", filename)
+    # box – The crop rectangle, as a (left, upper, right, lower)-tuple.
     with Image.open(filename) as img:
-        half_width = int(img.size[0] / 2)
-        full_height = img.size[1]
         full_width = img.size[0]
+        full_height = img.size[1]
+        half_width = int(full_width / 2)
         # (top, left, right, bottom)
         if get_first_half:
             logger.debug("Getting first half.")
@@ -89,8 +92,8 @@ def get_thirds_of_image_file(filename: str, *, get_last_third: bool):
     """
     logger.debug("Cutting '%s' into thirds.", filename)
     with Image.open(filename) as img:
-        full_height = img.size[1]
         full_width = img.size[0]
+        full_height = img.size[1]
         two_thirds_width = int(full_width * 2 / 3)
         if get_last_third:
             logger.debug("Getting last third.")
@@ -125,11 +128,11 @@ def delete_unused_images(index):
             )
         )
     )
-    num_unused_images = len(unused_images)
-    logger.debug("Found (%d) unused image files in '%s'.", num_unused_images, TARGET_DIR)
-    for imagefile in unused_images:
+    #num_unused_images = len(unused_images)
+    for num_unused_images, image_name in enumerate(unused_images, start=1):
+        imagefile = Path(TARGET_DIR, image_name)
         imagefile.unlink()
-    logger.debug("Deleted images. Number of images remaining: %d", num_image_files - num_unused_images)
+    logger.debug("Deleted %d unused image files in '%s'. Number of images remaining: %d.", num_unused_images, TARGET_DIR, num_image_files - num_unused_images)
 
 if __name__ == "__main__":
 
@@ -137,6 +140,7 @@ if __name__ == "__main__":
     def copy_all_images():
         """
         """
+        shutil.rmtree(TARGET_DIR, ignore_errors=True)
         shutil.copytree(SOURCE_DIR, TARGET_DIR)
         logger.info("'%s' has been copied to '%s'", SOURCE_DIR, TARGET_DIR)
 
@@ -168,7 +172,8 @@ if __name__ == "__main__":
             sample_img_filename = list(filter(lambda path: path.name.endswith(sample_image_type.value), Path(TARGET_DIR).iterdir())).pop()
             logger.debug("Extracting generic part from sample file: '%s'.", sample_img_filename)
             cropped_image = partitioning_func(sample_img_filename, **kwds)
-            target_filename = sample_image_type.get_filename_for_default()
+            target_filename = sample_image_type.get_filename_for_default(prefix=".")
+            #cropped_image.filename = "/".join([TARGET_DIR, target_filename])
             target_path = Path(TARGET_DIR, target_filename)
             cropped_image.save(target_path)
             logger.info("Generic %s image has been saved to: '%s'", sample_image_type, target_path)
@@ -181,7 +186,7 @@ if __name__ == "__main__":
         for imgtype in SampleImageType:
             partition_log[imgtype] = 0
         for imagefile in filter(
-            lambda path: SampleImageType.get_sample_image_type(path.name) is not None,
+            lambda path: SampleImageType.get_sample_image_type(path.name) is not None and not path.name.startswith("."),
             Path(TARGET_DIR).iterdir(),
         ):
             sample_image_type = SampleImageType.get_sample_image_type(imagefile.name)
@@ -194,4 +199,14 @@ if __name__ == "__main__":
             cropped_image.save(imagefile)
             partition_log[sample_image_type] += 1
         logger.info("Partition complete. Report: %s", partition_log)
+
+    def amputate_images():
+        """
+        """
+        copy_all_images()
+        compile_and_delete_used_images()
+        generate_default_blendingmodes_images()
+        partition_blendingmodes_images_inplace()
+
+    amputate_images()
 
