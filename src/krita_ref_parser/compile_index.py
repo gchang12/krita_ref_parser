@@ -4,12 +4,13 @@
 import json
 from pathlib import Path
 
-SOURCE_DIR = "../../output/raw-excerpts/"
-TARGET_DIR = "../../output/"
+from krita_ref_parser.amputate_images import SampleImageType
+
+SOURCE_DIR = "./output/raw-excerpts/"
+TARGET_DIR = "./output/"
 
 # TODO: Index
-# - (directory, filename, header, hero-image=null, image-set=null)
-# - ('blending_modes/', filename, header, image-set)
+# - (directory, filename, header, hero-image=null, figures=null)
 
 def get_index(filename):
     """
