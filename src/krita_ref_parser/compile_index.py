@@ -342,4 +342,3 @@ def compile_items(root, reference_sections):
                 (directory, source, target, header, icon, soup)
             )
     return buffer
-
