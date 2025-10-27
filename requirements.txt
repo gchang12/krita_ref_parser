@@ -1,7 +1,18 @@
 ## The following requirements were added by pip freeze:
 beautifulsoup4==4.14.2
 bs4==0.0.2
--e git+https://github.com/gchang12/krita_ref_parser.git@0ec8db9363cec650361b447ffa885c9a5f92bfe8#egg=krita_ref_parser
+cachetools==6.2.1
+chardet==5.2.0
+colorama==0.4.6
+distlib==0.4.0
+filelock==3.20.0
+-e git+https://github.com/gchang12/krita_ref_parser.git@c1422690d20d25d5d7b965dcbcd7b724070c3fcb#egg=krita_ref_parser
+packaging==25.0
 pillow==12.0.0
+platformdirs==4.5.0
+pluggy==1.6.0
+pyproject-api==1.10.0
 soupsieve==2.8
+tox==4.32.0
 typing_extensions==4.15.0
+virtualenv==20.35.3
