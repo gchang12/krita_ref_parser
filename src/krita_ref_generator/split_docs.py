@@ -313,7 +313,7 @@ if __name__ == "__main__":
         import subprocess
         subprocess.run(args)
 
-    #split_docs()
-    #inspect_output()
-    _get_blendingmode_dict()
+    split_docs()
+    inspect_output()
+    #_get_blendingmode_dict()
 

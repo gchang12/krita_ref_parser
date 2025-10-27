@@ -135,6 +135,7 @@ def delete_unused_images(index):
     logger.debug("Deleted %d unused image files in '%s'. Number of images remaining: %d.", num_unused_images, TARGET_DIR, num_image_files - num_unused_images)
 
 if __name__ == "__main__":
+    GENERIC_IMAGE_PREFIX = "."
 
     # Copy images directory from source to target.
     def copy_all_images():
@@ -172,7 +173,7 @@ if __name__ == "__main__":
             sample_img_filename = list(filter(lambda path: path.name.endswith(sample_image_type.value), Path(TARGET_DIR).iterdir())).pop()
             logger.debug("Extracting generic part from sample file: '%s'.", sample_img_filename)
             cropped_image = partitioning_func(sample_img_filename, **kwds)
-            target_filename = sample_image_type.get_filename_for_default(prefix=".")
+            target_filename = sample_image_type.get_filename_for_default(prefix=GENERIC_IMAGE_PREFIX)
             #cropped_image.filename = "/".join([TARGET_DIR, target_filename])
             target_path = Path(TARGET_DIR, target_filename)
             cropped_image.save(target_path)
@@ -186,7 +187,7 @@ if __name__ == "__main__":
         for imgtype in SampleImageType:
             partition_log[imgtype] = 0
         for imagefile in filter(
-            lambda path: SampleImageType.get_sample_image_type(path.name) is not None and not path.name.startswith("."),
+            lambda path: SampleImageType.get_sample_image_type(path.name) is not None and not path.name.startswith(GENERIC_IMAGE_PREFIX),
             Path(TARGET_DIR).iterdir(),
         ):
             sample_image_type = SampleImageType.get_sample_image_type(imagefile.name)
