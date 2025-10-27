@@ -1,4 +1,4 @@
-# krita_ref_generator
+# krita_ref_parser
 
 Add a short description here!
 

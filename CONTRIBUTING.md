@@ -27,7 +27,7 @@
 
 # Contributing
 
-Welcome to `krita_ref_generator` contributor's guide.
+Welcome to `krita_ref_parser` contributor's guide.
 
 This document focuses on getting any potential contributor familiarized with
 the development processes, but [other kinds of contributions] are also appreciated.
@@ -43,7 +43,7 @@ behavior guidelines.
 
 ## Issue Reports
 
-If you experience bugs or general issues with `krita_ref_generator`, please have a look
+If you experience bugs or general issues with `krita_ref_parser`, please have a look
 on the [issue tracker].
 If you don't see anything useful there, please feel free to fire an issue report.
 
@@ -61,10 +61,10 @@ you help us to identify the root cause of the issue.
 
 ## Documentation Improvements
 
-You can help improve `krita_ref_generator` docs by making them more readable and coherent, or
+You can help improve `krita_ref_parser` docs by making them more readable and coherent, or
 by adding missing information and correcting mistakes.
 
-`krita_ref_generator` documentation uses [Sphinx] as its main documentation compiler.
+`krita_ref_parser` documentation uses [Sphinx] as its main documentation compiler.
 This means that the docs are kept in the same repository as the project code, and
 that any documentation update is done in the same way was a code contribution.
 
@@ -77,7 +77,7 @@ that any documentation update is done in the same way was a code contribution.
 
    :::{tip}
       Please notice that the [GitHub web interface] provides a quick way of
-      propose changes in `krita_ref_generator`'s files. While this mechanism can
+      propose changes in `krita_ref_parser`'s files. While this mechanism can
       be tricky for normal code contributions, it works perfectly fine for
       contributing to the docs, and can be quite handy.
 
@@ -134,8 +134,8 @@ source <PATH TO VENV>/bin/activate
 or [Miniconda]:
 
 ```
-conda create -n krita_ref_generator python=3 six virtualenv pytest pytest-cov
-conda activate krita_ref_generator
+conda create -n krita_ref_parser python=3 six virtualenv pytest pytest-cov
+conda activate krita_ref_parser
 ```
 
 ### Clone the repository
@@ -148,8 +148,8 @@ conda activate krita_ref_generator
 3. Clone this copy to your local disk:
 
    ```
-   git clone git@github.com:YourLogin/krita_ref_generator.git
-   cd krita_ref_generator
+   git clone git@github.com:gchang12/krita_ref_parser.git
+   cd krita_ref_parser
    ```
 
 4. You should run:
@@ -170,7 +170,7 @@ conda activate krita_ref_generator
    pre-commit install
    ```
 
-   `krita_ref_generator` comes with a lot of hooks configured to automatically help the
+   `krita_ref_parser` comes with a lot of hooks configured to automatically help the
    developer to check the code being written.
 
 ### Implement your changes
@@ -314,7 +314,7 @@ package:
 
 If you are part of the group of maintainers and have correct user permissions
 on [PyPI], the following steps can be used to release a new version for
-`krita_ref_generator`:
+`krita_ref_parser`:
 
 1. Make sure all unit tests are successful.
 2. Tag the current commit on the main branch with a release tag, e.g., `v1.2.3`.
@@ -367,5 +367,5 @@ on [PyPI], the following steps can be used to release a new version for
 ```{todo} Please review and change the following definitions:
 ```
 
-[repository]: https://github.com/<USERNAME>/krita_ref_generator
-[issue tracker]: https://github.com/<USERNAME>/krita_ref_generator/issues
+[repository]: https://github.com/gchang12/krita_ref_parser
+[issue tracker]: https://github.com/gchang12/krita_ref_parser/issues

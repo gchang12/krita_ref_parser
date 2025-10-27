@@ -9,7 +9,7 @@ from pathlib import Path
 from PIL import Image
 from bs4 import BeautifulSoup
 
-from krita_ref_generator._logging import logger
+from krita_ref_parser._logging import logger
 
 SOURCE_DIR = "./input/docs-krita-org/_build/html/_images/"
 TARGET_DIR = "./output/images/"
