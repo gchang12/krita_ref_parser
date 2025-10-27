@@ -22,11 +22,12 @@ input/:
 ## 2: Fetch raw source from world-wide web.
 input/docs-krita-org/: input/
 	cd input/; git clone https://invent.kde.org/documentation/docs-krita-org.git;
-	echo "'input/docs-krita-org/' has been created.";
+	echo "'input/docs-krita-org/' has been created and populated from the repository at 'https://invent.kde.org/documentation/docs-krita-org.git'.";
 
 ## 3: Extract HTML from source.
 input/docs-krita-org/_build/html/: $(VENV_NAME)/ input/docs-krita-org/
 	. $(VENV_NAME)/bin/activate; cd input/docs-krita-org/; make html;
+	echo "HTML of Krita documentation has been generated and populated into 'input/docs-krita-org/_build/html/'.";
 
 # C: Parse raw HTML for text and images to insert into logical sections.
 
@@ -68,10 +69,11 @@ output/excerpts/: output/raw-excerpts/ output/index.json
 
 ## 6: Search for hidden output.
 .SEARCH_FOR_HIDDEN_OUTPUT:
-	echo "The following files are hidden: `find output/ -name \.\*`";
+	echo -e "The following files are hidden:\n`find output/ -name \.\*`";
 
 # *: CLEANUP
 
 .PHONY: clean
 clean:
 	rm -rf output/ $(VENV_NAME)/ #input/
+	echo "'output/' and '$(VENV_NAME)' have been removed. 'input/' has not been removed."
