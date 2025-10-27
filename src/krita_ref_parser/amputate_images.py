@@ -112,13 +112,13 @@ def compile_images_from_soup(soup: BeautifulSoup):
         images.add(Path(img['src']).name)
     return images
 
-def delete_unused_images(index):
+def delete_unused_images(index, *, target_dir=TARGET_DIR):
     """
     """
     logger.debug("Found (%d) filenames in index.", len(index))
-    image_files = tuple(filter(lambda file: file.is_file(), Path(TARGET_DIR).iterdir()))
+    image_files = tuple(filter(lambda file: file.is_file(), Path(target_dir).iterdir()))
     num_image_files = len(image_files)
-    logger.debug("Found (%d) image files in '%s'.", num_image_files, TARGET_DIR)
+    logger.debug("Found (%d) image files in '%s'.", num_image_files, target_dir)
     unused_images = map(
         lambda file: file.name,
         tuple(
@@ -130,9 +130,9 @@ def delete_unused_images(index):
     )
     #num_unused_images = len(unused_images)
     for num_unused_images, image_name in enumerate(unused_images, start=1):
-        imagefile = Path(TARGET_DIR, image_name)
+        imagefile = Path(target_dir, image_name)
         imagefile.unlink()
-    logger.debug("Deleted %d unused image files in '%s'. Number of images remaining: %d.", num_unused_images, TARGET_DIR, num_image_files - num_unused_images)
+    logger.debug("Deleted %d unused image files in '%s'. Number of images remaining: %d.", num_unused_images, target_dir, num_image_files - num_unused_images)
 
 if __name__ == "__main__":
     GENERIC_IMAGE_PREFIX = "."
