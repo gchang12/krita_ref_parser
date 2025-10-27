@@ -19,6 +19,9 @@ from krita_ref_parser._logging import logger
 SOURCE_DIR = "./tests/input/docs-krita-org/_build/html/reference_manual/"
 TARGET_DIR = "./tests/output/raw-excerpts/"
 
+for dirname in (SOURCE_DIR, TARGET_DIR):
+    Path(dirname).mkdir(parents=True, exist_ok=True)
+
 class AssistantToolTestCase(unittest.TestCase):
     """
     """
@@ -28,7 +31,11 @@ class AssistantToolTestCase(unittest.TestCase):
         """
         subdirectory = "tools/"
         filename = "assistant.html"
-        self.path_to_test_file = Path(SOURCE_DIR, subdirectory, filename)
+        path_to_test_dir = Path(SOURCE_DIR, subdirectory)
+        path_to_test_dir.mkdir(exist_ok=True)
+        self.path_to_test_file = path_to_test_dir.joinpath(filename)
+        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
+        shutil.copyfile(path_to_og_file, self.path_to_test_file)
 
     def test_split_from_page(self):
         """
@@ -53,7 +60,11 @@ class ArithmeticBlendingModeTestCase(unittest.TestCase):
         subdirectory = "blending_modes/"
         filename = "arithmetic.html"
         self.number_of_subsections = 5
-        self.path_to_test_file = Path(SOURCE_DIR, subdirectory, filename)
+        path_to_test_dir = Path(SOURCE_DIR, subdirectory)
+        path_to_test_dir.mkdir(exist_ok=True)
+        self.path_to_test_file = path_to_test_dir.joinpath(filename)
+        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
+        shutil.copyfile(path_to_og_file, self.path_to_test_file)
 
     def test_split_from_blendingmodes_pages(self):
         """
@@ -78,7 +89,11 @@ class AssistantToolTestCase(unittest.TestCase):
         subdirectory = "blending_modes/"
         filename = "hsx.html"
         self.number_of_subsections = 11
-        self.path_to_test_file = Path(SOURCE_DIR, subdirectory, filename)
+        path_to_test_dir = Path(SOURCE_DIR, subdirectory)
+        path_to_test_dir.mkdir(exist_ok=True)
+        self.path_to_test_file = path_to_test_dir.joinpath(filename)
+        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
+        shutil.copyfile(path_to_og_file, self.path_to_test_file)
 
     def test_split_from_hsx_blendingmodes_pages(self):
         """
@@ -102,7 +117,11 @@ class CalligraphyToolTestCase(unittest.TestCase):
         """
         subdirectory = "tools/"
         filename = "calligraphy.html"
-        self.path_to_test_file = Path(TARGET_DIR, subdirectory, filename)
+        path_to_test_dir = Path(SOURCE_DIR, subdirectory)
+        path_to_test_dir.mkdir(exist_ok=True)
+        self.path_to_test_file = path_to_test_dir.joinpath(filename)
+        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
+        shutil.copyfile(path_to_og_file, self.path_to_test_file)
 
     @patch("pathlib.Path.write_text")
     def test_write_stripped_soup(self, MOCK_write_text):

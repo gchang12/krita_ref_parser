@@ -20,6 +20,9 @@ from krita_ref_parser.amputate_images import (
 SOURCE_DIR = "./tests/input/docs-krita-org/_build/html/_images/"
 TARGET_DIR = "./tests/output/images/"
 
+for dirname in (SOURCE_DIR, TARGET_DIR):
+    Path(dirname).mkdir(parents=True, exist_ok=True)
+
 class ImageWithDotsTestCase(unittest.TestCase):
     """
     """
