@@ -4,6 +4,7 @@
 import unittest
 from unittest.mock import patch
 from pathlib import Path
+import shutil
 
 from PIL import Image
 from bs4 import BeautifulSoup
@@ -26,8 +27,11 @@ class ImageWithDotsTestCase(unittest.TestCase):
     def setUp(self):
         """
         """
-        self.filename = "Blending_modes_Addition_Sample_image_with_dots.png"
+        filename = "Blending_modes_Addition_Sample_image_with_dots.png"
         self.number_of_partitions = 2
+        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [filename])
+        self.filename = "/".join([SOURCE_DIR, filename])
+        shutil.copyfile(path_to_og_file, self.filename)
 
     def test_get_sample_image_type(self):
         """
@@ -54,7 +58,7 @@ class ImageWithDotsTestCase(unittest.TestCase):
     def test_get_half_of_image_file1(self):
         """
         """
-        filename = "/".join([SOURCE_DIR, self.filename])
+        filename = self.filename
         with Image.open(filename) as img:
             full_width = img.size[0]
             full_height = img.size[1]
@@ -70,7 +74,7 @@ class ImageWithDotsTestCase(unittest.TestCase):
     def test_get_half_of_image_file2(self):
         """
         """
-        filename = "/".join([SOURCE_DIR, self.filename])
+        filename = self.filename
         with Image.open(filename) as img:
             full_width = img.size[0]
             full_height = img.size[1]
@@ -90,8 +94,11 @@ class GradientComparisonTestCase(unittest.TestCase):
     def setUp(self):
         """
         """
-        self.filename = "Blending_modes_Divisive_Modulo_Gradient_Comparison.png"
+        filename = "Blending_modes_Divisive_Modulo_Gradient_Comparison.png"
         self.number_of_partitions = 3
+        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [filename])
+        self.filename = "/".join([SOURCE_DIR, filename])
+        shutil.copyfile(path_to_og_file, self.filename)
 
     def test_get_sample_image_type(self):
         """
@@ -118,7 +125,7 @@ class GradientComparisonTestCase(unittest.TestCase):
     def test_get_thirds_of_image_file23(self):
         """
         """
-        filename = "/".join([SOURCE_DIR, self.filename])
+        filename = self.filename
         with Image.open(filename) as img:
             full_width = img.size[0]
             full_height = img.size[1]
@@ -134,7 +141,7 @@ class GradientComparisonTestCase(unittest.TestCase):
     def test_get_thirds_of_image_file13(self):
         """
         """
-        filename = "/".join([SOURCE_DIR, self.filename])
+        filename = self.filename
         with Image.open(filename) as img:
             full_width = img.size[0]
             full_height = img.size[1]
@@ -154,7 +161,10 @@ class NotASampleImageTestCase(unittest.TestCase):
     def setUp(self):
         """
         """
-        self.filename = "Color-adjustment-curve.png"
+        filename = "Color-adjustment-curve.png"
+        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [filename])
+        self.filename = "/".join([SOURCE_DIR, filename])
+        shutil.copyfile(path_to_og_file, self.filename)
 
     def test_get_sample_image_type(self):
         """
@@ -169,6 +179,15 @@ class ImageDirectoryTestCase(unittest.TestCase):
     def setUp(self):
         """
         """
+        filenames = (
+            "Blending_modes_Addition_Sample_image_with_dots.png",
+            "Blending_modes_Divisive_Modulo_Gradient_Comparison.png",
+            "Color-adjustment-curve.png",
+        )
+        for filename in filenames:
+            path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [filename])
+            self.filename = "/".join([SOURCE_DIR, filename])
+            shutil.copyfile(path_to_og_file, self.filename)
 
     @patch("pathlib.Path.iterdir")
     @patch("pathlib.Path.unlink")
@@ -179,12 +198,11 @@ class ImageDirectoryTestCase(unittest.TestCase):
         mock_iterdir.return_value = (
             Path(SOURCE_DIR, name) for name in [
                 "Blending_modes_Addition_Sample_image_with_dots.png",
-                "Blending_modes_Divisive_Modulo_Continuous_Gradient_Comparison.png",
                 "Blending_modes_Divisive_Modulo_Gradient_Comparison.png",
                 "Color-adjustment-curve.png",
             ]
         )
-        expected = 3
+        expected = 2
         delete_unused_images(index, target_dir=TARGET_DIR)
         actual = mock_unlink.call_count
         self.assertEqual(actual, expected)
