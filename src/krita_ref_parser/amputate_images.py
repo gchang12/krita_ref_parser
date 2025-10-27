@@ -128,10 +128,11 @@ def delete_unused_images(index, *, target_dir=TARGET_DIR):
             )
         )
     )
-    #num_unused_images = len(unused_images)
-    for num_unused_images, image_name in enumerate(unused_images, start=1):
+    num_unused_images = 0
+    for image_name in unused_images:
         imagefile = Path(target_dir, image_name)
         imagefile.unlink()
+        num_unused_images += 1
     logger.debug("Deleted %d unused image files in '%s'. Number of images remaining: %d.", num_unused_images, target_dir, num_image_files - num_unused_images)
 
 if __name__ == "__main__":
