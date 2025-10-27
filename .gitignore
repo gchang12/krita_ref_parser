@@ -54,6 +54,6 @@ MANIFEST
 .python-version
 
 # MY STUFF
-.vim/
-input/
-output/
+/.vim/
+/input/
+/output/
