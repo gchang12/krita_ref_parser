@@ -43,7 +43,7 @@ class SampleImageType(enum.Enum):
             logger.debug("'%s' does not fall into one of the declared SampleImageType enumerations.", filename)
             return None
 
-    def get_filename_for_default(self, *, prefix="."):
+    def get_filename_for_default(self, *, prefix):
         """
         """
         filename_for_default_image = prefix + self.value
@@ -112,7 +112,7 @@ def compile_images_from_soup(soup: BeautifulSoup):
         images.add(Path(img['src']).name)
     return images
 
-def delete_unused_images(index, *, target_dir=TARGET_DIR):
+def delete_unused_images(index, *, target_dir):
     """
     """
     logger.debug("Found (%d) filenames in index.", len(index))
@@ -158,7 +158,7 @@ if __name__ == "__main__":
                 soup = BeautifulSoup(filepath.read_text(), 'html.parser')
                 images.update(compile_images_from_soup(soup))
         logger.info("Compiled (%d) images being referenced in HTML.", len(images))
-        delete_unused_images(images)
+        delete_unused_images(images, target_dir=TARGET_DIR)
 
     # Generate generic blending-mode images
     def generate_default_blendingmodes_images():
