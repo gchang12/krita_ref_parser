@@ -3,6 +3,9 @@
 
 import unittest
 from pathlib import Path
+import shutil
+
+from bs4 import BeautifulSoup
 
 from krita_ref_parser.compile_index import (
     compile_directories,
@@ -11,6 +14,7 @@ from krita_ref_parser.compile_index import (
     get_hero_image,
     get_figures,
 )
+from krita_ref_parser._logging import logger
 
 SOURCE_DIR = "./tests/output/raw-excerpts/"
 TARGET_DIR = "./tests/output/"
@@ -29,9 +33,9 @@ class ExcerptDirectoryTestCase(unittest.TestCase):
         mock_dir.mkdir(exist_ok=False)
         self.mock_dir = mock_dir
         self.subdirectories = (
-            "blending_modes/",
-            "tools/",
-            "main_menu/",
+            "blending_modes",
+            "tools",
+            "main_menu",
         )
         for dirname in self.subdirectories:
             self.mock_dir.joinpath(dirname).mkdir(exist_ok=False)
@@ -188,7 +192,16 @@ class BlendingModesHSXFileTestCase(unittest.TestCase):
         self.path_to_test_file = path_to_test_dir.joinpath(filename)
         path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
         shutil.copyfile(path_to_og_file, self.path_to_test_file)
-
+        self.soup_as_str = """<section id="intensity">
+<span id="bm-intensity"></span><h3>Intensity<a class="headerlink" href="#intensity" title="Link to this heading">¶</a></h3>
+<p>Takes the Hue and Saturation of the lower layer and outputs them with the intensity of the upper layer.</p>
+<figure class="align-center" id="id19">
+<img alt="../../_images/Blending_modes_Intensity_Sample_image_with_dots.png" src="../../_images/Blending_modes_Intensity_Sample_image_with_dots.png"/>
+<figcaption>
+<p><span class="caption-text">Left: <strong>Normal</strong>. Right: <strong>Intensity</strong>.</span><a class="headerlink" href="#id19" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>"""
 
     def test_get_header(self):
         """
@@ -202,7 +215,7 @@ class BlendingModesHSXFileTestCase(unittest.TestCase):
         """
         """
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
-        with self.assertRaises(TypeError):
+        with self.assertRaises(AttributeError):
             get_header(soup, level=2)
 
     @unittest.skip("The first image of each 'blending_modes/*' file is invalid as a hero-image.")
@@ -378,47 +391,47 @@ class HeroImageFileTestCase(unittest.TestCase):
         expected = [
             {
                 "img": "linear.png",
-                "figcaption": "Left: None. Middle: Forwards. Right: Alternating."
+                "figcaption": "Left: None. Middle: Forwards. Right: Alternating.",
             },
             {
                 "img": "bilinear.png",
-                "figcaption": "Left: None. Middle: Forwards. Right: Alternating."
+                "figcaption": "Left: None. Middle: Forwards. Right: Alternating.",
             },
             {
                 "img": "radial.png",
-                "figcaption": "Left: None. Middle: Forwards. Right: Alternating."
+                "figcaption": "Left: None. Middle: Forwards. Right: Alternating.",
             },
             {
                 "img": "square.png",
-                "figcaption": "Left: None. Middle: Forwards. Right: Alternating."
+                "figcaption": "Left: None. Middle: Forwards. Right: Alternating.",
             },
             {
                 "img": "conical.png",
-                "figcaption": "Left: None. Middle: Forwards. Right: Alternating."
+                "figcaption": "Left: None. Middle: Forwards. Right: Alternating.",
             },
             {
                 "img": "conical_symmetric.png",
-                "figcaption": "Left: None. Middle: Forwards. Right: Alternating."
+                "figcaption": "Left: None. Middle: Forwards. Right: Alternating.",
             },
             {
                 "img": "spiral.png",
-                "figcaption": "Left: None. Middle: Forwards. Right: Alternating."
+                "figcaption": "Left: None. Middle: Forwards. Right: Alternating.",
             },
             {
                 "img": "reverse_spiral.png",
-                "figcaption": "Left: None. Middle: Forwards. Right: Alternating."
+                "figcaption": "Left: None. Middle: Forwards. Right: Alternating.",
             },
             {
                 "img": "shaped.png",
-                "figcaption": "Left: 0. Middle: 0.5. Right: 1."
+                "figcaption": None,
             },
             {
                 "img": "antialias_threshold.png",
-                "figcaption": "Left: None. Middle: Forwards. Right: Alternating."
+                "figcaption": "Left: 0. Middle: 0.5. Right: 1.",
             },
             {
-                "img": "krita_gradient_dithering.png",
-                "figcaption": "In the above example, the topleft is a subtle gradient without dithering. The bottom left is with blue noise dithering. The right two examples are the same as the left, but with a contrast filter applied so the blue noise dithering pattern becomes obvious."
+                "img": "krita_gradient_dithering.svg",
+                "figcaption": "In the above example, the topleft is a subtle gradient without dithering. The bottom left is with blue noise dithering. The right two examples are the same as the left, but with a contrast filter applied so the blue noise dithering pattern becomes obvious.",
             },
         ]
         actual = get_figures(soup)
