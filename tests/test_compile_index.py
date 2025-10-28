@@ -4,10 +4,12 @@
 import unittest
 from pathlib import Path
 import shutil
+import logging
 
 from bs4 import BeautifulSoup
 
 from krita_ref_parser.compile_index import (
+    detect_index_files_for_directories,
     compile_directories,
     compile_filenames,
     get_header,
@@ -38,7 +40,9 @@ class ExcerptDirectoryTestCase(unittest.TestCase):
             "main_menu",
         )
         for dirname in self.subdirectories:
-            self.mock_dir.joinpath(dirname).mkdir(exist_ok=False)
+            subdir = self.mock_dir.joinpath(dirname)
+            subdir.mkdir(exist_ok=False)
+            subdir.with_suffix(".html").write_text("")
 
     def test_compile_directories(self):
         """
@@ -47,11 +51,26 @@ class ExcerptDirectoryTestCase(unittest.TestCase):
         actual = compile_directories(source_dir=self.mock_dir)
         self.assertSetEqual(actual, expected)
 
+    def test_detect_index_files_for_directories__HAS_COMPLEMENTING_INDEX_FILE(self):
+        """
+        """
+        with self.assertLogs(logger='krita_ref_parser', level='INFO'):
+            detect_index_files_for_directories(source_dir=self.mock_dir)
+
+    def test_detect_index_files_for_directories__NO_COMPLEMENTING_INDEX_FILE(self):
+        """
+        """
+        self.mock_dir.joinpath(self.subdirectories[0]).with_suffix('.html').unlink()
+        with self.assertRaises(FileNotFoundError):
+            detect_index_files_for_directories(source_dir=self.mock_dir)
+
     def tearDown(self):
         """
         """
-        for dirpath in self.mock_dir.iterdir():
+        for dirpath in filter(lambda path: path.is_dir(), self.mock_dir.iterdir()):
             dirpath.rmdir()
+        for filepath in filter(lambda path: path.is_file(), self.mock_dir.iterdir()):
+            filepath.unlink()
         self.mock_dir.rmdir()
 
 class ToolExcerptSubdirectoryTestCase(unittest.TestCase):

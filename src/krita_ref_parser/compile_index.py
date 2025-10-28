@@ -2,9 +2,11 @@
 Defines functions to return list of objects of the form:
 [
   {
-    dir: str,
-    subdir: str|null,
-    filename: str,
+    path: [
+      dir: str,
+      subdir: str|null,
+      filename: str,
+    ],
     header: str,
     hero-image: str|null,
     figures: [{img, figcaption}, ...]|null,
@@ -26,7 +28,20 @@ TARGET_DIR = "./output/"
 PILCROW = "¶"
 # - (directory, filename, header, hero-image=null, figures=null)
 
-def compile_directories(*, source_dir: str = SOURCE_DIR):
+def detect_index_files_for_directories(source_dir: str):
+    """
+    """
+    missing_files = []
+    for dirpath in filter(
+        lambda path: not path.with_suffix(".html").exists(),
+        filter(lambda path: path.is_dir(), Path(source_dir).iterdir()),
+    ):
+        missing_files.append(dirpath)
+    if missing_files:
+        raise FileNotFoundError("These directories in '%s' lack complementing index files: %r" % (source_dir, missing_files))
+    logger.info("All directories in '%s' have complementing index files.", source_dir)
+
+def compile_directories(source_dir: str):
     """
     """
     directories = map(
