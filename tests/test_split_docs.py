@@ -4,7 +4,7 @@
 import unittest
 from unittest.mock import patch
 from pathlib import Path
-from tempfile import NamedTemporaryFile
+import shutil
 
 import bs4
 
@@ -40,7 +40,7 @@ class AssistantToolTestCase(unittest.TestCase):
     def test_split_from_page(self):
         """
         """
-        soup = bs4.BeautifulSoup(self.path_to_test_file.read_text(encoding="utf-8"))
+        soup = bs4.BeautifulSoup(self.path_to_test_file.read_text(encoding="utf-8"), 'html.parser')
         sections = split_from_page(soup)
         self.assertIsInstance(sections, list)
         self.assertEqual(len(sections), 1)
@@ -69,7 +69,7 @@ class ArithmeticBlendingModeTestCase(unittest.TestCase):
     def test_split_from_blendingmodes_pages(self):
         """
         """
-        soup = bs4.BeautifulSoup(self.path_to_test_file.read_text(encoding="utf-8"))
+        soup = bs4.BeautifulSoup(self.path_to_test_file.read_text(encoding="utf-8"), 'html.parser')
         sections = split_from_blendingmodes_page(soup)
         self.assertIsInstance(sections, list)
         self.assertEqual(len(sections), self.number_of_subsections)
@@ -98,7 +98,7 @@ class AssistantToolTestCase(unittest.TestCase):
     def test_split_from_hsx_blendingmodes_pages(self):
         """
         """
-        soup = bs4.BeautifulSoup(self.path_to_test_file.read_text(encoding="utf-8"))
+        soup = bs4.BeautifulSoup(self.path_to_test_file.read_text(encoding="utf-8"), 'html.parser')
         sections = split_from_hsx_blendingmodes_page(soup)
         self.assertIsInstance(sections, list)
         self.assertEqual(len(sections), self.number_of_subsections)

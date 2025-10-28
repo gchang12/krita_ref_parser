@@ -126,7 +126,8 @@ if __name__ == "__main__":
             soup = BeautifulSoup(filepath.read_text(), 'html.parser')
             sections = split_from_blendingmodes_page(soup)
             for section in sections:
-                h2_text = section.find("h2").text.replace(PILCROW, "")
+                h2_text = section.find("h2").text
+                h2_text = h2_text[:h2_text.index(PILCROW)]
                 blending_mode = re.sub(r" \((.+?)\)", r"_\1", h2_text.replace(" & ", "_and_").replace(" - ", "_")).replace(" ", "-").lower()
                 blendingmode_dict[h2_text] = blending_mode
         import json
@@ -243,7 +244,9 @@ if __name__ == "__main__":
             sections = split_from_blendingmodes_page(soup)
             num_files = 0
             for section in sections:
-                h2_text = section.find("h2").text.replace(PILCROW, "")
+                h2_text = section.find("h2").text
+                #h2_text = section.find("h2").text.replace(PILCROW, "")
+                h2_text = h2_text[:h2_text.index(PILCROW)]
                 blending_mode = blendingmode_dict[h2_text]
                 target_file = blendingmodes_subdir.joinpath(blending_mode + ".html")
                 soup = BeautifulSoup(str(section), 'html.parser')
@@ -278,7 +281,9 @@ if __name__ == "__main__":
         sections = split_from_hsx_blendingmodes_page(soup)
         num_files = 0
         for section in sections:
-            h3_text = section.find("h3").text.replace(PILCROW, "")
+            h3_text = section.find("h3").text
+            #h3_text = section.find("h3").text.replace(PILCROW, "")
+            h3_text = h3_text[:h3_text.index(PILCROW)]
             blending_mode = hsx_blendingmode_dict[h3_text]
             target_file = hsx_blendingmode_subdir.joinpath(blending_mode + ".html")
             soup = BeautifulSoup(str(section), 'html.parser')
