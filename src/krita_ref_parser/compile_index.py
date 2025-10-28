@@ -1,4 +1,16 @@
 """
+Defines functions to return list of objects of the form:
+[
+  {
+    dir: str,
+    subdir: str|null,
+    filename: str,
+    header: str,
+    hero-image: str|null,
+    figures: [{img, figcaption}, ...]|null,
+  },
+  ...
+]
 """
 
 from pathlib import Path
@@ -6,12 +18,12 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 from krita_ref_parser.amputate_images import SampleImageType
+from krita_ref_parser._logging import logger
 
 SOURCE_DIR = "./output/raw-excerpts/"
 TARGET_DIR = "./output/"
 
 PILCROW = "¶"
-# TODO: Index
 # - (directory, filename, header, hero-image=null, figures=null)
 
 def compile_directories(*, source_dir: str = SOURCE_DIR):
@@ -21,7 +33,9 @@ def compile_directories(*, source_dir: str = SOURCE_DIR):
         lambda path: path.name,
         filter(lambda path: path.is_dir(), Path(source_dir).iterdir()),
     )
-    return set(directories)
+    directory_set = set(directories)
+    logger.debug("Identified (%d) directories in '%s/'. Returning set of directories as string.", len(directory_set), source_dir)
+    return directory_set
 
 def compile_filenames(source_subdir: str):
     """
@@ -30,22 +44,28 @@ def compile_filenames(source_subdir: str):
         lambda path: path.name,
         filter(lambda path: path.is_file(), Path(source_subdir).iterdir()),
     )
-    return set(files)
+    file_set = set(files)
+    logger.debug("Identified (%d) files in '.../%s'. Returning set of files as string.", len(file_set), source_subdir)
+    return file_set
 
 def get_header(soup: BeautifulSoup, *, level):
     """
     """
     h_tag = "h%d" % level
     h_text = soup.find(h_tag).text
-    return h_text[:h_text.index(PILCROW)]
+    h_text = h_text[:h_text.index(PILCROW)]
+    logger.debug("Returning header: '%s'", h_text)
+    return h_text
 
 def get_hero_image(soup: BeautifulSoup):
     """
     """
     try:
         img_src = Path(soup.find("img")['src']).name
+        logger.debug("Image found. Returning source: '%s'", img_src)
     except TypeError:
         img_src = None
+        logger.debug("No image found. Returning None.")
     return img_src
 
 def get_figures(soup: BeautifulSoup):
@@ -64,11 +84,18 @@ def get_figures(soup: BeautifulSoup):
             "figcaption": figcaption,
         }
         figures.append(fig_as_dict)
-    return (figures if figures else None)
+    if figures:
+        logger.debug("(%d) figures found. Returning as dict-list.", len(figures))
+        return figures
+    logger.debug("No figures found. Returning None.")
+    return None
 
 if __name__ == "__main__":
+    # Walk file-tree and replicate it in JSON
+
     import json
     import shutil
+
     def get_index(filename):
         """
         Returns a dict-object from file.
@@ -400,3 +427,4 @@ if __name__ == "__main__":
                     (directory, source, target, header, icon, soup)
                 )
         return buffer
+
