@@ -1,6 +1,5 @@
 """
 """
-#
 
 import json
 from pathlib import Path
@@ -12,6 +11,51 @@ TARGET_DIR = "./output/"
 
 # TODO: Index
 # - (directory, filename, header, hero-image=null, figures=null)
+
+def compile_directories(*, source_dir: str = SOURCE_DIR):
+    """
+    """
+    directories = map(
+        lambda path: path.name,
+        filter(lambda path: path.is_dir(), filter(Path(source_dir).iterdir())),
+    )
+    return set(directories)
+
+def compile_filenames(source_subdir: str):
+    """
+    """
+    files = map(
+        lambda path: path.name,
+        filter(lambda path: path.is_file(), filter(Path(source_subdir).iterdir())),
+    )
+    return set(files)
+
+def get_header(soup: BeautifulSoup, *, level=2):
+    """
+    """
+    h_tag = "h%d" % level
+    h_text = soup.find(h_tag).text
+    return h_text
+
+def get_hero_image(soup: BeautifulSoup):
+    """
+    """
+    img_src = soup.find("img")['src']
+    return img_src
+
+def get_figures(soup: BeautifulSoup):
+    """
+    """
+    figures = []
+    for figure in soup.find_all("figure"):
+        img = figure.find('img')['src']
+        figcaption = figure.find('figcaption').text
+        fig_as_dict = {
+            "img": img,
+            "figcaption": figcaption,
+        }
+        figures.append(fig_as_dict)
+    return (figures if figures else None)
 
 def get_index(filename):
     """
