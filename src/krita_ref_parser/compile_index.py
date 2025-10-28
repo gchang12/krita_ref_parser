@@ -9,6 +9,7 @@ from krita_ref_parser.amputate_images import SampleImageType
 SOURCE_DIR = "./output/raw-excerpts/"
 TARGET_DIR = "./output/"
 
+PILCROW = "¶"
 # TODO: Index
 # - (directory, filename, header, hero-image=null, figures=null)
 
@@ -30,17 +31,17 @@ def compile_filenames(source_subdir: str):
     )
     return set(files)
 
-def get_header(soup: BeautifulSoup, *, level=2):
+def get_header(soup: BeautifulSoup, *, level):
     """
     """
     h_tag = "h%d" % level
     h_text = soup.find(h_tag).text
-    return h_text
+    return h_text[:h_text.index(PILCROW)]
 
 def get_hero_image(soup: BeautifulSoup):
     """
     """
-    img_src = soup.find("img")['src']
+    img_src = Path(soup.find("img")['src']).name
     return img_src
 
 def get_figures(soup: BeautifulSoup):
