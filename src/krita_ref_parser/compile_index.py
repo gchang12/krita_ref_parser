@@ -90,6 +90,14 @@ def get_header(soup: BeautifulSoup, *, h_level):
     logger.debug("Returning header: '%s'", h_text)
     return h_text
 
+def get_header_href(soup: BeautifulSoup, *, h_level):
+    """
+    """
+    h_tag = soup.find("h%d" % h_level)
+    a_href = h_tag.find("a", class_="headerlink")['href']
+    logger.debug("Returning header: '%s'", a_href)
+    return a_href
+
 def get_icon(soup: BeautifulSoup):
     """
     """
@@ -170,15 +178,20 @@ if __name__ == "__main__":
             filepath = Path(dirpath, filename)
             filetext = filepath.read_text(encoding="utf-8")
             soup = BeautifulSoup(filetext, "html.parser")
-            header = get_header(soup, h_level=h_level)
+            header_text = get_header(soup, h_level=h_level)
             # header: DONE
+            header_href = get_header_href(soup, h_level=h_level)
+            # header.href: DONE
             icon = get_icon(soup)
             # icon: DONE
             figures = get_figures(soup)
             # figures: DONE
             article = {
                 "path": path_root + [filename],
-                "header": header,
+                "header": {
+                    "text": header_text,
+                    "href": header_href,
+                },
                 "icon": icon,
                 "figures": figures,
             }

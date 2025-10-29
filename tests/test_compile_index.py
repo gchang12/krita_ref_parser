@@ -13,6 +13,7 @@ from krita_ref_parser.compile_index import (
     #compile_directories,
     #compile_filenames,
     get_header,
+    get_header_href,
     get_icon,
     get_figures,
 )
@@ -124,6 +125,14 @@ class BlendingModesAdditionFileTestCase(unittest.TestCase):
         expected = "Addition"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
         actual = get_header(soup, h_level=2)
+        self.assertEqual(actual, expected)
+
+    def test_get_header_href(self):
+        """
+        """
+        expected = "#addition"
+        soup = BeautifulSoup(self.soup_as_str, 'html.parser')
+        actual = get_header_href(soup, h_level=2)
         self.assertEqual(actual, expected)
 
     @unittest.skip("The first image of each 'blending_modes/*' file is invalid as a hero-image.")
