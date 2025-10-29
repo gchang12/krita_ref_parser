@@ -25,6 +25,49 @@ DIRS_WITH_NO_INDICES = (
     Path(SOURCE_DIR, "layers_and_masks", "fill_layer_generators"),
 )
 
+# For exporting to .regenerate_docs
+ALL_SECTIONS = {
+    "tools": True,
+    "brushes": None,
+    "brushes/brush_engines": True,
+    "brushes/brush_settings": False,
+    "dockers": False,
+    "filters": False,
+    "layers_and_masks": False,
+    "layers_and_masks/fill_layer_generators": False,
+    "main_menu": False,
+    "preferences": False,
+    "resource_management": False,
+    "blending_modes": None,
+}
+SECTIONS_WITHOUT_ICONS = tuple(
+    map(
+        lambda keyvalue: keyvalue[0],
+        filter(lambda keyvalue: keyvalue[1] is False, ALL_SECTIONS.items())
+    )
+)
+SECTIONS_WITH_ICONS = tuple(
+    map(
+        lambda keyvalue: keyvalue[0],
+        filter(lambda keyvalue: keyvalue[1] is True, ALL_SECTIONS.items())
+    )
+)
+BLENDING_MODE_SECTIONS = (
+    "blending_modes/arithmetic",
+    "blending_modes/binary",
+    "blending_modes/darken",
+    #"blending_modes/hsx",
+    "blending_modes/lighten",
+    "blending_modes/misc",
+    "blending_modes/mix",
+    "blending_modes/modulo",
+    "blending_modes/negative",
+    "blending_modes/quadratic",
+)
+BLENDING_MODE_HSX_SECTION = (
+    "blending_modes/hsx",
+)
+
 def detect_index_files_for_directories(source_dir: str, *, dirs_with_no_indices=DIRS_WITH_NO_INDICES):
     """
     """
@@ -93,49 +136,7 @@ if __name__ == "__main__":
       }
     ]
     '''
-
     ROOT_LEN = 2
-    ALL_SECTIONS = {
-        "tools": True,
-        "brushes": None,
-        "brushes/brush_engines": True,
-        "brushes/brush_settings": False,
-        "dockers": False,
-        "filters": False,
-        "layers_and_masks": False,
-        "layers_and_masks/fill_layer_generators": False,
-        "main_menu": False,
-        "preferences": False,
-        "resource_management": False,
-        "blending_modes": None,
-    }
-    SECTIONS_WITHOUT_ICONS = tuple(
-        map(
-            lambda keyvalue: keyvalue[0],
-            filter(lambda keyvalue: keyvalue[1] is False, ALL_SECTIONS.items())
-        )
-    )
-    SECTIONS_WITH_ICONS = tuple(
-        map(
-            lambda keyvalue: keyvalue[0],
-            filter(lambda keyvalue: keyvalue[1] is True, ALL_SECTIONS.items())
-        )
-    )
-    BLENDING_MODE_SECTIONS = (
-        "blending_modes/arithmetic",
-        "blending_modes/binary",
-        "blending_modes/darken",
-        #"blending_modes/hsx",
-        "blending_modes/lighten",
-        "blending_modes/misc",
-        "blending_modes/mix",
-        "blending_modes/modulo",
-        "blending_modes/negative",
-        "blending_modes/quadratic",
-    )
-    BLENDING_MODE_HSX_SECTION = (
-        "blending_modes/hsx",
-    )
     INDEX = []
     INDEX_NAME = "index.json"
 
