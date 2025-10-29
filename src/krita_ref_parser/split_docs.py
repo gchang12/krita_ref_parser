@@ -63,7 +63,7 @@ if __name__ == "__main__":
                 logger.warning("'%s' does not exist. Skipping.", index_path)
                 continue
             # create folder
-            target_subdir.mkdir(exist_ok=True)
+            target_subdir.mkdir(exist_ok=True, parents=True)
             logger.debug("'%s' now exists.", target_subdir)
             # create index file
             # - get file content
@@ -103,7 +103,7 @@ if __name__ == "__main__":
             for subdir_path in filter(lambda path_: path_.is_dir(), dir_path.iterdir()):
                 # brush_settings/
                 target_subsubdir = Path(TARGET_DIR, dir_path.name, subdir_path.name)
-                target_subsubdir.mkdir(exist_ok=True)
+                target_subsubdir.mkdir(exist_ok=True, parents=True)
                 logger.info("Populating '%s'.", target_subsubdir)
                 num_files = 0
                 for filepath in filter(lambda path_: path_.is_file(), subdir_path.iterdir()):
@@ -238,16 +238,17 @@ if __name__ == "__main__":
         for filepath in filter(lambda path_: path_.is_file() and path_.name != "hsx.html", Path(TARGET_DIR, "blending_modes").iterdir()):
             # brushes/
             blendingmodes_subdir = Path(TARGET_DIR, "blending_modes", filepath.with_suffix("").name) # TARGET_DIR/'blending_modes'/blending_mode_type/
-            blendingmodes_subdir.mkdir(exist_ok=True)
+            blendingmodes_subdir.mkdir(exist_ok=True, parents=True)
             logger.info("Populating '%s'.", blendingmodes_subdir)
             soup = BeautifulSoup(filepath.read_text(), 'html.parser')
             sections = split_from_blendingmodes_page(soup)
             num_files = 0
             for section in sections:
-                h2_text = section.find("h2").text
+                #h2_text = section.find("h2").text
                 #h2_text = section.find("h2").text.replace(PILCROW, "")
-                h2_text = h2_text[:h2_text.index(PILCROW)]
-                blending_mode = blendingmode_dict[h2_text]
+                #h2_text = h2_text[:h2_text.index(PILCROW)]
+                #blending_mode = blendingmode_dict[h2_text]
+                blending_mode = section['id']
                 target_file = blendingmodes_subdir.joinpath(blending_mode + ".html")
                 soup = BeautifulSoup(str(section), 'html.parser')
                 num_lines = write_stripped_soup(section, target_file)
@@ -275,16 +276,17 @@ if __name__ == "__main__":
         }
         filepath = Path(TARGET_DIR, "blending_modes", "hsx.html")
         hsx_blendingmode_subdir = filepath.with_suffix("")
-        hsx_blendingmode_subdir.mkdir(exist_ok=True)
+        hsx_blendingmode_subdir.mkdir(exist_ok=True, parents=True)
         logger.info("Populating '%s'.", hsx_blendingmode_subdir)
         soup = BeautifulSoup(filepath.read_text(), 'html.parser')
         sections = split_from_hsx_blendingmodes_page(soup)
         num_files = 0
         for section in sections:
-            h3_text = section.find("h3").text
+            #h3_text = section.find("h3").text
             #h3_text = section.find("h3").text.replace(PILCROW, "")
-            h3_text = h3_text[:h3_text.index(PILCROW)]
-            blending_mode = hsx_blendingmode_dict[h3_text]
+            #h3_text = h3_text[:h3_text.index(PILCROW)]
+            #blending_mode = hsx_blendingmode_dict[h3_text]
+            blending_mode = section['id']
             target_file = hsx_blendingmode_subdir.joinpath(blending_mode + ".html")
             soup = BeautifulSoup(str(section), 'html.parser')
             num_lines = write_stripped_soup(section, target_file)
