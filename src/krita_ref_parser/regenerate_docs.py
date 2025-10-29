@@ -30,7 +30,7 @@ LINK_TO_OFFICIAL_DOCS_CLASSNAME = "link-to-official-docs"
 
 # TODO: /^def replace_blending_modes_index_file
 
-# INSERT CONTENT
+# ADD-AND-DELETE CONTENT
 
 # - Prepend CSS link lines for files of these types: with-icon, without-icon, blending_modes, blending_mode-hsx
 def prepend_link_tags_to_soup(soup: bs4.BeautifulSoup, href_list: list[str]):
@@ -39,8 +39,6 @@ def prepend_link_tags_to_soup(soup: bs4.BeautifulSoup, href_list: list[str]):
     for href in href_list:
         tag = soup.new_tag("link", rel="stylesheet", type="text/css", href=href)
         soup.section.insert_before(tag)
-
-# STRIP CONTENT
 
 # - Extract h_ tags. Note that this also extracts the href.
 def extract_h_tag(soup: bs4.BeautifulSoup, *, h_level: int):
