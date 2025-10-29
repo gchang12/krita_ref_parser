@@ -13,7 +13,7 @@ from krita_ref_parser.compile_index import (
     #compile_directories,
     #compile_filenames,
     get_header,
-    get_hero_image,
+    get_icon,
     get_figures,
 )
 from krita_ref_parser._logging import logger
@@ -123,11 +123,11 @@ class BlendingModesAdditionFileTestCase(unittest.TestCase):
         """
         expected = "Addition"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
-        actual = get_header(soup, level=2)
+        actual = get_header(soup, h_level=2)
         self.assertEqual(actual, expected)
 
     @unittest.skip("The first image of each 'blending_modes/*' file is invalid as a hero-image.")
-    def test_get_hero_image(self):
+    def test_get_icon(self):
         """
         """
 
@@ -187,7 +187,7 @@ class BlendingModesHSXFileTestCase(unittest.TestCase):
         """
         expected = "Intensity"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
-        actual = get_header(soup, level=3)
+        actual = get_header(soup, h_level=3)
         self.assertEqual(actual, expected)
 
     def test_get_header__GET_H2_FAIL(self):
@@ -195,10 +195,10 @@ class BlendingModesHSXFileTestCase(unittest.TestCase):
         """
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
         with self.assertRaises(AttributeError):
-            get_header(soup, level=2)
+            get_header(soup, h_level=2)
 
     @unittest.skip("The first image of each 'blending_modes/*' file is invalid as a hero-image.")
-    def test_get_hero_image(self):
+    def test_get_icon(self):
         """
         """
 
@@ -347,12 +347,12 @@ class HeroImageFileTestCase(unittest.TestCase):
 </section>
 </section>"""
 
-    def test_get_hero_image(self):
+    def test_get_icon(self):
         """
         """
         expected = "gradient_drawing_tool.svg"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
-        actual = get_hero_image(soup)
+        actual = get_icon(soup)
         self.assertEqual(actual, expected)
 
     def test_get_header(self):
@@ -360,7 +360,7 @@ class HeroImageFileTestCase(unittest.TestCase):
         """
         expected = "Gradient Tool"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
-        actual = get_header(soup, level=1)
+        actual = get_header(soup, h_level=1)
         self.assertEqual(actual, expected)
 
     def test_get_figures(self):
@@ -462,14 +462,14 @@ class NoHeroImageFileTestCase(unittest.TestCase):
         """
         expected = "Clone Layers"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
-        actual = get_header(soup, level=1)
+        actual = get_header(soup, h_level=1)
         self.assertEqual(actual, expected)
 
-    def test_get_hero_image(self):
+    def test_get_icon(self):
         """
         """
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
-        actual = get_hero_image(soup)
+        actual = get_icon(soup)
         self.assertIsNone(actual)
 
 class FigureFileTestCase(BlendingModesAdditionFileTestCase):
@@ -515,7 +515,7 @@ class NoFigureFileTestCase(unittest.TestCase):
         """
         expected = "Filter Masks"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
-        actual = get_header(soup, level=1)
+        actual = get_header(soup, h_level=1)
         self.assertEqual(actual, expected)
 
     def test_get_figures(self):
