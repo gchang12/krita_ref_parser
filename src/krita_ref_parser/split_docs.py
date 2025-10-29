@@ -9,10 +9,10 @@ from bs4 import BeautifulSoup
 
 from krita_ref_parser._logging import logger
 
+PILCROW = "¶"
+
 SOURCE_DIR = "./input/docs-krita-org/_build/html/reference_manual/"
 TARGET_DIR = "./output/raw-excerpts/"
-
-PILCROW = "¶"
 
 def split_from_page(soup: BeautifulSoup):
     """

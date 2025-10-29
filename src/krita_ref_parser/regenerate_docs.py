@@ -9,29 +9,25 @@ from bs4 import BeautifulSoup
 from krita_ref_parser.amputate_images import SampleImageType
 from krita_ref_parser._logging import logger
 
+PILCROW = "¶"
+
 SOURCE_DIR = "./output/raw-excerpts/"
 TARGET_DIR = "./output/excerpts/"
 
-#CLASS_FOR_LINKS_TO_OFFICIAL_DOCS = "link-to-official-docs"
-PILCROW = "¶"
+LINK_TO_OFFICAL_DOCS_CLASSNAME = "link-to-official-docs"
 
 # TODO:
-#- Extract H2 tags.
-#- Change image sources
-#- Extract images as necessary.
-#- Prepend CSS link lines.
-#- Mark stuff as external or not.
-#- Have links open new tabs.
-#- Add CSS classes
-#- Delete bad tags.
-#- Set CSS 'rel' attribute
-#- Manually create blending_modes/* indices.
-#- Make 'layers_and_masks/fill_layer_generators.html' index
-#- Extract blending_modes/* subsections.
-#- Extract SampleImageType figures
-#- Extract h* tags.
-#- Reset image sources.
-#-
+# - Extract h_ tags
+# - Change image sources to /images/{filename}
+# - Set CSS 'rel' attribute
+# - Extract blending_modes/* subsections.
+# - Make 'layers_and_masks/fill_layer_generators.html' index
+# - Manually create blending_modes/* indices.
+# - Mark stuff as external or not.
+# - Have links open new tabs.
+# - Prepend CSS link lines.
+# - Change documentation links to official docs website as needed; add extra classes as necessary.
+#- Extract SampleImageType figures? (NO)
 
 def _extract_h_tag(section, *, h_level: int):
     """

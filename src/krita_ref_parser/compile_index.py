@@ -16,15 +16,14 @@ from bs4 import BeautifulSoup
 
 from krita_ref_parser._logging import logger
 
+PILCROW = "¶"
+
 SOURCE_DIR = "./output/raw-excerpts/"
 TARGET_DIR = "./output/"
 
 DIRS_WITH_NO_INDICES = (
     Path(SOURCE_DIR, "layers_and_masks", "fill_layer_generators"),
 )
-
-PILCROW = "¶"
-# - (directory, filename, header, hero-image=null, figures=null)
 
 def detect_index_files_for_directories(source_dir: str, *, dirs_with_no_indices=DIRS_WITH_NO_INDICES):
     """
