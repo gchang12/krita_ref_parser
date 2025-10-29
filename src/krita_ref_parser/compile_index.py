@@ -14,7 +14,6 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from krita_ref_parser.amputate_images import SampleImageType
 from krita_ref_parser._logging import logger
 
 SOURCE_DIR = "./output/raw-excerpts/"

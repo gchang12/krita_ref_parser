@@ -2,6 +2,13 @@
 Modifies compiled HTML documents and yields various output.
 """
 
+from pathlib import Path
+
+from bs4 import BeautifulSoup
+
+from krita_ref_parser.amputate_images import SampleImageType
+from krita_ref_parser._logging import logger
+
 SOURCE_DIR = "./output/raw-excerpts/"
 TARGET_DIR = "./output/excerpts/"
 
@@ -18,6 +25,13 @@ PILCROW = "¶"
 #- Add CSS classes
 #- Delete bad tags.
 #- Set CSS 'rel' attribute
+#- Manually create blending_modes/* indices.
+#- Make 'layers_and_masks/fill_layer_generators.html' index
+#- Extract blending_modes/* subsections.
+#- Extract SampleImageType figures
+#- Extract h* tags.
+#- Reset image sources.
+#-
 
 def _extract_h_tag(section, *, h_level: int):
     """
