@@ -10,8 +10,8 @@ from bs4 import BeautifulSoup
 
 from krita_ref_parser.compile_index import (
     detect_index_files_for_directories,
-    compile_directories,
-    compile_filenames,
+    #compile_directories,
+    #compile_filenames,
     get_header,
     get_hero_image,
     get_figures,
@@ -44,13 +44,6 @@ class ExcerptDirectoryTestCase(unittest.TestCase):
             subdir.mkdir(exist_ok=False)
             subdir.with_suffix(".html").write_text("")
 
-    def test_compile_directories(self):
-        """
-        """
-        expected = set(self.subdirectories)
-        actual = compile_directories(source_dir=self.mock_dir)
-        self.assertSetEqual(actual, expected)
-
     def test_detect_index_files_for_directories__HAS_COMPLEMENTING_INDEX_FILE(self):
         """
         """
@@ -70,39 +63,6 @@ class ExcerptDirectoryTestCase(unittest.TestCase):
         for dirpath in filter(lambda path: path.is_dir(), self.mock_dir.iterdir()):
             dirpath.rmdir()
         for filepath in filter(lambda path: path.is_file(), self.mock_dir.iterdir()):
-            filepath.unlink()
-        self.mock_dir.rmdir()
-
-class ToolExcerptSubdirectoryTestCase(unittest.TestCase):
-    """
-    """
-
-    def setUp(self):
-        """
-        """
-        mock_dir = Path(TARGET_DIR, "TEST-for-tool-excerpts-subdirectory")
-        mock_dir.mkdir(exist_ok=False)
-        self.mock_dir = mock_dir
-
-    def test_compile_filenames(self):
-        """
-        """
-        filenames = (
-            "foo.txt",
-            "bar.png",
-            "bacon.php",
-            "eggs.apartheid",
-        )
-        for filename in filenames:
-            self.mock_dir.joinpath(filename).write_text("")
-        expected = set(filenames)
-        actual = compile_filenames(self.mock_dir)
-        self.assertSetEqual(actual, expected)
-
-    def tearDown(self):
-        """
-        """
-        for filepath in self.mock_dir.iterdir():
             filepath.unlink()
         self.mock_dir.rmdir()
 

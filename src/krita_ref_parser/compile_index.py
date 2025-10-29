@@ -37,28 +37,6 @@ def detect_index_files_for_directories(source_dir: str):
         raise FileNotFoundError("These directories in '%s' lack complementing index files: %r" % (source_dir, missing_files))
     logger.info("All directories in '%s' have complementing index files.", source_dir)
 
-def compile_directories(source_dir: str):
-    """
-    """
-    directories = map(
-        lambda path: path.name,
-        filter(lambda path: path.is_dir(), Path(source_dir).iterdir()),
-    )
-    directory_set = set(directories)
-    logger.debug("Identified (%d) directories in '%s/'. Returning set of directories as string.", len(directory_set), source_dir)
-    return directory_set
-
-def compile_filenames(source_subdir: str):
-    """
-    """
-    files = map(
-        lambda path: path.name,
-        filter(lambda path: path.is_file(), Path(source_subdir).iterdir()),
-    )
-    file_set = set(files)
-    logger.debug("Identified (%d) files in '.../%s'. Returning set of files as string.", len(file_set), source_subdir)
-    return file_set
-
 def get_header(soup: BeautifulSoup, *, level):
     """
     """
@@ -103,7 +81,6 @@ def get_figures(soup: BeautifulSoup):
 
 if __name__ == "__main__":
     # Walk file-tree and replicate it in JSON
-def detect_index_files_for_directories(source_dir: str):
 
     import json
     import shutil
@@ -121,36 +98,86 @@ def detect_index_files_for_directories(source_dir: str):
 
     INDEX = []
 
-    for dirpath in Path(SOURCE_DIR).iterdir():
-        #path = [subdir.name]
-        for 
+    def validate_directory_set(dirname):
+        """
+        """
+        logger.info("Validating: An index file exists for each directory in '%s'.", dirname)
+        detect_index_files_for_directories(dirname)
+        logger.info("Success!")
 
-    def get_index(filename):
-        """
-        Returns a dict-object from file.
-        """
-        with open(filename, encoding="utf-8") as rfile:
-            index = json.load(rfile)
-        return index
+    # SOURCE_DIR
+    #compile_and_validate_directory_set(SOURCE_DIR)
+    # {'resource_management', 'blending_modes', 'dockers', 'filters', 'layers_and_masks', 'brushes', 'preferences', 'tools', 'main_menu'}
+    # index files exist: YES
 
-    def write_index(buffer, index_name):
+    # compile index for sections without icons
+    SECTIONS_WITHOUT_ICONS = (
+        #"brush_engines/",
+        #"tools/",
+        #"brushes",
+        "brushes/brush_settings",
+        "dockers",
+        "filters",
+        "layers_and_masks",
+        "layers_and_masks/fill_layer_generators",
+        "main_menu",
+        "preferences",
+        "resource_management",
+        #"blending_modes/",
+    )
+
+    sections_to_search = SECTIONS_WITHOUT_ICONS
+    level = 1
+
+    index = []
+    def walk_entry_is_in_section(dirpathdirnamesfilenames):
         """
-        Writes directory, filename, header, icon to JSON
         """
-        #index_name = "kritaref-index.json"
-        def get_fileheadericon(kernel_item):
-            """
-            Turns 4-tuple into dict
-            """
-            # expect: 5-tuple of the form: directory, (filename, header, icon, soup)
-            directory, source, target, header, icon, _ = kernel_item
-            fileheadericon = {
-                "dir": directory.rstrip('/') + "/",
-                "file": target,
+        dirpath, dirnames, filenames = dirpathdirnamesfilenames
+        content_path = "/".join(dirpath.parts[2:])
+        return content_path in sections_to_search
+    for dirpath, dirnames, filenames in filter(
+        lambda dirpathdirnamesfilenames: not dirpathdirnamesfilenames[1],
+        filter(walk_entry_is_in_section, Path(SOURCE_DIR).walk()),
+    ):
+        validate_directory_set(dirpath)
+        path_root = list(dirpath.parts[2:])
+        for filename in filenames:
+            #path = path_buf.copy()
+            #path.append(filename)
+            # path: DONE
+            filepath = Path(dirpath, filename)
+            filetext = filepath.read_text(encoding="utf-8")
+            soup = BeautifulSoup(filetext, "html.parser")
+            header = get_header(soup, level=level)
+            # header: DONE
+            icon = get_hero_image(soup)
+            # icon: DONE
+            figures = get_figures(soup)
+            # figures: DONE
+            article = {
+                "path": path_root + [filename],
                 "header": header,
                 "icon": icon,
+                "figures": figures,
             }
-            return fileheadericon
-        out_kernel = list(map(get_fileheadericon, buffer))
-        with open(index_name, mode="w", encoding="utf-8") as wfile:
-            json.dump(out_kernel, wfile)
+            index.append(article)
+        logger.info("Extracted data for (%d) sections from '%s'.", len(filenames), dirpath)
+    logger.info("Returning index of length: %d", len(index))
+    #return index
+
+    # compile index for sections with icons
+    with_icons = (
+        "tools",
+        "brushes/brush_engines",
+        #"brushes",
+        #"brushes/brush_settings",
+        #"dockers/",
+        #"filters/",
+        #"layers_and_masks/",
+        #"main_menu/",
+        #"preferences/",
+        #"resource_management/",
+        #"blending_modes/",
+    )
+    # compile index for 'blending_modes/' section
