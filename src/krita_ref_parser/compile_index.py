@@ -68,7 +68,7 @@ BLENDING_MODE_HSX_SECTION = (
     "blending_modes/hsx",
 )
 
-def detect_index_files_for_directories(source_dir: str, *, dirs_with_no_indices=DIRS_WITH_NO_INDICES):
+def detect_index_files_for_directories(source_dir: Path, *, dirs_with_no_indices=DIRS_WITH_NO_INDICES):
     """
     """
     missing_files = set()
@@ -155,10 +155,10 @@ if __name__ == "__main__":
         detect_index_files_for_directories(dirname)
         logger.info("Success!")
 
-    def determine_if_walk_entry_is_in_sections(sections_to_search: tuple):
+    def determine_if_walk_entry_is_in_sections(sections_to_search: list[str]):
         """
         """
-        def walk_entry_is_in_sections(dirpathdirnamesfilenames: tuple):
+        def walk_entry_is_in_sections(dirpathdirnamesfilenames: tuple[Path, list[str], list[str]]):
             """
             """
             dirpath, dirnames, filenames = dirpathdirnamesfilenames
@@ -166,7 +166,7 @@ if __name__ == "__main__":
             return content_path in sections_to_search
         return walk_entry_is_in_sections
 
-    def compile_entries_from_dir(dirpath: Path, filenames: tuple, *, h_level: int):
+    def compile_entries_from_dir(dirpath: Path, filenames: list[str], *, h_level: int):
         """
         """
         index = []
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     # {'resource_management', 'blending_modes', 'dockers', 'filters', 'layers_and_masks', 'brushes', 'preferences', 'tools', 'main_menu'}
     # index files exist: YES
 
-    def compile_entries_from_dirs(sections_to_search: tuple, *, h_level: int):
+    def compile_entries_from_dirs(sections_to_search: list[str], *, h_level: int):
         """
         """
         index = []
@@ -223,10 +223,9 @@ if __name__ == "__main__":
     INDEX.extend(compile_entries_from_dirs(BLENDING_MODE_SECTIONS, h_level=2))
     # compile index for 'blending_modes/hsx' section
     INDEX.extend(compile_entries_from_dirs(BLENDING_MODE_HSX_SECTION, h_level=3))
-
     logger.info("(%d) entries compiled into index.", len(INDEX))
-    index_path = Path(TARGET_DIR, INDEX_NAME)
-    logger.info("Saving index to: '%s'", index_path)
+    logger.info("Fields of index: %s.", tuple(INDEX[0].keys()))
+
     def affirm_all_sections_are_in_index():
         """
         """
@@ -240,8 +239,12 @@ if __name__ == "__main__":
         index_dirs = set(map(lambda entry: '/'.join(entry['path'][:-1]), INDEX))
         #print(index_dirs - set_of_all_sections)
         #print(set_of_all_sections - index_dirs)
+        logger.info("Assert: These sections are listed in the index: %s.", all_sections)
         assert set(all_sections) == index_dirs
     affirm_all_sections_are_in_index()
+
+    index_path = Path(TARGET_DIR, INDEX_NAME)
+    logger.info("Saving index to: '%s'", index_path)
     with open(index_path, mode="w") as wfile:
         json.dump(INDEX, wfile, indent=2)
     logger.info("Save successful.")

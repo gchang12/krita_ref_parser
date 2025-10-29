@@ -43,7 +43,7 @@ class SampleImageType(enum.Enum):
             logger.debug("'%s' does not fall into one of the declared SampleImageType enumerations.", filename)
             return None
 
-    def get_filename_for_default(self, *, prefix):
+    def get_filename_for_default(self, *, prefix: str):
         """
         """
         filename_for_default_image = prefix + self.value
@@ -112,7 +112,7 @@ def compile_images_from_soup(soup: BeautifulSoup):
         images.add(Path(img['src']).name)
     return images
 
-def delete_unused_images(index, *, target_dir):
+def delete_unused_images(index: list[str], *, target_dir: Path):
     """
     """
     logger.debug("Found (%d) filenames in index.", len(index))

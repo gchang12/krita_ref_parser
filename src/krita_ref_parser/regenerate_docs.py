@@ -1,11 +1,12 @@
 """
 """
 
+from io import open
 import shutil
 import json
 from pathlib import Path
 
-from bs4 import BeautifulSoup
+import bs4
 
 #from krita_ref_parser.amputate_images import SampleImageType
 from krita_ref_parser.compile_index import (
@@ -25,32 +26,41 @@ SOURCE_DIR = "./output/raw-excerpts/"
 TARGET_DIR = "./output/excerpts/"
 INDEX_FILE = "./output/index.json"
 
-LINK_TO_OFFICAL_DOCS_CLASSNAME = "link-to-official-docs"
+LINK_TO_OFFICIAL_DOCS_CLASSNAME = "link-to-official-docs"
 
 # TODO:
 
-# - Extract h_ tags
-def extract_h_tag(soup: BeautifulSoup, *, h_level):
+# - Extract h_ tags. Note that this also extracts the href.
+def extract_h_tag(soup: bs4.BeautifulSoup, *, h_level: int):
     """
     """
     h_tag = "h%d" % h_level
     soup.find(h_tag).extract()
 
 # - Extract icons
-def extract_icon(soup: BeautifulSoup):
+def extract_icon(soup: bs4.BeautifulSoup):
     """
     """
     soup.find("img").extract()
 
+# - check if a-href exists.
+def a_href_exists(a: bs4.Tag, *, root_dir: str):
+    """
+    """
+    a_href = a['src']
+    stripped_a_href = a_href.lstrip('./')
+    normalized_a_href = Path(root_dir, stripped_a_href)
+    return normalized_a_href.exists()
+
 # - Change image sources to /images/{filename}
-def update_img_sources(soup: BeautifulSoup):
+def update_img_src(tag: bs4.Tag):
     """
     """
-    for img in soup.find_all("img"):
-        img['src'] = "/images/" + Path(img['src']).name
+    #for img in soup.find_all("img"):
+    img['src'] = "/images/" + Path(img['src']).name
 
 # - Prepend CSS link lines for files of these types: with-icon, without-icon, blending_modes, blending_mode-hsx
-def prepend_link_tags_to_soup(soup: BeautifulSoup, href_list: list):
+def prepend_link_tags_to_soup(soup: bs4.BeautifulSoup, href_list: list[str]):
     """
     """
     for href in href_list:
@@ -58,19 +68,20 @@ def prepend_link_tags_to_soup(soup: BeautifulSoup, href_list: list):
         soup.section.insert_before(tag)
 
 # - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
-def replace_internal_links_with_official_docs_links(soup: BeautifulSoup, num_levels: int):
+def replace_links_with_official_docs_links(a: bs4.Tag, *, num_levels: int):
     """
     """
-    for a in filter(lambda a: "internal" in a['class'], soup.find_all("a")):
-        href_path = a['href'].split('/')
-        if href_path.count('..') == num_levels:
-            new_href_path = '/'.join([OFFICIAL_DOCS_ROOT, *filter(lambda part: part != "..", href_path)])
-            a['href'] = new_href_path
-            a['class'].remove("internal")
-            a['class'].add("external")
+    #for a in filter(lambda a: "internal" in a['class'], soup.find_all("a")):
+    href_path = a['href'].split('/')
+    if href_path.count('..') == num_levels:
+        new_href_path = '/'.join([OFFICIAL_DOCS_ROOT, *filter(lambda part: part != "..", href_path)])
+        a['href'] = new_href_path
+        a['class'].remove("internal")
+        a['class'].add("external")
+        a['class'].add(LINK_TO_OFFICIAL_DOCS_CLASSNAME)
 
 # - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
-def replace_anchor_tags_with_link_tags(soup: BeautifulSoup):
+def replace_anchor_tags_with_link_tags(soup: bs4.BeautifulSoup):
     """
     """
     # NOTE: May change depending on web interface implementation
@@ -79,31 +90,50 @@ def replace_anchor_tags_with_link_tags(soup: BeautifulSoup):
         a.replace_with(react_link)
 
 # - Have links to external/official pages open new tabs.
-def have_external_links_open_new_tabs(soup: BeautifulSoup):
+def have_a_tag_open_new_tab(a: bs4.Tag):
     """
     """
-    for a in filter(lambda a: "external" in a['class'], soup.find_all("a")):
-        a['target'] = "_blank"
+    #for a in filter(lambda a: "external" in a['class'], soup.find_all("a")):
+    a['target'] = "_blank"
 
 # - Extract blending_modes/* subsections.
-def extract_subsections(soup: BeautifulSoup):
+def extract_subsections(soup: bs4.BeautifulSoup):
     """
     """
-    for section in soup.css.select("section[id] > section"):
+    for section in soup.css.select("section[id] > section[id]"):
         section.extract()
 
-# - Extract blending_modes/* subsections.
-def delete_references_to_section(soup: BeautifulSoup, section_name: str):
+# - Delete references to extracted sections
+def update_references_to_blending_modes_sections(root_dir: str, internal_a: bs4.Tag):
     """
     """
-    for section in soup.css.select("section[id] > section"):
-        section.extract()
+    normalized_href = internal_a['href'].lstrip('./')
+    renormalized_href = normalized_href.replace(".html#", "/") + ".html"
+    full_path_to_tgt = Path(root_dir, renormalized_href)
+    if full_path_to_tgt.exists():
+        internal_a['href'] = renormalized_href
+    raise FileNotFoundError("Fatal error: '%s' should exist, but it doesn't." % full_path_to_tgt)
+    # normalize link to blending_modes/* section
+    # if link exists: further normalize
+    # o.w.: raise Exception | replace with link to official docs.
+
+# - Delete references to extracted sections
+def delete_references_to_nonexistent_sections(internal_a: bs4.Tag):
+    """
+    """
+    # check if references are dead.
+    # if yes: raise Exception | replace with link to official docs.
+    # if no: normalize link
+    #for a in soup.css.select("a[class='internal']"):
+    internal_a['href'] = '/'.join([OFFICIAL_DOCS_ROOT.rstrip('/'), internal_a['href'].lstrip('/')])
+    internal_a['class'].remove("internal")
+    internal_a['class'].add(LINK_TO_OFFICIAL_DOCS_CLASSNAME)
 
 # - Manually create blending_modes/* index files.
-def replace_blending_modes_index_file(filename: str, index: list):
+def replace_blending_modes_index_file(filename: str, index: list[dict]):
     """
     """
-    soup = BeautifulSoup(Path(filename).read_text(encoding="utf-8"), "html.parser")
+    soup = bs4.BeautifulSoup(Path(filename).read_text(encoding="utf-8"), "html.parser")
     # insert header and wrap as necessary.
     # insert content from existing page.
     # provide links to page.
@@ -135,19 +165,55 @@ def replace_blending_modes_index_file(filename: str, index: list):
 </section>'''
 
 # - mv 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
-#shutil.mv(Path(TARGET_DIR, "layers_and_masks", "fill_layers.html"), Path(TARGET_DIR, "layers_and_masks", "fill_layer_generators.html"))
+
+def update_filename(root_dir: str, src_path: Path, tgt_path: Path):
+    """
+    """
+    #src_path = Path("layers_and_masks", "fill_layers.html")
+    #tgt_path = Path("layers_and_masks", "fill_layer_generators.html")
+    #root_dir = TARGET_DIR
+    shutil.mv(
+        Path(root_dir, src_path),
+        Path(root_dir, tgt_path),
+    )
 # - and change header to 'Fill Layer Generators'
-#with open(INDEX_FILE, encoding="utf-8") as rfile:
-#    index = json.load(rfile)
-#for record in index:
-#    if record['path'] == ["layers_and_masks", "fill_layers.html"]:
-#        break
-#record['path'] = ["layers_and_masks", "fill_layer_generator.html"]
-#record['header'] = "Fill Layer Generator"
-#with open(INDEX_FILE, encoding="utf-9", mode="w") as wfile:
-#    json.dump(index, wfile)
-# - modify index.json as necessary. (NOTE: Warrants manual operation).
-# - Do NOT extract SampleImageType figures.
+
+def update_references_to_filename(soup: bs4.BeautifulSoup, root_dir: src, src_path: Path, tgt_path: Path):
+    """
+    """
+    for internal_a in filter(
+        lambda internal_a: internal_a['href'].endswith(str(src_path)),
+        soup.css.select("a[class='internal']"),
+    ):
+        internal_a['href'] = '/'.join([root_dir, str(tgt_path)])
+    #src_path = Path("layers_and_masks", "fill_layers.html")
+    #tgt_path = Path("layers_and_masks", "fill_layer_generators.html")
+
+def update_record_of_index(index_file: str, path_id: list[str], new_record: dict):
+    """
+    """
+    #src_path=["layers_and_masks", "fill_layers.html"]
+    #tgt_path=
+    #new_record = {
+    #    'path': ["layers_and_masks", "fill_layer_generator.html"],
+    #    'header': "Fill Layer Generator",
+    #}
+    with open(index_file, encoding="utf-8") as rfile:
+        index = json.load(rfile)
+    for record in index:
+        if record['path'] == path_id:
+            break
+    for key in record:
+        try:
+            record[key] = new_record[key]
+        except KeyError:
+            pass
+    with open(index_file, encoding="utf-9", mode="w") as wfile:
+        json.dump(index, wfile)
+    # - modify index.json as necessary. (NOTE: Warrants manual operation).
+    # - Do NOT extract SampleImageType figures.
+
+# OLD CODE HERE #
 
 def _extract_h_tag(section, *, h_level: int):
     """
