@@ -64,7 +64,7 @@ output/index.json: output/raw-excerpts/
 ## 5: Format and clean generated HTML files.
 output/excerpts/: output/raw-excerpts/ output/index.json
 	mkdir output/excerpts/;
-	. $(VENV_NAME)/bin/activate; python3 src/krita_ref_parser/modify_dom.py;
+	. $(VENV_NAME)/bin/activate; python3 src/krita_ref_parser/regenerate_docs.py;
 	echo "'output/excerpts/' has been cloned from 'output/raw-excerpts/' and processed."
 
 ## 6: Search for hidden output.
