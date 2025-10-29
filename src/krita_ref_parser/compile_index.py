@@ -81,7 +81,7 @@ def detect_index_files_for_directories(source_dir: str, *, dirs_with_no_indices=
         raise FileNotFoundError("These directories in '%s' lack complementing index files: %r" % (source_dir, missing_files))
     logger.info("All directories in '%s' have complementing index files.", source_dir)
 
-def get_header(soup: BeautifulSoup, *, h_level):
+def get_header(soup: BeautifulSoup, *, h_level: int):
     """
     """
     h_tag = "h%d" % h_level
@@ -90,7 +90,7 @@ def get_header(soup: BeautifulSoup, *, h_level):
     logger.debug("Returning header: '%s'", h_text)
     return h_text
 
-def get_header_href(soup: BeautifulSoup, *, h_level):
+def get_section_id(soup: BeautifulSoup, *, h_level: int):
     """
     """
     h_tag = soup.find("h%d" % h_level)
@@ -166,7 +166,7 @@ if __name__ == "__main__":
             return content_path in sections_to_search
         return walk_entry_is_in_sections
 
-    def compile_entries_from_dir(dirpath: Path, filenames: tuple, h_level: int):
+    def compile_entries_from_dir(dirpath: Path, filenames: tuple, *, h_level: int):
         """
         """
         index = []
@@ -180,18 +180,16 @@ if __name__ == "__main__":
             soup = BeautifulSoup(filetext, "html.parser")
             header_text = get_header(soup, h_level=h_level)
             # header: DONE
-            header_href = get_header_href(soup, h_level=h_level)
-            # header.href: DONE
+            section_id = get_section_id(soup, h_level=h_level)
+            # section.id: DONE
             icon = get_icon(soup)
             # icon: DONE
             figures = get_figures(soup)
             # figures: DONE
             article = {
                 "path": path_root + [filename],
-                "header": {
-                    "text": header_text,
-                    "href": header_href,
-                },
+                "header": header_text,
+                "section": section_id,
                 "icon": icon,
                 "figures": figures,
             }
@@ -204,14 +202,14 @@ if __name__ == "__main__":
     # {'resource_management', 'blending_modes', 'dockers', 'filters', 'layers_and_masks', 'brushes', 'preferences', 'tools', 'main_menu'}
     # index files exist: YES
 
-    def compile_entries_from_dirs(sections_to_search: tuple, h_level: int):
+    def compile_entries_from_dirs(sections_to_search: tuple, *, h_level: int):
         """
         """
         index = []
         for dirpath, dirnames, filenames in filter(determine_if_walk_entry_is_in_sections(sections_to_search), Path(SOURCE_DIR).walk()):
             validate_directory(dirpath)
             determine_if_walk_entry_is_in_sections(sections_to_search)
-            index.extend(compile_entries_from_dir(dirpath, filenames, h_level))
+            index.extend(compile_entries_from_dir(dirpath, filenames, h_level=h_level))
         return index
 
     # compile index for sections without icons
