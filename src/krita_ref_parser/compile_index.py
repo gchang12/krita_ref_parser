@@ -68,7 +68,7 @@ BLENDING_MODE_HSX_SECTION = (
     "blending_modes/hsx",
 )
 
-def detect_index_files_for_directories(source_dir: Path, *, dirs_with_no_indices=DIRS_WITH_NO_INDICES):
+def detect_index_files_for_directories(source_dir: Path | str, *, dirs_with_no_indices=DIRS_WITH_NO_INDICES):
     """
     """
     missing_files = set()
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     INDEX = []
     INDEX_NAME = "index.json"
 
-    def validate_directory(dirname: Path):
+    def validate_directory(dirname: Path | str):
         """
         """
         logger.info("Validating: An index file exists for each directory in '%s'.", dirname)
@@ -166,7 +166,7 @@ if __name__ == "__main__":
             return content_path in sections_to_search
         return walk_entry_is_in_sections
 
-    def compile_entries_from_dir(dirpath: Path, filenames: list[str], *, h_level: int):
+    def compile_entries_from_dir(dirpath: Path | str, filenames: list[str], *, h_level: int):
         """
         """
         index = []

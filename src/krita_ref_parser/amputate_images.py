@@ -112,7 +112,7 @@ def compile_images_from_soup(soup: BeautifulSoup):
         images.add(Path(img['src']).name)
     return images
 
-def delete_unused_images(index: list[str], *, target_dir: Path):
+def delete_unused_images(index: list[str], *, target_dir: Path | str):
     """
     """
     logger.debug("Found (%d) filenames in index.", len(index))
