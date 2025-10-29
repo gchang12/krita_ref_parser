@@ -1,33 +1,153 @@
 """
-Modifies compiled HTML documents and yields various output.
 """
 
+import shutil
+import json
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from krita_ref_parser.amputate_images import SampleImageType
+#from krita_ref_parser.amputate_images import SampleImageType
+from krita_ref_parser.compile_index import (
+    ALL_SECTIONS,
+    SECTIONS_WITHOUT_ICONS,
+    SECTIONS_WITH_ICONS,
+    BLENDING_MODE_SECTIONS,
+    BLENDING_MODE_HSX_SECTION,
+    )
 from krita_ref_parser._logging import logger
 
 PILCROW = "¶"
 
+OFFICIAL_DOCS_ROOT = "https://docs.krita.org/en/"
+
 SOURCE_DIR = "./output/raw-excerpts/"
 TARGET_DIR = "./output/excerpts/"
+INDEX_FILE = "./output/index.json"
 
 LINK_TO_OFFICAL_DOCS_CLASSNAME = "link-to-official-docs"
 
 # TODO:
+
 # - Extract h_ tags
+def extract_h_tag(soup: BeautifulSoup, *, h_level):
+    """
+    """
+    h_tag = "h%d" % h_level
+    soup.find(h_tag).extract()
+
+# - Extract icons
+def extract_icon(soup: BeautifulSoup):
+    """
+    """
+    soup.find("img").extract()
+
 # - Change image sources to /images/{filename}
-# - Set CSS 'rel' attribute
+def update_img_sources(soup: BeautifulSoup):
+    """
+    """
+    for img in soup.find_all("img"):
+        img['src'] = "/images/" + Path(img['src']).name
+
+# - Prepend CSS link lines for files of these types: with-icon, without-icon, blending_modes, blending_mode-hsx
+def prepend_link_tags_to_soup(soup: BeautifulSoup, href_list: list):
+    """
+    """
+    for href in href_list:
+        tag = soup.new_tag("link", rel="stylesheet", type="text/css", href=href)
+        soup.section.insert_before(tag)
+
+# - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
+def replace_internal_links_with_official_docs_links(soup: BeautifulSoup, num_levels: int):
+    """
+    """
+    for a in filter(lambda a: "internal" in a['class'], soup.find_all("a")):
+        href_path = a['href'].split('/')
+        if href_path.count('..') == num_levels:
+            new_href_path = '/'.join([OFFICIAL_DOCS_ROOT, *filter(lambda part: part != "..", href_path)])
+            a['href'] = new_href_path
+            a['class'].remove("internal")
+            a['class'].add("external")
+
+# - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
+def replace_anchor_tags_with_link_tags(soup: BeautifulSoup):
+    """
+    """
+    # NOTE: May change depending on web interface implementation
+    for a in filter(lambda a: "internal" in a['class'], soup.find_all("a")):
+        react_link = soup.new_tag("Link", to=a['href'])
+        a.replace_with(react_link)
+
+# - Have links to external/official pages open new tabs.
+def have_external_links_open_new_tabs(soup: BeautifulSoup):
+    """
+    """
+    for a in filter(lambda a: "external" in a['class'], soup.find_all("a")):
+        a['target'] = "_blank"
+
 # - Extract blending_modes/* subsections.
-# - Make 'layers_and_masks/fill_layer_generators.html' index
-# - Manually create blending_modes/* indices.
-# - Mark stuff as external or not.
-# - Have links open new tabs.
-# - Prepend CSS link lines.
-# - Change documentation links to official docs website as needed; add extra classes as necessary.
-#- Extract SampleImageType figures? (NO)
+def extract_subsections(soup: BeautifulSoup):
+    """
+    """
+    for section in soup.css.select("section[id] > section"):
+        section.extract()
+
+# - Extract blending_modes/* subsections.
+def delete_references_to_section(soup: BeautifulSoup, section_name: str):
+    """
+    """
+    for section in soup.css.select("section[id] > section"):
+        section.extract()
+
+# - Manually create blending_modes/* index files.
+def replace_blending_modes_index_file(filename: str, index: list):
+    """
+    """
+    soup = BeautifulSoup(Path(filename).read_text(encoding="utf-8"), "html.parser")
+    # insert header and wrap as necessary.
+    # insert content from existing page.
+    # provide links to page.
+    '''<span id="category-brush-engines"></span><h1>Brush Engines<a class="headerlink" href="#brush-engines" title="Link to this heading">¶</a></h1>
+<p>Information on the brush engines that can be accessed in the brush editor.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Available Engines:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/bristle_engine.html">Bristle Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/chalk_engine.html">Chalk Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/clone_engine.html">Clone Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/color_smudge_engine.html">Color Smudge Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/curve_engine.html">Curve Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/deform_brush_engine.html">Deform Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/dyna_brush_engine.html">Dyna Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/filter_brush_engine.html">Filter Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/grid_brush_engine.html">Grid Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/hatching_brush_engine.html">Hatching Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/mypaint_engine.html">MyPaint Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/particle_brush_engine.html">Particle Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/pixel_brush_engine.html">Pixel Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/quick_brush_engine.html">Quick Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/shape_brush_engine.html">Shape Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/sketch_brush_engine.html">Sketch Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/spray_brush_engine.html">Spray Brush Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brush_engines/tangen_normal_brush_engine.html">Tangent Normal Brush Engine</a></li>
+</ul>
+</div>
+</section>'''
+
+# - mv 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
+#shutil.mv(Path(TARGET_DIR, "layers_and_masks", "fill_layers.html"), Path(TARGET_DIR, "layers_and_masks", "fill_layer_generators.html"))
+# - and change header to 'Fill Layer Generators'
+#with open(INDEX_FILE, encoding="utf-8") as rfile:
+#    index = json.load(rfile)
+#for record in index:
+#    if record['path'] == ["layers_and_masks", "fill_layers.html"]:
+#        break
+#record['path'] = ["layers_and_masks", "fill_layer_generator.html"]
+#record['header'] = "Fill Layer Generator"
+#with open(INDEX_FILE, encoding="utf-9", mode="w") as wfile:
+#    json.dump(index, wfile)
+# - modify index.json as necessary. (NOTE: Warrants manual operation).
+# - Do NOT extract SampleImageType figures.
 
 def _extract_h_tag(section, *, h_level: int):
     """
