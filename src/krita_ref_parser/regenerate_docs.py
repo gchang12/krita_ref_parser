@@ -81,12 +81,12 @@ def normalize_internal_href(a: bs4.Tag):
     a['href'] = "/" + a['href'].lstrip('./')
 
 # - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
-def internal_link_must_be_replaced_with_official_docs_link(a: bs4.Tag, *, num_levels: int):
+def internal_link_should_stay_internal(a: bs4.Tag, *, num_levels: int):
     """
     """
     #for a in filter(lambda a: "internal" in a['class'], soup.find_all("a")):
     href_path = a['href'].split('/')
-    return href_path.count('..') == num_levels:
+    return href_path.count('..') == num_levels
 
 # - Delete references to extracted sections
 def update_references_to_blending_modes_sections(root_dir: Path | str, internal_a: bs4.Tag):
@@ -95,10 +95,9 @@ def update_references_to_blending_modes_sections(root_dir: Path | str, internal_
     normalized_href = internal_a['href'].lstrip('./')
     renormalized_href = normalized_href.replace(".html#", "/") + ".html"
     full_path_to_tgt = Path(root_dir, renormalized_href)
-    if full_path_to_tgt.exists():
-        internal_a['href'] = "/" + renormalized_href
-        return
-    raise FileNotFoundError("Fatal error: '%s' should exist, but it doesn't." % full_path_to_tgt)
+    if not full_path_to_tgt.exists():
+        raise FileNotFoundError("Fatal error: '%s' should exist, but it doesn't." % full_path_to_tgt)
+    internal_a['href'] = "/" + renormalized_href
     # normalize link to blending_modes/* section
     # if link exists: further normalize
     # o.w.: raise Exception | replace with link to official docs.
