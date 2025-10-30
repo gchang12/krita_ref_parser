@@ -166,9 +166,7 @@ def remove_links_from_index(soup: bs4.BeautifulSoup, section: str):
     for li in filter(lambda li: not li.contents, soup.css.select("ul > li")):
         li.decompose()
     for ul in soup.css.select("ul"):
-        are_blanks = []
-        for content in ul.contents:
-            are_blanks.append(not str(content).strip())
+        are_blanks = [not str(content).strip() for content in ul.contents]
         if all(are_blanks):
             ul.decompose()
 
