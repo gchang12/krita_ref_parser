@@ -1241,7 +1241,6 @@ class IndexTestCase(unittest.TestCase):
         """
         """
         soup = self.soup
-        #section_dir = self.section_dir
         section = self.section
         with self.subTest():
             actual = list(
@@ -1309,10 +1308,10 @@ class SpecialIndexTestCase(unittest.TestCase):
 </section>
 </section>''')
         self.soup = soup
-        self.section_dir = "layers_and_masks"
-        self.subsection_dir = "fill_layer_generators"
+        self.section = "layers_and_masks"
+        self.subsection = "fill_layer_generators"
         self.filename = "fill_layers.html"
-        self.section = (self.section_dir, self.filename)
+        self.section = (self.section, self.filename)
 
     def test_is_index_file(self):
         """
@@ -1334,15 +1333,14 @@ class SpecialIndexTestCase(unittest.TestCase):
         """
         """
         soup = self.soup
-        #section_dir = self.section_dir
-        subsection_dir = self.subsection_dir
+        subsection = self.subsection
         with self.subTest():
             actual = list(
                 map(lambda a: a['href'], filter(
                     lambda a: \
                         'internal' in a['class'] \
                         and 'reference' in a['class'] \
-                        and a['href'].startswith(subsection_dir),
+                        and a['href'].startswith(subsection),
                     soup.find_all("a"),
                     )
                 )
@@ -1352,7 +1350,7 @@ class SpecialIndexTestCase(unittest.TestCase):
             self.assertIsNotNone(actual)
             actual = list(soup.css.select("ul > li"))
             self.assertTrue(actual)
-        remove_links_from_index(soup, subsection_dir)
+        remove_links_from_index(soup, subsection)
         #logger.critical("%s", soup)
         with self.subTest():
             actual = list(
@@ -1360,7 +1358,7 @@ class SpecialIndexTestCase(unittest.TestCase):
                     lambda a: \
                         'internal' in a['class'] \
                         and 'reference' in a['class'] \
-                        and a['href'].startswith(subsection_dir),
+                        and a['href'].startswith(subsection),
                     soup.find_all("a"),
                     )
                 )
@@ -1432,18 +1430,18 @@ class MovedFileTestCase(unittest.TestCase):
         """
         """
         soup = self.soup
-        section_dir = "layers_and_masks"
+        section = "layers_and_masks"
         src_name = "fill_layers.html"
         tgt_name = "fill_layer_generators.html"
-        new_href = '%s/%s' % (section_dir, tgt_name)
-        old_href = '../../%s/%s' % (section_dir, src_name)
+        new_href = '%s/%s' % (section, tgt_name)
+        old_href = '../../%s/%s' % (section, src_name)
         with self.subTest(msg="Assert: Target DNE."):
             actual = soup.find("a", href=new_href)
             self.assertIsNone(actual)
         with self.subTest(msg="Assert: Source exists."):
             actual = soup.find("a", href=old_href)
             self.assertIsNotNone(actual)
-        update_references_to_filename(soup, section_dir, src_name, tgt_name)
+        update_references_to_filename(soup, section, src_name, tgt_name)
         with self.subTest(msg="Assert: Target exists."):
             actual = soup.find("a", href=new_href)
             self.assertIsNotNone(actual)
