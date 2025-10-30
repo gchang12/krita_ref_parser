@@ -27,6 +27,7 @@ from krita_ref_parser.regenerate_docs import (
     # for renovating index files
     extract_subsections,
     remove_links_from_index,
+    is_index_file,
     #replace_blending_modes_index_file,
     # for renaming files
     update_filename,
@@ -277,8 +278,18 @@ class BlendingModeArticleTestCase(unittest.TestCase):
     def setUp(self):
         """
         """
-        soup = get_soup(Path(TARGET_DIR, "arithmetic", "addition.html"))
+        section = ("arithmetic", "addition.html")
+        soup = get_soup(Path(TARGET_DIR, *section))
         self.soup = soup
+        self.section = section
+
+    def test_is_index_file(self):
+        """
+        """
+        filename = Path(*self.section)
+        expected = False
+        actual = is_index_file(filename)
+        self.assertIs(actual, expected)
 
     def test_update_img_src(self):
         """
@@ -447,6 +458,15 @@ class IndexTestCase(unittest.TestCase):
         self.root_dirname = "layers_and_masks"
         soup = get_soup(Path(TARGET_DIR, self.root_dirname, "fill_layers.html"))
         self.soup = soup
+        self.section = (self.root_dirname, "fill_layers.html")
+
+    def test_is_index_file(self):
+        """
+        """
+        filename = Path(*self.section)
+        expected = True
+        actual = is_index_file(filename)
+        self.assertIs(actual, expected)
 
     def test_remove_links_from_index(self):
         """

@@ -135,6 +135,11 @@ def have_a_tag_open_new_tab(a: bs4.Tag):
 
 # INDEX-FILE MANAGEMENT
 
+def is_index_file(filename: Path | str):
+    """
+    """
+    return Path(filename).with_suffix("").is_dir()
+
 # - Extract blending_modes/* subsections.
 def extract_subsections(soup: bs4.BeautifulSoup):
     """
