@@ -60,7 +60,12 @@ def replace_section_with_div(soup: bs4.BeautifulSoup):
 def remove_empty_tags(soup: bs4.BeautifulSoup):
     """
     """
-    for tag in filter(lambda tag: tag.find() is None and tag['id'] is None, soup.find_all()):
+    for tag in filter(
+        lambda tag: \
+            not tag.contents \
+            and 'id' not in tag.attrs,
+        soup.find_all(),
+    ):
         tag.decompose()
 
 # REFERENCE MANAGEMENT
@@ -116,9 +121,10 @@ def replace_internal_reference_with_official(internal_a: bs4.Tag):
     # if yes: raise Exception | replace with link to official docs.
     # if no: normalize link
     #for a in soup.css.select("a[class='internal']"):
-    internal_a['href'] = '/'.join([OFFICIAL_DOCS_ROOT.rstrip('/'), internal_a['href'].lstrip('/')])
+    internal_a['href'] = '/'.join([OFFICIAL_DOCS_ROOT.rstrip('/'), internal_a['href'].lstrip('./')])
     internal_a['class'].remove("internal")
-    internal_a['class'].add(LINK_TO_OFFICIAL_DOCS_CLASSNAME)
+    internal_a['class'].append(LINK_TO_OFFICIAL_DOCS_CLASSNAME)
+    internal_a['class'].append("external")
 
 # MODIFY LINK BEHAVIOR
 
@@ -128,8 +134,8 @@ def replace_a_tags_with_reactlink_tags(soup: bs4.BeautifulSoup):
     """
     # NOTE: May change depending on web interface implementation
     for a in filter(lambda a: "internal" in a['class'], soup.find_all("a")):
-        react_link = soup.new_tag("Link", to=a['href'])
-        a.replace_with(react_link)
+        a.name = "Link"
+        a['to'] = a.attrs.pop('href')
 
 # - Have links to external/official pages open new tabs.
 def have_a_tag_open_new_tab(a: bs4.Tag):
@@ -152,14 +158,22 @@ def extract_subsections(soup: bs4.BeautifulSoup):
     for section in soup.css.select("section[id] > section[id]"):
         section.decompose()
 
-def remove_links_from_index(soup: bs4.BeautifulSoup, root_dirname: str):
+def remove_links_from_index(soup: bs4.BeautifulSoup, section_dir: str):
     """
     """
-    for a in filter(lambda a: a['href'].startswith(root_dirname), soup.find_all("ul > li > a")):
+    for a in soup.css.select("ul > li > a"):
+        if not a['href'].startswith(section_dir):
+            continue
         a.decompose()
-    for li in filter(lambda li: li.find() is None, soup.find_all("ul > li")):
+    for li in soup.css.select("ul > li"):
+        if li.contents:
+            continue
         li.decompose()
-    for ul in filter(lambda ul: ul.find() is None, soup.find_all("ul")):
+    for ul in soup.css.select("ul"):
+        if not ul.contents:
+            continue
+        elif ul.contents[0].strip():
+            continue
         ul.decompose()
 
 # RENAMING FILES
@@ -171,7 +185,7 @@ def update_filename(root_dir: Path | str, src_path: Path | str, tgt_path: Path |
     #src_path = Path("layers_and_masks", "fill_layers.html")
     #tgt_path = Path("layers_and_masks", "fill_layer_generators.html")
     #root_dir = TARGET_DIR
-    shutil.mv(
+    shutil.move(
         Path(root_dir, src_path),
         Path(root_dir, tgt_path),
     )
@@ -179,17 +193,18 @@ def update_filename(root_dir: Path | str, src_path: Path | str, tgt_path: Path |
 
 def update_references_to_filename(
         soup: bs4.BeautifulSoup,
-        root_dir: Path | str,
-        src_path: Path | str,
-        tgt_path: Path | str,
+        section_dir: Path | str,
+        src_name: Path | str,
+        tgt_name: Path | str,
     ):
     """
     """
+    src_path = '/'.join([str(section_dir), str(src_name)])
     for internal_a in filter(
-        lambda internal_a: internal_a['href'].endswith(str(src_path)),
+        lambda internal_a: internal_a['href'].endswith(src_path),
         soup.css.select("a[class='internal']"),
     ):
-        internal_a['href'] = '/'.join([str(root_dir), str(tgt_path)])
+        internal_a['href'] = '/'.join([str(section_dir), str(tgt_name)])
     #src_path = Path("layers_and_masks", "fill_layers.html")
     #tgt_path = Path("layers_and_masks", "fill_layer_generators.html")
 

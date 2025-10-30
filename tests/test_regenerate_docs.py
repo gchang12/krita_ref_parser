@@ -78,6 +78,7 @@ class GeneralTestCase(unittest.TestCase):
             "<h1>General Test Case</h1>",
             "<ul>",
             "</ul>",
+            "<span class='empty-tag'></span>"
             "<div id='empty-tag'></div>"
             "</section>",
         )
@@ -90,7 +91,8 @@ class GeneralTestCase(unittest.TestCase):
             'subtract',
             )
         for blending_mode in blending_modes:
-            index_item_tag = soup.new_tag("a", class_=["internal"])
+            index_item_tag = soup.new_tag("a")
+            index_item_tag['class'] = ["internal"]
             index_item_tag.string = blending_mode
             index_item_tag['href'] = '../../blending_modes/arithmetic.html#%s' % blending_mode
             li_tag = soup.new_tag('li')
@@ -112,8 +114,17 @@ class GeneralTestCase(unittest.TestCase):
             "</div>",
         )
         expected = get_soup("\n".join(html_source_lines))
-        replace_section_with_div(self.soup)
-        actual = self.soup
+        html_source_lines = (
+            "<section id='GeneralTestCase'>",
+            "<img src='/images/nonexistent-image.svg' />",
+            "<h1>General Test Case</h1>",
+            "<ul>",
+            "</ul>",
+            "<div id='empty-tag'></div>"
+            "</section>",
+        )
+        actual = get_soup("\n".join(html_source_lines))
+        replace_section_with_div(actual)
         self.assertEqual(actual, expected)
 
     #@unittest.skip("")
@@ -169,7 +180,7 @@ class GeneralTestCase(unittest.TestCase):
         self.assertIsNone(actual)
 
     #@unittest.skip("")
-    def test_remove_empty_tags(self):
+    def test_remove_empty_tags__TAGS_WITH_ID_REMAIN(self):
         """
         """
         soup = self.soup
@@ -178,6 +189,21 @@ class GeneralTestCase(unittest.TestCase):
         self.assertIsNone(div_contents)
         remove_empty_tags(soup)
         actual = soup.find('div')
+        self.assertIsNotNone(actual)
+        self.assertIn('id', actual.attrs)
+
+    #@unittest.skip("")
+    def test_remove_empty_tags__TAGS_WITHOUT_ID_ARE_GONE(self):
+        """
+        """
+        soup = self.soup
+        span = soup.find('span')
+        contents = span.find()
+        logger.debug("Contents of only span[id='empty-tag'] tag: %r", contents)
+        self.assertIsNone(contents)
+        self.assertNotIn('id', soup.find('span').attrs)
+        remove_empty_tags(soup)
+        actual = soup.find('span')
         self.assertIsNone(actual)
 
     def test_update_references_to_blending_modes_sections(self):
@@ -202,7 +228,7 @@ class GeneralTestCase(unittest.TestCase):
         replace_a_tags_with_reactlink_tags(soup)
         actual = []
         for Link in soup.find_all("Link"):
-            actual.append(Link.text, Link['to'])
+            actual.append((Link.text, Link['to']))
         self.assertListEqual(actual, expected)
 
 # - with icon: tools/assistant.html
@@ -249,7 +275,6 @@ class DoesNotContainIconTestCase(unittest.TestCase):
         """
         soup = get_soup('''<section id="add-shape">
 <span id="add-shape-docker"></span><h1>Add Shape<a class="headerlink" href="#add-shape" title="Link to this heading">¶</a></h1>
-<img alt="../../_images/Krita_Add_Shape_Docker.png" src="../../_images/Krita_Add_Shape_Docker.png"/>
 <p>A docker for adding KOffice shapes to a Vector Layers.</p>
 <div class="deprecated">
 <p><span class="versionmodified deprecated">Deprecated since version 4.0: </span>This got removed in 4.0, the <a class="reference internal" href="vector_library.html#vector-library-docker"><span class="std std-ref">Symbol Libraries</span></a> replacing it.</p>
@@ -264,9 +289,12 @@ class DoesNotContainIconTestCase(unittest.TestCase):
         soup = self.soup
         actual = soup.find("img")
         self.assertIsNone(actual)
-        extract_icon(soup)
+        with self.assertRaises(AttributeError):
+            extract_icon(soup)
+        logger.debug("Checking that no images have been accidentally added... apparently.")
         actual = soup.find("img")
         self.assertIsNone(actual)
+        logger.debug("Clear.")
 
 # - blending_modes: arithmetic.html
 class BlendingModeIndexTestCase(unittest.TestCase):
@@ -423,6 +451,7 @@ One puts the black and white lineart on top, sets the layer to ‘Multiply’, a
     def test_extract_subsections(self):
         """
         """
+        soup = self.soup
         actual = tuple(soup.css.select("section[id] > section[id]"))
         logger.debug("Now you see them...")
         self.assertTrue(actual)
@@ -818,6 +847,7 @@ Checks whether the upper layer’s pixel has a lower Saturation than the lower l
     def test_MANUALLY_REMOVE_SUBSECTIONS(self):
         """
         """
+        soup = self.soup
         section = soup.find(id="hsx-blending-modes")
         section.extract()
         expected = set(["HSI", "HSL", "HSV", "HSY"])
@@ -993,6 +1023,7 @@ splitter.</p>
         expected = False
         num_levels = 2
         href = "../../../tutorials/seexpr.html#seexpr-tut-intro"
+        soup = self.soup
         a = soup.find("a", href=href)
         actual = internal_link_should_stay_internal(a, num_levels=num_levels)
         self.assertIs(actual, expected)
@@ -1011,9 +1042,9 @@ splitter.</p>
                 break
         actual = a['href']
         self.assertEqual(actual, expected)
-        expected = set(["link-to-official-docs", "external"])
+        expected = set(["link-to-official-docs", "external", "reference"])
         actual = set(a['class']) # iterable
-        self.asserSetEqual(actual, expected)
+        self.assertSetEqual(actual, expected)
 
 # - has_link_to_krita_refman_article: dockers/animation_curves.html
 class ContainsInternalLinkTestCase(unittest.TestCase):
@@ -1166,14 +1197,13 @@ class ContainsInternalLinkTestCase(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 # - is_index_file: layers_and_masks/fill_layers.html
-class IndexTestCase(unittest.TestCase):
+class SpecialIndexTestCase(unittest.TestCase):
     """
     """
 
     def setUp(self):
         """
         """
-        self.root_dirname = "layers_and_masks"
         soup = get_soup('''<section id="fill-layers">
 <span id="index-0"></span><span id="id1"></span><h1>Fill Layers<a class="headerlink" href="#fill-layers" title="Link to this heading">¶</a></h1>
 <p>A Fill Layer is a special layer that Krita generates on-the-fly that can contain either a pattern or a solid color.</p>
@@ -1196,13 +1226,24 @@ class IndexTestCase(unittest.TestCase):
 </section>
 </section>''')
         self.soup = soup
-        self.section = (self.root_dirname, "fill_layers.html")
+        self.section_dir = "layers_and_masks"
+        self.subsection_dir = "fill_layer_generators"
+        self.filename = "fill_layers.html"
+        self.section = (self.section_dir, self.filename)
 
     def test_is_index_file(self):
         """
         """
-        filename = Path(*self.section)
+        filename = Path(TARGET_DIR, *self.section).with_name("fill_layer_generators.html")
         expected = True
+        actual = is_index_file(filename)
+        self.assertIs(actual, expected)
+
+    def test_is_index_file__DIR_DNE(self):
+        """
+        """
+        filename = Path(TARGET_DIR, *self.section)
+        expected = False
         actual = is_index_file(filename)
         self.assertIs(actual, expected)
 
@@ -1210,11 +1251,15 @@ class IndexTestCase(unittest.TestCase):
         """
         """
         soup = self.soup
-        root_dirname = self.root_dirname
+        #section_dir = self.section_dir
+        subsection_dir = self.subsection_dir
         with self.subTest():
             actual = list(
                 map(lambda a: a['href'], filter(
-                    lambda a: a['href'].startswith(root_dirname),
+                    lambda a: \
+                        'internal' in a['class'] \
+                        and 'reference' in a['class'] \
+                        and a['href'].startswith(subsection_dir),
                     soup.find_all("a"),
                     )
                 )
@@ -1224,11 +1269,15 @@ class IndexTestCase(unittest.TestCase):
             self.assertIsNotNone(actual)
             actual = list(soup.css.select("ul > li"))
             self.assertTrue(actual)
-        remove_links_from_index(soup, root_dirname)
+        remove_links_from_index(soup, subsection_dir)
+        #logger.critical("%s", soup)
         with self.subTest():
             actual = list(
                 map(lambda a: a['href'], filter(
-                    lambda a: a['href'].startswith(root_dirname),
+                    lambda a: \
+                        'internal' in a['class'] \
+                        and 'reference' in a['class'] \
+                        and a['href'].startswith(subsection_dir),
                     soup.find_all("a"),
                     )
                 )
@@ -1264,13 +1313,13 @@ class MovedFileTestCase(unittest.TestCase):
                 "figures": None,
             },
         ]
-        shutil.copy_file(
+        shutil.copyfile(
             Path(SOURCE_DIR, self.dirname, self.filename),
             Path(TARGET_DIR, self.dirname, self.filename),
         )
         self.soup = get_soup("""<section id='dummy'>
 <h1>References Fill Layer</h1>
-<p><a href='layers_and_masks/fill_layers.html'>On Fill Layers</a></p>
+<p><a class='internal' href='../../layers_and_masks/fill_layers.html'>On Fill Layers</a></p>
 </section>""")
 
     def test_update_filename(self):
@@ -1300,15 +1349,23 @@ class MovedFileTestCase(unittest.TestCase):
         """
         """
         soup = self.soup
-        root_dir = "layers_and_masks"
-        src_path = "fill_layers.html"
-        tgt_path = "fill_layer_generators.html"
-        update_references_to_filename(soup, root_dir, src_path, tgt_path)
-        with self.subTest():
-            actual = soup.find("a", href='%s/%s' % (root_dir, tgt_path))
+        section_dir = "layers_and_masks"
+        src_name = "fill_layers.html"
+        tgt_name = "fill_layer_generators.html"
+        new_href = '%s/%s' % (section_dir, tgt_name)
+        old_href = '../../%s/%s' % (section_dir, src_name)
+        with self.subTest(msg="Assert: Target DNE."):
+            actual = soup.find("a", href=new_href)
+            self.assertIsNone(actual)
+        with self.subTest(msg="Assert: Source exists."):
+            actual = soup.find("a", href=old_href)
             self.assertIsNotNone(actual)
-        with self.subTest():
-            actual = soup.find("a", href='%s/%s' % (root_dir, src_path))
+        update_references_to_filename(soup, section_dir, src_name, tgt_name)
+        with self.subTest(msg="Assert: Target exists."):
+            actual = soup.find("a", href=new_href)
+            self.assertIsNotNone(actual)
+        with self.subTest(msg="Assert: Source DNE."):
+            actual = soup.find("a", href=old_href)
             self.assertIsNone(actual)
 
     def test_update_filename_record_of_index(self):
