@@ -161,20 +161,13 @@ def extract_subsections(soup: bs4.BeautifulSoup):
 def remove_links_from_index(soup: bs4.BeautifulSoup, section_dir: str):
     """
     """
-    for a in soup.css.select("ul > li > a"):
-        if not a['href'].startswith(section_dir):
-            continue
+    for a in filter(lambda a: a['href'].startswith(section_dir), soup.css.select("ul > li > a")):
         a.decompose()
-    for li in soup.css.select("ul > li"):
-        if li.contents:
-            continue
+    for li in filter(lambda li: not li.contents, soup.css.select("ul > li")):
         li.decompose()
     for ul in soup.css.select("ul"):
-        if not ul.contents:
-            continue
-        elif ul.contents[0].strip():
-            continue
-        ul.decompose()
+        if (not ul.contents) or (not ul.contents[0].strip()):
+            ul.decompose()
 
 # RENAMING FILES
 # - mv 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'

@@ -1197,6 +1197,89 @@ class ContainsInternalLinkTestCase(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 # - is_index_file: layers_and_masks/fill_layers.html
+class IndexTestCase(unittest.TestCase):
+    """
+    """
+
+    def setUp(self):
+        """
+        """
+        soup = get_soup('''
+<section id="main-menu">
+<span id="id1"></span><h1>Main Menu<a class="headerlink" href="#main-menu" title="Link to this heading">¶</a></h1>
+<p>A list of all of main menu actions and a short description on what they do.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 5.0: </span>Actions, including all of the main menu actions can now be searched with <kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Ctrl</kbd> <kbd class="kbd docutils literal notranslate"></kbd>+<kbd class="kbd docutils literal notranslate"></kbd> <kbd class="kbd docutils literal notranslate">Enter</kbd></kbd>.</p>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="main_menu/edit_menu.html">Edit Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_menu/file_menu.html">File Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_menu/help_menu.html">Help Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_menu/image_menu.html">Image Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_menu/layers_menu.html">Layers Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_menu/select_menu.html">Select Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_menu/settings_menu.html">Settings Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_menu/tools_menu.html">Tools Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_menu/view_menu.html">View Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main_menu/window_menu.html">Window Menu</a></li>
+</ul>
+</div>
+</section>''')
+        self.soup = soup
+        self.section = "main_menu"
+
+    def test_is_index_file(self):
+        """
+        """
+        filename = Path(TARGET_DIR, self.section).with_suffix(".html")
+        expected = True
+        actual = is_index_file(filename)
+        self.assertIs(actual, expected)
+
+    def test_remove_links_from_index(self):
+        """
+        """
+        soup = self.soup
+        #section_dir = self.section_dir
+        section = self.section
+        with self.subTest():
+            actual = list(
+                map(lambda a: a['href'], filter(
+                    lambda a: \
+                        'internal' in a['class'] \
+                        and 'reference' in a['class'] \
+                        and a['href'].startswith(section),
+                    soup.find_all("a"),
+                    )
+                )
+            )
+            self.assertTrue(actual)
+            actual = soup.find("ul")
+            self.assertIsNotNone(actual)
+            actual = list(soup.css.select("ul > li"))
+            self.assertTrue(actual)
+        remove_links_from_index(soup, section)
+        #logger.critical("%s", soup)
+        with self.subTest():
+            actual = list(
+                map(lambda a: a['href'], filter(
+                    lambda a: \
+                        'internal' in a['class'] \
+                        and 'reference' in a['class'] \
+                        and a['href'].startswith(section),
+                    soup.find_all("a"),
+                    )
+                )
+            )
+            self.assertFalse(actual)
+            actual = soup.find("ul")
+            self.assertIsNone(actual)
+            actual = list(soup.css.select("ul > li"))
+            self.assertFalse(actual)
+
+
+# - is_index_file: layers_and_masks/fill_layers.html
 class SpecialIndexTestCase(unittest.TestCase):
     """
     """
