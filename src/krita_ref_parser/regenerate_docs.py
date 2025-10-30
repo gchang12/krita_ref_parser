@@ -43,19 +43,19 @@ def extract_h_tag(soup: bs4.BeautifulSoup, *, h_level: int):
     """
     """
     h_tag = "h%d" % h_level
-    soup.find(h_tag).extract()
+    soup.find(h_tag).decompose()
 
 # - Extract icons
 def extract_icon(soup: bs4.BeautifulSoup):
     """
     """
-    soup.find("img").extract()
+    soup.find("img").decompose()
 
 def remove_empty_tags(soup: bs4.BeautifulSoup):
     """
     """
     for tag in filter(lambda tag: tag.find() is None and tag.id is None, soup.find_all()):
-        tag.extract()
+        tag.decompose()
 
 # REFERENCE MANAGEMENT
 
@@ -144,17 +144,17 @@ def extract_subsections(soup: bs4.BeautifulSoup):
     """
     """
     for section in soup.css.select("section[id] > section[id]"):
-        section.extract()
+        section.decompose()
 
 def remove_links_from_index(soup: bs4.BeautifulSoup, root_dirname: str):
     """
     """
     for a in filter(lambda a: a['href'].startswith(root_dirname), soup.find_all("ul > li > a")):
-        a.extract()
+        a.decompose()
     for li in filter(lambda li: li.find() is None, soup.find_all("ul > li")):
-        li.extract()
+        li.decompose()
     for ul in filter(lambda ul: ul.find() is None, soup.find_all("ul")):
-        ul.extract()
+        ul.decompose()
 
 # RENAMING FILES
 # - mv 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
