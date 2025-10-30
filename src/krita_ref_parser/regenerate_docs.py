@@ -28,8 +28,6 @@ INDEX_FILE = "./output/index.json"
 
 LINK_TO_OFFICIAL_DOCS_CLASSNAME = "link-to-official-docs"
 
-# TODO: /^def replace_blending_modes_index_file
-
 # ADD-AND-DELETE CONTENT
 
 # - Prepend CSS link lines for files of these types: with-icon, without-icon, blending_modes, blending_mode-hsx
@@ -153,42 +151,6 @@ def remove_links_from_index(soup: bs4.BeautifulSoup, root_dirname: str):
         li.extract()
     for ul in filter(lambda ul: ul.find() is None, soup.find_all("ul")):
         ul.extract()
-
-# - Manually create blending_modes/* index files.
-# NOTE: Implement properly. ...I mean, can't I just clear all children and link content?
-def replace_blending_modes_index_file(filename: Path | str, index: list[dict]):
-    """
-    """
-    soup = bs4.BeautifulSoup(Path(filename).read_text(encoding="utf-8"), "html.parser")
-    # insert header and wrap as necessary.
-    # insert content from existing page.
-    # provide links to page.
-    '''<span id="category-brush-engines"></span><h1>Brush Engines<a class="headerlink" href="#brush-engines" title="Link to this heading">¶</a></h1>
-<p>Information on the brush engines that can be accessed in the brush editor.</p>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Available Engines:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/bristle_engine.html">Bristle Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/chalk_engine.html">Chalk Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/clone_engine.html">Clone Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/color_smudge_engine.html">Color Smudge Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/curve_engine.html">Curve Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/deform_brush_engine.html">Deform Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/dyna_brush_engine.html">Dyna Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/filter_brush_engine.html">Filter Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/grid_brush_engine.html">Grid Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/hatching_brush_engine.html">Hatching Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/mypaint_engine.html">MyPaint Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/particle_brush_engine.html">Particle Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/pixel_brush_engine.html">Pixel Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/quick_brush_engine.html">Quick Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/shape_brush_engine.html">Shape Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/sketch_brush_engine.html">Sketch Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/spray_brush_engine.html">Spray Brush Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="brush_engines/tangen_normal_brush_engine.html">Tangent Normal Brush Engine</a></li>
-</ul>
-</div>
-</section>'''
 
 # RENAMING FILES
 # - mv 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
