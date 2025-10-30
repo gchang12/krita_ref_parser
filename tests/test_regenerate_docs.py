@@ -5,6 +5,7 @@ import io
 import unittest
 from unittest.mock import patch
 from pathlib import Path
+import shutil
 
 from bs4 import BeautifulSoup
 
@@ -14,6 +15,7 @@ from krita_ref_parser.regenerate_docs import (
     extract_h_tag,
     extract_icon,
     remove_empty_tags,
+    replace_section_with_div,
     # for updating paths and references
     update_references_to_blending_modes_sections,
     a_href_exists,
@@ -96,6 +98,23 @@ class GeneralTestCase(unittest.TestCase):
             soup.ul.append(li_tag)
         self.soup = soup
         self.blending_modes = blending_modes
+
+    def test_replace_section_with_div(self):
+        """
+        """
+        html_source_lines = (
+            "<div id='GeneralTestCase'>",
+            "<img src='/images/nonexistent-image.svg' />",
+            "<h1>General Test Case</h1>",
+            "<ul>",
+            "</ul>",
+            "<div id='empty-tag'></div>"
+            "</div>",
+        )
+        expected = get_soup("\n".join(html_source_lines))
+        replace_section_with_div(self.soup)
+        actual = self.soup
+        self.assertEqual(actual, expected)
 
     #@unittest.skip("")
     def test_prepend_link_tags_to_soup(self):
@@ -219,7 +238,7 @@ class ContainsIconTestCase(unittest.TestCase):
         self.assertIsNone(actual)
 
 # - without icon: dockers/add_shape.html
-class DoesNotContainsIconTestCase(unittest.TestCase):
+class DoesNotContainIconTestCase(unittest.TestCase):
     """
     """
     # Some file-text should:

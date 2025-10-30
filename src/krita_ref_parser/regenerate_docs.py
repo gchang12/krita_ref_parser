@@ -51,10 +51,16 @@ def extract_icon(soup: bs4.BeautifulSoup):
     """
     soup.find("img").decompose()
 
+def replace_section_with_div(soup: bs4.BeautifulSoup):
+    """
+    """
+    section = soup.css.select_one("section[id]")
+    section.name = "div"
+
 def remove_empty_tags(soup: bs4.BeautifulSoup):
     """
     """
-    for tag in filter(lambda tag: tag.find() is None and tag.id is None, soup.find_all()):
+    for tag in filter(lambda tag: tag.find() is None and tag['id'] is None, soup.find_all()):
         tag.decompose()
 
 # REFERENCE MANAGEMENT
