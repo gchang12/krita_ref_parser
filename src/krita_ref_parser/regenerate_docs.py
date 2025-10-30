@@ -18,6 +18,9 @@ from krita_ref_parser.compile_index import (
     )
 from krita_ref_parser._logging import logger
 
+# TODO: Replace blending mode section hrefs
+# TODO: Correct the href detector or whatever.
+
 PILCROW = "¶"
 
 OFFICIAL_DOCS_ROOT = "https://docs.krita.org/en/"
@@ -74,8 +77,12 @@ def remove_empty_tags(soup: bs4.BeautifulSoup):
 def a_href_exists(a: bs4.Tag, *, root_dir: Path | str):
     """
     """
-    a_href = a['src']
+    a_href = a['href']
     stripped_a_href = a_href.lstrip('./')
+    if "blending_modes/" in stripped_a_href and "/" in stripped_a_href[stripped_a_href.index("blending_modes/"):]:
+        stripped_a_href = stripped_a_href.replace('.html#', '/') + '.html'
+    if "#" in stripped_a_href:
+        stripped_a_href = stripped_a_href[:stripped_a_href.index("#")]
     normalized_a_href = Path(root_dir, stripped_a_href)
     return normalized_a_href.exists()
 
@@ -195,7 +202,7 @@ def update_references_to_filename(
     """
     src_path = '/'.join([str(section), str(src_name)])
     for internal_a in filter(
-        lambda internal_a: internal_a['href'].endswith(src_path),
+        lambda internal_a: src_path in internal_a['href'],
         soup.css.select("a[class='internal']"),
     ):
         internal_a['href'] = '/'.join([str(section), str(tgt_name)])

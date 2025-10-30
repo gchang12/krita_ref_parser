@@ -92,7 +92,7 @@ class GeneralTestCase(unittest.TestCase):
             )
         for blending_mode in blending_modes:
             index_item_tag = soup.new_tag("a")
-            index_item_tag['class'] = ["internal"]
+            index_item_tag['class'] = ["internal", "reference"]
             index_item_tag.string = blending_mode
             index_item_tag['href'] = '../../blending_modes/arithmetic.html#%s' % blending_mode
             li_tag = soup.new_tag('li')
@@ -244,6 +244,8 @@ class ContainsIconTestCase(unittest.TestCase):
             "<section id='GeneralTestCase'>",
             "<img src='/images/nonexistent-image.svg' />",
             "<h1>General Test Case</h1>",
+            "<p><a href='../../layers_and_masks/fill_layers.html#some-stuff-or-whatever'></a></p>",
+            "<p><a href='../../blending_modes/arithmetic.html#addition'></a></p>",
             "<ul>",
             "</ul>",
             "<div id='empty-tag'></div>"
@@ -251,6 +253,24 @@ class ContainsIconTestCase(unittest.TestCase):
         )
         soup = get_soup("\n".join(html_source_lines))
         self.soup = soup
+
+    def test_a_href_exists(self):
+        """
+        """
+        expected = True
+        soup = self.soup
+        a = soup.find('a')
+        actual = a_href_exists(a, root_dir=TARGET_DIR)
+        self.assertIs(actual, expected)
+
+    def test_a_href_exists__BLENDING_MODE(self):
+        """
+        """
+        expected = True
+        soup = self.soup
+        a = soup.find('a', href="../../blending_modes/arithmetic.html#addition")
+        actual = a_href_exists(a, root_dir=TARGET_DIR)
+        self.assertIs(actual, expected)
 
     #@unittest.skip("")
     def test_extract_icon(self):
