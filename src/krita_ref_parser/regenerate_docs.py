@@ -56,7 +56,7 @@ def extract_icon(soup: bs4.BeautifulSoup):
 def remove_empty_tags(soup: bs4.BeautifulSoup):
     """
     """
-    for tag in filter(lambda tag: tag.find() is None, soup.find_all()):
+    for tag in filter(lambda tag: tag.find() is None and tag.id is None, soup.find_all()):
         tag.extract()
 
 # REFERENCE MANAGEMENT
@@ -71,24 +71,24 @@ def a_href_exists(a: bs4.Tag, *, root_dir: Path | str):
     return normalized_a_href.exists()
 
 # - Change image sources to /images/{filename}
-def update_img_src(tag: bs4.Tag):
+def update_img_src(img: bs4.Tag):
     """
     """
     #for img in soup.find_all("img"):
     img['src'] = "/images/" + Path(img['src']).name
 
+def normalize_internal_href(a: bs4.Tag):
+    """
+    """
+    a['href'] = "/" + a['href'].lstrip('./')
+
 # - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
-def replace_links_with_official_docs_links(a: bs4.Tag, *, num_levels: int):
+def internal_link_must_be_replaced_with_official_docs_link(a: bs4.Tag, *, num_levels: int):
     """
     """
     #for a in filter(lambda a: "internal" in a['class'], soup.find_all("a")):
     href_path = a['href'].split('/')
-    if href_path.count('..') == num_levels:
-        new_href_path = '/'.join([OFFICIAL_DOCS_ROOT, *filter(lambda part: part != "..", href_path)])
-        a['href'] = new_href_path
-        a['class'].remove("internal")
-        a['class'].add("external")
-        a['class'].add(LINK_TO_OFFICIAL_DOCS_CLASSNAME)
+    return href_path.count('..') == num_levels:
 
 # - Delete references to extracted sections
 def update_references_to_blending_modes_sections(root_dir: Path | str, internal_a: bs4.Tag):
@@ -98,7 +98,8 @@ def update_references_to_blending_modes_sections(root_dir: Path | str, internal_
     renormalized_href = normalized_href.replace(".html#", "/") + ".html"
     full_path_to_tgt = Path(root_dir, renormalized_href)
     if full_path_to_tgt.exists():
-        internal_a['href'] = renormalized_href
+        internal_a['href'] = "/" + renormalized_href
+        return
     raise FileNotFoundError("Fatal error: '%s' should exist, but it doesn't." % full_path_to_tgt)
     # normalize link to blending_modes/* section
     # if link exists: further normalize
@@ -143,7 +144,7 @@ def extract_subsections(soup: bs4.BeautifulSoup):
     for section in soup.css.select("section[id] > section[id]"):
         section.extract()
 
-def remove_links_from_index(soup: bs4.BeautifulSoup, root_dirname: str, filename: Path | str):
+def remove_links_from_index(soup: bs4.BeautifulSoup, root_dirname: str):
     """
     """
     for a in filter(lambda a: a['href'].startswith(root_dirname), soup.find_all("ul > li > a")):
@@ -154,7 +155,7 @@ def remove_links_from_index(soup: bs4.BeautifulSoup, root_dirname: str, filename
         ul.extract()
 
 # - Manually create blending_modes/* index files.
-# TODO: Implement properly. ...I mean, just clear all children and link content.
+# NOTE: Implement properly. ...I mean, can't I just clear all children and link content?
 def replace_blending_modes_index_file(filename: Path | str, index: list[dict]):
     """
     """
@@ -192,7 +193,7 @@ def replace_blending_modes_index_file(filename: Path | str, index: list[dict]):
 # RENAMING FILES
 # - mv 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
 
-def update_filename(root_dir: Path | str, src_path: Path, tgt_path: Path):
+def update_filename(root_dir: Path | str, src_path: Path | str, tgt_path: Path | str):
     """
     """
     #src_path = Path("layers_and_masks", "fill_layers.html")
@@ -204,18 +205,23 @@ def update_filename(root_dir: Path | str, src_path: Path, tgt_path: Path):
     )
 # - and change header to 'Fill Layer Generators'
 
-def update_references_to_filename(soup: bs4.BeautifulSoup, root_dir: src, src_path: Path, tgt_path: Path):
+def update_references_to_filename(
+        soup: bs4.BeautifulSoup,
+        root_dir: Path | str,
+        src_path: Path | str,
+        tgt_path: Path | str,
+    ):
     """
     """
     for internal_a in filter(
         lambda internal_a: internal_a['href'].endswith(str(src_path)),
         soup.css.select("a[class='internal']"),
     ):
-        internal_a['href'] = '/'.join([root_dir, str(tgt_path)])
+        internal_a['href'] = '/'.join([str(root_dir), str(tgt_path)])
     #src_path = Path("layers_and_masks", "fill_layers.html")
     #tgt_path = Path("layers_and_masks", "fill_layer_generators.html")
 
-def update_filename_record_of_index(index_file: Path | str, path_id: list[str], new_record: dict):
+def update_filename_record_of_index(index: list[dict], path_id: list[str], new_record: dict):
     """
     """
     #src_path=["layers_and_masks", "fill_layers.html"]
@@ -224,8 +230,8 @@ def update_filename_record_of_index(index_file: Path | str, path_id: list[str], 
     #    'path': ["layers_and_masks", "fill_layer_generator.html"],
     #    'header': "Fill Layer Generator",
     #}
-    with open(index_file, encoding="utf-8") as rfile:
-        index = json.load(rfile)
+    #with open(index_file, encoding="utf-8") as rfile:
+        #index = json.load(rfile)
     for record in index:
         if record['path'] == path_id:
             break
@@ -235,8 +241,8 @@ def update_filename_record_of_index(index_file: Path | str, path_id: list[str], 
             logger.info("Setting record['%s'] = %r.", key, new_record[key])
         except KeyError:
             logger.debug("'%s' not found in provided record.", key)
-    with open(index_file, encoding="utf-9", mode="w") as wfile:
-        json.dump(index, wfile)
+    #with open(index_file, encoding="utf-9", mode="w") as wfile:
+        #json.dump(index, wfile)
     # - modify index.json as necessary. (NOTE: Warrants manual operation).
     # - Do NOT extract SampleImageType figures.
 
