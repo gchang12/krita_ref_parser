@@ -107,6 +107,7 @@ def normalize_internal_href(a: bs4.Tag):
     a['href'] = "/" + a['href'].lstrip('./')
 
 # - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
+# NOTE: Isn't this accomplished already by 'a_href_exists'?
 def internal_link_should_stay_internal(a: bs4.Tag, *, num_levels: int):
     """
     """
@@ -244,11 +245,20 @@ def update_filename_record_of_index(index: list[dict], path_id: list[str], new_r
 
 if __name__ == "__main__":
 
-    from krita_ref_parser.compile_index import (
-        SECTIONS_WITHOUT_ICONS,
-        SECTIONS_WITH_ICONS,
-        )
+    # HELPER FUNCTIONS
 
+    def get_soup_from_file(filepath: Path):
+        """
+        """
+        soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+        return soup
+
+    def write_soup_to_file(soup: bs4.BeautifulSoup, filepath: Path):
+        """
+        """
+        return filepath.write_text(str(soup), encoding="utf-8")
+
+    # clone raw-excerpts/ to excerpts/
 
     def clone_from_raw():
         """
@@ -257,6 +267,38 @@ if __name__ == "__main__":
         shutil.rmtree(TARGET_DIR, ignore_errors=True)
         logger.debug("Cloning from '%s' to '%s'.", SOURCE_DIR, TARGET_DIR)
         shutil.copytree(SOURCE_DIR, TARGET_DIR)
+
+    # rename 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
+    # - update index s.t. header = "Fill Layer Generators"
+
+    '''
+    # for inserting and removing content
+    prepend_link_tags_to_soup,
+    extract_h_tag,
+    extract_icon,
+    remove_empty_tags,
+    replace_section_with_div,
+    promote_h_tags,
+    # for updating paths and references
+    update_references_to_blending_modes_sections,
+    a_href_exists,
+    update_img_src,
+    normalize_internal_href,
+    internal_link_should_stay_internal,
+    replace_internal_reference_with_official,
+    # for changing behavior of links themselves
+    replace_a_tags_with_reactlink_tags,
+    have_a_tag_open_new_tab,
+    # for renovating index files
+    extract_subsections,
+    remove_links_from_index,
+    is_index_file,
+    #replace_blending_modes_index_file,
+    # for renaming files
+    update_filename,
+    update_references_to_filename,
+    update_filename_record_of_index,
+    '''
 
     def rename_fill_layers_to_fill_layer_generators():
         """
@@ -289,13 +331,76 @@ if __name__ == "__main__":
         with open(INDEX_FILE, encoding="utf-8") as rfile:
             index = json.load(rfile)
         path_id = [section, src_name]
-        new_record = {"path": [section, tgt_name]}
+        new_record = {"path": [section, tgt_name], "header": "Fill Layer Generators"}
         logger.info("Updating record where 'path'=%s to %s.", path_id, new_record)
         update_filename_record_of_index(
             index,
             path_id,
             new_record,
         )
+
+    # update all references to files, then normalize them
+
+    def update_img_sources_in_files():
+        """
+        """
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+                for img in soup.find_all("img"):
+                    update_img_src(img)
+                filepath.write_text(str(soup), encoding="utf-8")
+
+    # strip headers
+
+    def strip_headers_from_files():
+        """
+        """
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+                extract_h_tag(soup)
+                filepath.write_text(str(soup), encoding="utf-8")
+
+    # upgrade sub-headers
+
+    # rename sections to div
+    def rename_sections_to_divs():
+        """
+        """
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+                replace_section_with_div(soup)
+                filepath.write_text(str(soup), encoding="utf-8")
+
+    # strip icons (note the exceptions)
+
+    def strip_icons_from_files():
+        """
+        """
+        exceptional_files = (
+            "",
+            )
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            section = dirpath.name
+            if section not in SECTIONS_WITH_ICONS:
+                continue
+            for filename in filenames:
+                if filename in exceptional_files:
+                    continue
+                filepath = dirpath.joinpath(filename)
+                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+                extract_icon(soup)
+                filepath.write_text(str(soup), encoding="utf-8")
+
+    # strip index files, noting blending-mode and blending-mode-hsx exceptions
+    # - leave 'blending_modes.html' alone
+    # - remove subsections of blending_modes/*.html
+    # - remove #hsx-blending-modes
 
     def strip_index_files():
         """
@@ -329,44 +434,7 @@ if __name__ == "__main__":
                 filepath.write_text(str(soup), encoding="utf-8")
             break
 
-    def strip_icons_from_files():
-        """
-        """
-        exceptional_files = (
-            "",
-            )
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            section = dirpath.name
-            if section not in SECTIONS_WITH_ICONS:
-                continue
-            for filename in filenames:
-                if filename in exceptional_files:
-                    continue
-                filepath = dirpath.joinpath(filename)
-                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
-                extract_icon(soup)
-                filepath.write_text(str(soup), encoding="utf-8")
-
-    def strip_headers_from_files():
-        """
-        """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            for filename in filenames:
-                filepath = dirpath.joinpath(filename)
-                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
-                extract_h_tag(soup)
-                filepath.write_text(str(soup), encoding="utf-8")
-
-    def rename_sections_to_divs():
-        """
-        """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            for filename in filenames:
-                filepath = dirpath.joinpath(filename)
-                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
-                replace_section_with_div(soup)
-                filepath.write_text(str(soup), encoding="utf-8")
-
+    # clean out empty tags
     def remove_empty_tags_from_files():
         """
         """
@@ -375,15 +443,4 @@ if __name__ == "__main__":
                 filepath = dirpath.joinpath(filename)
                 soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
                 remove_empty_tags(soup)
-                filepath.write_text(str(soup), encoding="utf-8")
-
-    def update_img_sources_in_files():
-        """
-        """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            for filename in filenames:
-                filepath = dirpath.joinpath(filename)
-                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
-                for img in soup.find_all("img"):
-                    update_img_src(img)
                 filepath.write_text(str(soup), encoding="utf-8")
