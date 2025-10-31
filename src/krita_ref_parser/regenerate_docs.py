@@ -71,7 +71,7 @@ def remove_empty_tags(soup: bs4.BeautifulSoup):
     ):
         tag.decompose()
 
-def promote_h_tags(soup: bs4.BeautifulSoup, *, og_and_tgt_levels: tuple[int]):
+def promote_h_tags(soup: bs4.BeautifulSoup, *, h_levels: tuple[int]):
     """
     """
     og_level, tgt_level = og_and_tgt_levels
@@ -270,35 +270,10 @@ if __name__ == "__main__":
 
     # rename 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
     # - update index s.t. header = "Fill Layer Generators"
-
-    '''
-    # for inserting and removing content
-    prepend_link_tags_to_soup,
-    extract_h_tag,
-    extract_icon,
-    remove_empty_tags,
-    replace_section_with_div,
-    promote_h_tags,
-    # for updating paths and references
-    update_references_to_blending_modes_sections,
-    a_href_exists,
-    update_img_src,
-    normalize_internal_href,
-    internal_link_should_stay_internal,
-    replace_internal_reference_with_official,
-    # for changing behavior of links themselves
-    replace_a_tags_with_reactlink_tags,
-    have_a_tag_open_new_tab,
-    # for renovating index files
-    extract_subsections,
-    remove_links_from_index,
-    is_index_file,
-    #replace_blending_modes_index_file,
     # for renaming files
-    update_filename,
-    update_references_to_filename,
-    update_filename_record_of_index,
-    '''
+    #update_filename,
+    #update_references_to_filename,
+    #update_filename_record_of_index,
 
     def rename_fill_layers_to_fill_layer_generators():
         """
@@ -316,30 +291,30 @@ if __name__ == "__main__":
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
-                soup = BeautifulSoup(
-                    filepath.read_text(encoding='utf-8'),
-                    'html.parser',
-                )
+                soup = get_soup_from_file(filepath)
                 update_references_to_filename(
                     soup,
                     section,
                     src_name,
                     tgt_name,
                 )
-                filepath.write_text(str(soup))
+                write_soup_to_file(soup, filepath)
             logger.info("Replaced references in '%s' section.", dirpath.name)
         with open(INDEX_FILE, encoding="utf-8") as rfile:
             index = json.load(rfile)
-        path_id = [section, src_name]
+        path = [section, src_name]
         new_record = {"path": [section, tgt_name], "header": "Fill Layer Generators"}
-        logger.info("Updating record where 'path'=%s to %s.", path_id, new_record)
+        logger.info("Updating record where 'path'=%s to %s.", path, new_record)
         update_filename_record_of_index(
             index,
-            path_id,
+            path,
             new_record,
         )
+        with open(INDEX_FILE, encoding="utf-8", mode="w") as wfile:
+            json.dump(index, wfile, indent=2)
 
     # update all references to files, then normalize them
+    #update_img_src,
 
     def update_img_sources_in_files():
         """
@@ -347,65 +322,129 @@ if __name__ == "__main__":
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
+                soup = get_soup_from_file(filepath)
                 soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
-                for img in soup.find_all("img"):
-                    update_img_src(img)
                 filepath.write_text(str(soup), encoding="utf-8")
+                update_references_to_filename(
+                    soup,
+                    section,
+                    src_name,
+                    tgt_name,
+                )
+                write_soup_to_file(soup, filepath)
+
+    #update_references_to_blending_modes_sections_in_files
+    def update_references_to_blending_modes_sections_in_files():
+        """
+        """
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = get_soup_from_file(filepath)
+                for a in soup.css.select("a[class='internal']"):
+                    update_references_to_blending_modes_sections(TARGET_DIR, a)
+                write_soup_to_file(soup, filepath)
+
+    # for updating paths and references
+    #a_href_exists,
+    #normalize_internal_href,
+    #replace_internal_reference_with_official,
+
+    def update_all_hrefs():
+        """
+        """
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = get_soup_from_file(filepath)
+                for a in soup.css.select("a[class='internal']"):
+                    if a_href_exists(a, TARGET_DIR):
+                        normalize_internal_href(a)
+                    else:
+                        replace_internal_reference_with_official(a)
+                write_soup_to_file(soup, filepath)
 
     # strip headers
+    #extract_h_tag,
 
     def strip_headers_from_files():
         """
         """
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            if dirpath.parts[-2] == "blending_modes":
+                h_level = 2
+            else:
+                h_level = 1
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
-                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
-                extract_h_tag(soup)
-                filepath.write_text(str(soup), encoding="utf-8")
+                soup = get_soup_from_file(filepath)
+                extract_h_tag(soup, h_level=h_level)
+                write_soup_to_file(soup, filepath)
 
     # upgrade sub-headers
-
-    # rename sections to div
-    def rename_sections_to_divs():
+    #promote_h_tags,
+    def promote_blending_modes_h_tags_in_files():
         """
         """
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            if dirpath.parts[-2] != "blending_modes":
+                continue
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
-                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+                soup = get_soup_from_file(filepath)
+                promote_h_tags(soup, h_levels=(2, 1))
+                write_soup_to_file(soup, filepath)
+
+    # replace section container with div.
+    #replace_section_with_div,
+    def promote_blending_modes_h_tags():
+        """
+        """
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            if dirpath.parts[-2] == "blending_modes":
+                h_level = 2
+            for filename in filenames:
+                if filename == "hsx.html":
+                    h_level = 3
+                filepath = dirpath.joinpath(filename)
+                soup = get_soup_from_file(filepath)
                 replace_section_with_div(soup)
-                filepath.write_text(str(soup), encoding="utf-8")
+                write_soup_to_file(soup, filepath)
 
     # strip icons (note the exceptions)
-
-    def strip_icons_from_files():
+    #extract_icon,
+    def strip_icons_from_all_files():
         """
         """
         exceptional_files = (
-            "",
+            "color_sampler.html", # tools
+            "chalk_engine.html", # brush_engines
             )
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             section = dirpath.name
             if section not in SECTIONS_WITH_ICONS:
                 continue
-            for filename in filenames:
-                if filename in exceptional_files:
-                    continue
+            for filename in filter(lambda filename: filename notn in exceptional_files, filenames):
                 filepath = dirpath.joinpath(filename)
-                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+                soup = get_soup_from_file(filepath)
                 extract_icon(soup)
-                filepath.write_text(str(soup), encoding="utf-8")
+                write_soup_to_file(filepath)
 
     # strip index files, noting blending-mode and blending-mode-hsx exceptions
     # - leave 'blending_modes.html' alone
     # - remove subsections of blending_modes/*.html
     # - remove #hsx-blending-modes
+    # for renovating index files
+    #extract_subsections,
+    #remove_links_from_index,
+    #is_index_file,
 
     def strip_index_files():
         """
         """
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            if dirpath.parts[-2] == "blending_modes":
+                continue
             section = dirpath.name
             for filename in filenames:
                 if filename == "blending_modes.html":
@@ -413,34 +452,80 @@ if __name__ == "__main__":
                 filepath = dirpath.joinpath(filename)
                 if not is_index_file(filepath):
                     continue
-                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+                soup = get_soup_from_file(filepath)
                 remove_links_from_index(soup, section)
-
-    def strip_blending_modes_index_files():
-        """
-        """
+                write_soup_to_file(soup, filepath)
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            section = dirpath.name
-            if section != "blending_modes":
+            if dirpath.parts[-2] != "blending_modes":
                 continue
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
-                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+                soup = get_soup_from_file(filepath)
                 if filename == "hsx.html":
-                    hsx_blending_modes = soup.css.select_one("#hsx-blending_modes")
-                    hsx_blending_modes.decompose()
+                    soup.css.select_one("#hsx-blending_modes").decompose()
                 else:
                     extract_subsections(soup)
-                filepath.write_text(str(soup), encoding="utf-8")
-            break
+                write_soup_to_file(filepath)
 
-    # clean out empty tags
+    #have_a_tag_open_new_tab,
+    def have_all_a_tags_open_new_tabs():
+        """
+        """
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = get_soup_from_file(filepath)
+                for a in soup.css.select("a[class='external']"):
+                    have_a_open_new_tab(a)
+                write_soup_to_file(filepath)
+
+    #remove_empty_tags,
     def remove_empty_tags_from_files():
         """
         """
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
-                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+                soup = get_soup_from_file(filepath)
                 remove_empty_tags(soup)
-                filepath.write_text(str(soup), encoding="utf-8")
+                write_soup_to_file(filepath)
+
+    #replace_a_tags_with_reactlink_tags,
+    def replace_all_a_tags_with_reactlink_tags():
+        """
+        """
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = get_soup_from_file(filepath)
+                replace_a_tags_with_reactlink_tags(soup)
+                write_soup_to_file(filepath)
+
+    #prepend_link_tags_to_soup
+    def prepend_link_tags_to_all_excerpts():
+        """
+        """
+        href_list = [
+            "/stylesheets/style.css",
+        ]
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = get_soup_from_file(filepath)
+                prepend_link_tags_to_soup(soup, href_list)
+                write_soup_to_file(filepath)
+
+    clone_from_raw()
+    rename_fill_layers_to_fill_layer_generators()
+    update_img_sources_in_files()
+    update_references_to_blending_modes_sections_in_files()
+    update_all_hrefs()
+    strip_headers_from_files()
+    promote_blending_modes_h_tags_in_files()
+    promote_blending_modes_h_tags()
+    strip_icons_from_all_files()
+    strip_index_files()
+    have_all_a_tags_open_new_tabs()
+    remove_empty_tags_from_files()
+    replace_all_a_tags_with_reactlink_tags()
+    prepend_link_tags_to_all_excerpts()
