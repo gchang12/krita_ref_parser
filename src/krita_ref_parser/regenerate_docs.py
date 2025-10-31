@@ -71,6 +71,14 @@ def remove_empty_tags(soup: bs4.BeautifulSoup):
     ):
         tag.decompose()
 
+def promote_h_tags(soup: bs4.BeautifulSoup, *, og_and_tgt_levels: tuple[int]):
+    """
+    """
+    og_level, tgt_level = og_and_tgt_levels
+    h_tag_name = "h%d" % og_level
+    for h_ in soup.find_all(h_tag_name):
+        h_.name = "h%d" % tgt_level
+
 # REFERENCE MANAGEMENT
 
 # - check if a-href exists.
@@ -136,13 +144,13 @@ def replace_internal_reference_with_official(internal_a: bs4.Tag):
 # MODIFY LINK BEHAVIOR
 
 # - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
-def replace_a_tags_with_reactlink_tags(soup: bs4.BeautifulSoup):
+def replace_a_tags_with_reactlink_tags(soup: bs4.BeautifulSoup, *, new_name="Link", new_href_name="to"):
     """
     """
     # NOTE: May change depending on web interface implementation
     for a in filter(lambda a: "internal" in a['class'], soup.find_all("a")):
-        a.name = "Link"
-        a['to'] = a.attrs.pop('href')
+        a.name = new_name
+        a[new_href_name] = a.attrs.pop('href')
 
 # - Have links to external/official pages open new tabs.
 def have_a_tag_open_new_tab(a: bs4.Tag):

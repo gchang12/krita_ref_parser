@@ -16,6 +16,7 @@ from krita_ref_parser.regenerate_docs import (
     extract_icon,
     remove_empty_tags,
     replace_section_with_div,
+    promote_h_tags,
     # for updating paths and references
     update_references_to_blending_modes_sections,
     a_href_exists,
@@ -895,6 +896,24 @@ class BlendingModeHSXArticleTestCase(unittest.TestCase):
 </figure>
 </section>''')
         self.soup = soup
+
+    def promote_h_tags(self):
+        """
+        """
+        expected = get_soup('''<section id="intensity">
+<span id="bm-intensity"></span><h1>Intensity<a class="headerlink" href="#intensity" title="Link to this heading">¶</a></h1>
+<p>Takes the Hue and Saturation of the lower layer and outputs them with the intensity of the upper layer.</p>
+<figure class="align-center" id="id19">
+<img alt="../../_images/Blending_modes_Intensity_Sample_image_with_dots.png" src="../../_images/Blending_modes_Intensity_Sample_image_with_dots.png"/>
+<figcaption>
+<p><span class="caption-text">Left: <strong>Normal</strong>. Right: <strong>Intensity</strong>.</span><a class="headerlink" href="#id19" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>''')
+        actual = self.soup
+        og_and_tgt_levels = (3, 1)
+        promote_h_tags(actual, og_and_tgt_levels=og_and_tgt_levels)
+        self.assertEqual(actual, expected)
 
     #@unittest.skip("")
     def test_extract_h_tag(self):
