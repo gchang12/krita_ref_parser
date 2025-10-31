@@ -911,8 +911,8 @@ class BlendingModeHSXArticleTestCase(unittest.TestCase):
 </figure>
 </section>''')
         actual = self.soup
-        og_and_tgt_levels = (3, 1)
-        promote_h_tags(actual, og_and_tgt_levels=og_and_tgt_levels)
+        h_levels = (3, 1)
+        promote_h_tags(actual, h_levels=h_levels)
         self.assertEqual(actual, expected)
 
     #@unittest.skip("")
@@ -1495,8 +1495,8 @@ class MovedFileTestCase(unittest.TestCase):
         new_record = self.mock_index[0].copy()
         new_record['path'] = [self.dirname, self.filename]
         new_record['header'] = "Fill Layer Generators"
-        path_id = ["layers_and_masks", "fill_layers.html"]
-        update_filename_record_of_index(index, path_id, new_record)
+        path = ["layers_and_masks", "fill_layers.html"]
+        update_filename_record_of_index(index, path, new_record)
         actual = self.mock_index[0].copy()
         expected = new_record
         self.assertDictEqual(actual, expected)
