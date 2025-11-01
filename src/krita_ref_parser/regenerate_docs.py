@@ -546,7 +546,9 @@ if __name__ == "__main__":
                 soup = get_soup_from_file(filepath)
                 for a in soup.css.select("a"):
                     hrefs.add(a['href'])
-        text_to_write = "\n".join(hrefs)
+        href_list = list(hrefs)
+        href_list.sort()
+        text_to_write = "\n".join(href_list)
         list_file = Path(TARGET_DIR, "..", "hrefs.txt")
         list_file.write_text(text_to_write, encoding="utf-8")
         args = ["vim", str(list_file)]
@@ -620,6 +622,3 @@ if __name__ == "__main__":
     prepend_link_tags_to_all_excerpts()
     update_all_hrefs()
     compile_all_hrefs()
-    '''
-    #normalize_all_hrefs()
-    '''
