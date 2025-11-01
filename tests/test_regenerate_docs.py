@@ -22,7 +22,7 @@ from krita_ref_parser.regenerate_docs import (
     a_href_exists,
     update_img_src,
     normalize_internal_href,
-    internal_link_should_stay_internal,
+    internal_link_should_become_external,
     replace_internal_reference_with_official,
     # for changing behavior of links themselves
     replace_a_tags_with_reactlink_tags,
@@ -1056,15 +1056,15 @@ splitter.</p>
 </section>''')
         self.soup = soup
 
-    def test_internal_link_should_stay_internal(self):
+    def test_internal_link_should_become_external(self):
         """
         """
-        expected = False
-        num_levels = 2
+        expected = True
+        num_levels = 3
         href = "../../../tutorials/seexpr.html#seexpr-tut-intro"
         soup = self.soup
         a = soup.find("a", href=href)
-        actual = internal_link_should_stay_internal(a, num_levels=num_levels)
+        actual = internal_link_should_become_external(a, num_levels=num_levels)
         self.assertIs(actual, expected)
 
     def test_replace_internal_reference_with_official(self):
@@ -1213,15 +1213,15 @@ class ContainsInternalLinkTestCase(unittest.TestCase):
 </section>''')
         self.soup = soup
 
-    def test_internal_link_should_stay_internal(self):
+    def test_internal_link_become_external(self):
         """
         """
         soup = self.soup
-        expected = True
-        num_levels = 1
+        expected = False
+        num_levels = 2
         href = "../layers_and_masks/transformation_masks.html#transformation-masks"
         a = soup.find("a", href=href)
-        actual = internal_link_should_stay_internal(a, num_levels=num_levels)
+        actual = internal_link_should_become_external(a, num_levels=num_levels)
         self.assertIs(actual, expected)
 
     def test_normalize_internal_href(self):
