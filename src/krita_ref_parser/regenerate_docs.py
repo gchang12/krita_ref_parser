@@ -144,13 +144,10 @@ def replace_internal_reference_with_official(internal_a: bs4.Tag):
     # if yes: raise Exception | replace with link to official docs.
     # if no: normalize link
     #for a in soup.css.select("a[class='internal']"):
-    if '_images' not in internal_a['href']:
-        internal_a['href'] = '/'.join([OFFICIAL_DOCS_ROOT.rstrip('/'), internal_a['href'].lstrip('./')])
-        internal_a['class'].remove("internal")
-        internal_a['class'].append(LINK_TO_OFFICIAL_DOCS_CLASSNAME)
-        internal_a['class'].append("external")
-    else:
-        internal_a['href'] = '/' + internal_a['href'].lstrip('./_')
+    internal_a['href'] = '/'.join([OFFICIAL_DOCS_ROOT.rstrip('/'), internal_a['href'].lstrip('./')])
+    internal_a['class'].remove("internal")
+    internal_a['class'].append(LINK_TO_OFFICIAL_DOCS_CLASSNAME)
+    internal_a['class'].append("external")
 
 # MODIFY LINK BEHAVIOR
 
@@ -367,47 +364,6 @@ if __name__ == "__main__":
     #normalize_internal_href,
     #replace_internal_reference_with_official,
 
-    def update_all_hrefs():
-        """
-        """
-        with open(INDEX_FILE, encoding="utf-8") as rfile:
-            index = json.load(rfile)
-        root_dir = Path(TARGET_DIR)
-        indexed_sections = list(map(lambda item: item[0], filter(lambda item: item[1] is not None, ALL_SECTIONS.items())))
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            if dirpath == root_dir:
-                continue
-            section = dirpath.name
-            if section not in indexed_sections:
-                continue
-            path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
-            record_found = False
-            logger.debug("dirpath: %r", dirpath)
-            for filename in filenames:
-                filepath = dirpath.joinpath(filename)
-                path.append(filename)
-                logger.debug("path: %r", path)
-                for record in index:
-                    if record['path'] != path:
-                        continue
-                    record_found = True
-                    break
-                if record_found is not True:
-                    raise Exception("'%s' does not exist in index.", filepath)
-                num_levels = len(path)
-                soup = get_soup_from_file(filepath)
-                for a in soup.css.select("a"):
-                    if 'internal' not in a['class']:
-                        continue
-                    if internal_link_should_become_external(a, num_levels=num_levels):
-                        logger.debug("Linking a['href'] ('%s') to official docs.", a['href'])
-                        replace_internal_reference_with_official(a)
-                    else:
-                        #normalize_internal_href(a)
-                        pass
-                write_soup_to_file(soup, filepath)
-                path.pop()
-
     # strip headers
     #extract_h_tag,
 
@@ -570,7 +526,7 @@ if __name__ == "__main__":
         """
         """
         href_list = [
-            "/stylesheets/style.css",
+            "/stylesheets/iframe.css",
         ]
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             for filename in filenames:
@@ -578,6 +534,60 @@ if __name__ == "__main__":
                 soup = get_soup_from_file(filepath)
                 prepend_link_tags_to_soup(soup, href_list, container="div")
                 write_soup_to_file(soup, filepath)
+
+    def update_all_hrefs():
+        """
+        """
+        with open(INDEX_FILE, encoding="utf-8") as rfile:
+            index = json.load(rfile)
+        root_dir = Path(TARGET_DIR)
+        indexed_sections = list(map(lambda item: item[0], filter(lambda item: item[1] is not None, ALL_SECTIONS.items())))
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            if dirpath == root_dir:
+                continue
+            path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
+            section = '/'.join(path)
+            if section not in indexed_sections:
+                continue
+            record_found = False
+            logger.debug("dirpath: %r", dirpath)
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                path.append(filename)
+                logger.debug("path: %r", path)
+                for record in index:
+                    if record['path'] != path:
+                        continue
+                    record_found = True
+                    break
+                if record_found is not True:
+                    raise Exception("'%s' does not exist in index.", filepath)
+                num_levels = len(path)
+                soup = get_soup_from_file(filepath)
+                for a in soup.css.select("a"):
+                    if 'internal' not in a['class']:
+                        continue
+                    if '_images' in a['href']:
+                        a['href'] = '/' + a['href'].lstrip('./_')
+                    elif internal_link_should_become_external(a, num_levels=num_levels):
+                        logger.debug("Linking a['href'] ('%s') to official docs.", a['href'])
+                        replace_internal_reference_with_official(a)
+                    else:
+                        #normalize_internal_href(a)
+                        if '/' not in a['href']:
+                            new_href = '/'.join([*path[:-1], a['href']])
+                        else:
+                            new_href_path = []
+                            for index_no, part in enumerate(a['href'].split('/')):
+                                if part == '..':
+                                    new_part = path[index_no]
+                                else:
+                                    new_part = part
+                                new_href_path.append(new_part)
+                            new_href = '/'.join(new_href_path)
+                        a['href'] = '/' + new_href
+                write_soup_to_file(soup, filepath)
+                path.pop()
 
     clone_from_raw()
     rename_fill_layers_to_fill_layer_generators()
