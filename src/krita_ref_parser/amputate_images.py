@@ -110,6 +110,8 @@ def compile_images_from_soup(soup: BeautifulSoup):
     images = set()
     for img in soup.find_all("img"):
         images.add(Path(img['src']).name)
+    for a in soup.find_all("a"):
+        images.add(Path(a['href']).name)
     return images
 
 def delete_unused_images(index: list[str], *, target_dir: Path | str):
