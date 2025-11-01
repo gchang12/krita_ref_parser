@@ -303,6 +303,7 @@ if __name__ == "__main__":
         shutil.rmtree(TARGET_DIR, ignore_errors=True)
         logger.debug("Cloning from '%s' to '%s'.", SOURCE_DIR, TARGET_DIR)
         shutil.copytree(SOURCE_DIR, TARGET_DIR)
+        Path(TARGET_DIR, "..", "hrefs.txt").unlink(missing_ok=True)
 
     # rename 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
     # - update index s.t. header = "Fill Layer Generators"
