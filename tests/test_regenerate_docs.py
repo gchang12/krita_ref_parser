@@ -1472,7 +1472,7 @@ class MovedFileTestCase(unittest.TestCase):
         section = "layers_and_masks"
         src_name = "fill_layers.html"
         tgt_name = "fill_layer_generators.html"
-        new_href = '%s/%s' % (section, tgt_name)
+        new_href = '../../%s/%s' % (section, tgt_name)
         old_href = '../../%s/%s' % (section, src_name)
         with self.subTest(msg="Assert: Target DNE."):
             actual = soup.find("a", href=new_href)
