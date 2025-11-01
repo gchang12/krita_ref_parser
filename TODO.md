@@ -26,8 +26,4 @@ DONE
 split_docs.py
 amputate_images.py
 compile_index.py
-
-NOT FINISHED
-============
-* Upon completion mark by invoking `chmod -x %`
 modify_dom.py
