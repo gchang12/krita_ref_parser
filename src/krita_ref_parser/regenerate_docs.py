@@ -223,9 +223,10 @@ def update_references_to_filename(
     src_path = '/'.join([str(section), str(src_name)])
     for internal_a in soup.css.select("a"):
         logger.debug("Checking if '%s' is present in '%s' (type=%r).", src_path, internal_a['href'], type(internal_a['href']))
-        if not src_path in str(internal_a['href']):
+        if src_path not in str(internal_a['href']):
             continue
-        internal_a['href'] = '/'.join([str(section), str(tgt_name)])
+        dots = filter(lambda href: href == '..', internal_a['href'].split('/'))
+        internal_a['href'] = '/'.join(list(dots) + [str(section), str(tgt_name)])
         logger.debug("Present.")
     #logger.debug("Last internal a found: %s.", internal_a)
     #src_path = Path("layers_and_masks", "fill_layers.html")
