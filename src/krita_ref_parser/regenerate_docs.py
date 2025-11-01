@@ -19,18 +19,15 @@ from krita_ref_parser.compile_index import (
     )
 from krita_ref_parser._logging import logger
 
-# TODO: Replace blending mode section hrefs
-# TODO: Correct the href detector or whatever.
-
 PILCROW = "¶"
-
 OFFICIAL_DOCS_ROOT = "https://docs.krita.org/en/"
+LINK_TO_OFFICIAL_DOCS_CLASSNAME = "link-to-official-docs"
 
 SOURCE_DIR = "./output/raw-excerpts/"
 TARGET_DIR = "./output/excerpts/"
 INDEX_FILE = "./output/index.json"
 
-LINK_TO_OFFICIAL_DOCS_CLASSNAME = "link-to-official-docs"
+INTERACTIVE_MODE = False
 
 # ADD-AND-DELETE CONTENT
 
@@ -258,6 +255,8 @@ def update_filename_record_of_index(index: list[dict], path_id: list[str], new_r
     # - Do NOT extract SampleImageType figures.
 
 if __name__ == "__main__":
+    import subprocess
+    import sys
 
     # HELPER FUNCTIONS
 
@@ -271,6 +270,29 @@ if __name__ == "__main__":
         """
         """
         return filepath.write_text(str(soup), encoding="utf-8")
+
+    def view_files_with_vim(files: list[Path | str], *, pattern: str = None):
+        """
+        """
+        if not INTERACTIVE_MODE:
+            return
+        #return
+        user_response = input("These files have changed: %r\nView them? (y/n) " % files)
+        if user_response != "y":
+            return
+        args = ["vim", "-R"]
+        args.extend([str(Path(TARGET_DIR, file)) for file in files])
+        if pattern is not None:
+            args.append("+/'" + pattern + "'")
+        elif pattern is None:
+            pass
+        elif not isinstance(pattern, str):
+            raise TypeError("Pass in an argument of type 'str'. Argument was of type: %r" % type(pattern))
+        subprocess.run(args)
+        user_response = input("Stop building and inspect? (y/n) ")
+        if user_response == "y":
+            subprocess.run(args)
+            sys.exit()
 
     # clone raw-excerpts/ to excerpts/
 
@@ -454,6 +476,7 @@ if __name__ == "__main__":
                 if filename == "blending_modes.html":
                     continue
                 filepath = dirpath.joinpath(filename)
+                logger.debug("Checking if %r is an index file.", filepath)
                 if not is_index_file(filepath):
                     logger.debug("'%s' is not an index file. Skipping.", filepath)
                     continue
@@ -464,13 +487,15 @@ if __name__ == "__main__":
                 write_soup_to_file(soup, filepath)
             logger.debug("Finished stripping index for '%s'.", section)
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            if dirpath.parts[-2] != "blending_modes": # target only blending mode subsections
+            logger.debug("dirpath.parts: %r", dirpath.parts)
+            if dirpath.name != "blending_modes": # target only blending mode subsections
                 continue
+            logger.debug("Dissecting files in %r", dirpath)
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
                 if filename == "hsx.html":
-                    soup.css.select_one("#hsx-blending_modes").decompose()
+                    soup.css.select_one("#hsx-blending-modes").decompose()
                 else:
                     extract_subsections(soup)
                 write_soup_to_file(soup, filepath)
@@ -551,9 +576,6 @@ if __name__ == "__main__":
         text_to_write = "\n".join(href_list)
         list_file = Path(TARGET_DIR, "..", "hrefs.txt")
         list_file.write_text(text_to_write, encoding="utf-8")
-        args = ["vim", str(list_file)]
-        import subprocess
-        subprocess.run(args)
 
     def update_all_hrefs():
         """
@@ -611,14 +633,36 @@ if __name__ == "__main__":
                 path.pop()
 
     clone_from_raw()
+    print("Finished cloning files.")
+    view_files_with_vim(["../index.json"])
     rename_fill_layers_to_fill_layer_generators()
+    print("Finished renaming fill_layers.html.")
+    view_files_with_vim(["dockers/layers.html", "dockers/palette_docker.html", "filters/artistic.html"], pattern="fill_layer_generators.html")
     update_img_sources_in_files()
+    print("Finished updating image sources.")
+    view_files_with_vim(["blending_modes/arithmetic/addition.html"], pattern="src=")
     update_references_to_blending_modes_sections_in_files()
+    print("Finished updating references to blending_mode sources.")
+    view_files_with_vim(["blending_modes.html"], pattern="blending_modes/binary/xnor.html")
     strip_headers_from_files()
+    print("Finished stripping <h[1-6]> tags.")
+    view_files_with_vim(["tools.html"], pattern="<h")
     strip_icons_from_all_files()
+    print("Finished stripping <img /> tags.")
+    view_files_with_vim(["tools/assistant.html"], pattern="<img ")
     strip_index_files()
+    print("Finished cleaning up index files.")
+    view_files_with_vim(["tools.html", "brushes/brush_engines.html", "blending_modes/arithmetic.html"], pattern="<a href=")
     have_all_a_tags_open_new_tabs()
+    print("Finished setting target='_blank' for external links.")
+    view_files_with_vim(["layers_and_masks/fill_layer_generators/seexpr.html"], pattern="target=")
     replace_sections_with_divs_in_files()
+    print("Finished replacing section[id] with div[id].")
+    view_files_with_vim(["layers_and_masks.html"], pattern="<div id=")
     prepend_link_tags_to_all_excerpts()
+    print("Finished prepending <link /> tags.")
+    view_files_with_vim(["brushes/brush_engines.html"], pattern="<link ")
     update_all_hrefs()
     compile_all_hrefs()
+    print("Finished updating a.href references.")
+    view_files_with_vim(["../hrefs.txt"])
