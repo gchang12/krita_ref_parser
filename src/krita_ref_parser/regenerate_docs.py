@@ -535,6 +535,23 @@ if __name__ == "__main__":
                 prepend_link_tags_to_soup(soup, href_list, container="div")
                 write_soup_to_file(soup, filepath)
 
+    def compile_all_hrefs():
+        """
+        """
+        hrefs = set()
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = get_soup_from_file(filepath)
+                for a in soup.css.select("a"):
+                    hrefs.add(a['href'])
+        text_to_write = "\n".join(hrefs)
+        list_file = Path(TARGET_DIR, "..", "hrefs.txt")
+        list_file.write_text(text_to_write, encoding="utf-8")
+        args = ["vim", str(list_file)]
+        import subprocess
+        subprocess.run(args)
+
     def update_all_hrefs():
         """
         """
@@ -543,48 +560,49 @@ if __name__ == "__main__":
         root_dir = Path(TARGET_DIR)
         indexed_sections = list(map(lambda item: item[0], filter(lambda item: item[1] is not None, ALL_SECTIONS.items())))
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            if dirpath == root_dir:
-                continue
-            path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
-            section = '/'.join(path)
-            if section not in indexed_sections:
-                continue
+            if dirpath != root_dir:
+                path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
+                section = '/'.join(path)
+                if section not in indexed_sections:
+                    section = None
+            else:
+                path = []
+                section = None
             record_found = False
             logger.debug("dirpath: %r", dirpath)
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 path.append(filename)
                 logger.debug("path: %r", path)
-                for record in index:
-                    if record['path'] != path:
-                        continue
-                    record_found = True
-                    break
-                if record_found is not True:
-                    raise Exception("'%s' does not exist in index.", filepath)
+                if section is not None:
+                    for record in index:
+                        if record['path'] != path:
+                            continue
+                        record_found = True
+                        break
+                    if record_found is not True and section is not None:
+                        raise Exception("'%s' does not exist in index.", filepath)
                 num_levels = len(path)
                 soup = get_soup_from_file(filepath)
                 for a in soup.css.select("a"):
+                    href = a['href']
                     if 'internal' not in a['class']:
                         continue
-                    if '_images' in a['href']:
-                        a['href'] = '/' + a['href'].lstrip('./_')
+                    if '_images' in href:
+                        a['href'] = '/' + href.lstrip('./_')
+                    elif href.startswith('#'):
+                        pass
                     elif internal_link_should_become_external(a, num_levels=num_levels):
-                        logger.debug("Linking a['href'] ('%s') to official docs.", a['href'])
+                        logger.debug("Linking a['href'] ('%s') to official docs.", href)
                         replace_internal_reference_with_official(a)
                     else:
-                        #normalize_internal_href(a)
-                        if '/' not in a['href']:
-                            new_href = '/'.join([*path[:-1], a['href']])
-                        else:
-                            new_href_path = []
-                            for index_no, part in enumerate(a['href'].split('/')):
-                                if part == '..':
-                                    new_part = path[index_no]
-                                else:
-                                    new_part = part
-                                new_href_path.append(new_part)
-                            new_href = '/'.join(new_href_path)
+                        new_path = path[:-1]
+                        parts = href.split('/')
+                        for part in parts:
+                            if part != '..':
+                                continue
+                            new_path.pop()
+                        new_href = '/'.join([*new_path, href.lstrip('./')])
                         a['href'] = '/' + new_href
                 write_soup_to_file(soup, filepath)
                 path.pop()
@@ -600,6 +618,7 @@ if __name__ == "__main__":
     replace_sections_with_divs_in_files()
     prepend_link_tags_to_all_excerpts()
     update_all_hrefs()
+    compile_all_hrefs()
     '''
     #normalize_all_hrefs()
     '''
