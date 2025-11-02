@@ -291,7 +291,7 @@ if __name__ == "__main__":
         subprocess.run(args)
         user_response = input("Stop building and inspect? (y/n) ")
         if user_response == "y":
-            subprocess.run(args)
+            #subprocess.run(args)
             sys.exit()
 
     # clone raw-excerpts/ to excerpts/
