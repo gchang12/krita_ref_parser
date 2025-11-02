@@ -28,7 +28,7 @@ DIRS_WITH_NO_INDICES = (
 # For exporting to .regenerate_docs
 ALL_SECTIONS = {
     "tools": True,
-    "brushes": None,
+    "brushes": False,
     "brushes/brush_engines": True,
     "brushes/brush_settings": False,
     "dockers": False,
@@ -38,7 +38,7 @@ ALL_SECTIONS = {
     "main_menu": False,
     "preferences": False,
     "resource_management": False,
-    "blending_modes": None,
+    "blending_modes": False,
 }
 SECTIONS_WITHOUT_ICONS = tuple(
     map(
