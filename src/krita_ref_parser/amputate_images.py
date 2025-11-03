@@ -208,9 +208,13 @@ if __name__ == "__main__":
         """
         """
         copy_all_images()
+        print("All images in '%s' have been copied into '%s'." % (TARGET_DIR, SOURCE_DIR))
         compile_and_delete_used_images()
+        print("Unused images in '%s' have been deleted." % TARGET_DIR)
         generate_default_blendingmodes_images()
+        print("Generic images for images with the suffixes: '%s'\nhave been created." % list(SampleImageType))
         partition_blendingmodes_images_inplace()
+        print("Images with the suffixes: '%s'\nhave been partitioned in-place." % list(SampleImageType))
 
     amputate_images()
 

@@ -298,10 +298,15 @@ if __name__ == "__main__":
         """
         """
         create_main_directories_and_indices()
+        print("Created main directories and indices in: '%s'" % TARGET_DIR)
         populate_main_directories()
+        print("Populated main directories.")
         populate_main_subdirectories()
+        print("Populated main subdirectories.")
         populate_blendingmodes_subdirectories()
+        print("Populated blending-mode subdirectories.")
         populate_hsx_blendingmodes_subdirectories()
+        print("Populated blending-mode-hsx subdirectory.")
 
     def inspect_output():
         """

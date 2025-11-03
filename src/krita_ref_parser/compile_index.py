@@ -214,15 +214,19 @@ if __name__ == "__main__":
 
     # compile index for sections without icons
     INDEX.extend(compile_entries_from_dirs(SECTIONS_WITHOUT_ICONS, h_level=1))
+    print("Entries from %s have been compiled." % (SECTIONS_WITHOUT_ICONS,))
     #"These directories in 'output/raw-excerpts/layers_and_masks' lack complementing index files: [PosixPath('output/raw-excerpts/layers_and_masks/fill_layer_generators')]"
     # compile index for sections with icons
     INDEX.extend(compile_entries_from_dirs(SECTIONS_WITH_ICONS, h_level=1))
+    print("Entries from %s have been compiled." % (SECTIONS_WITH_ICONS,))
     # compile index for 'layers_and_masks' section because directories with nested directories are excluded.
     #INDEX.extend(compile_entries_from_dirs(["layers_and_masks"], h_level=3))
     # compile index for 'blending_modes/' section
     INDEX.extend(compile_entries_from_dirs(BLENDING_MODE_SECTIONS, h_level=2))
+    print("Entries from %s have been compiled." % (BLENDING_MODE_SECTIONS,))
     # compile index for 'blending_modes/hsx' section
     INDEX.extend(compile_entries_from_dirs(BLENDING_MODE_HSX_SECTION, h_level=3))
+    print("Entries from %s have been compiled." % (BLENDING_MODE_HSX_SECTION,))
     logger.info("(%d) entries compiled into index.", len(INDEX))
     logger.info("Fields of index: %s.", tuple(INDEX[0].keys()))
 
@@ -235,17 +239,14 @@ if __name__ == "__main__":
             + BLENDING_MODE_SECTIONS \
             + BLENDING_MODE_HSX_SECTION
         set_of_all_sections = set(all_sections)
-        #print(set_of_all_sections)
         index_dirs = set(map(lambda entry: '/'.join(entry['path'][:-1]), INDEX))
-        #print(index_dirs - set_of_all_sections)
-        #print(set_of_all_sections - index_dirs)
-        logger.info("Assert: These sections are listed in the index: %s.", all_sections)
         assert set(all_sections) == index_dirs
+        logger.info("These sections compose the entirety of the index: %s.", all_sections)
     affirm_all_sections_are_in_index()
 
     index_path = Path(TARGET_DIR, INDEX_NAME)
-    logger.info("Saving index to: '%s'", index_path)
+    print("Saving index to: '%s'" % index_path)
     with open(index_path, mode="w") as wfile:
         json.dump(INDEX, wfile, indent=2)
-    logger.info("Save successful.")
+    print("Save successful.")
 
