@@ -52,11 +52,13 @@ def extract_icon(soup: bs4.BeautifulSoup):
     """
     soup.find("img").decompose()
 
-def replace_section_with_div(soup: bs4.BeautifulSoup):
+def replace_section_with_div(soup: bs4.BeautifulSoup, *, og_repl=("section[id]", "div")):
     """
     """
-    section = soup.css.select_one("section[id]")
-    section.name = "div"
+    og, repl = og_repl
+    section = soup.css.select_one(og)
+    section.name = repl
+    section['class'] = "excerpt"
 
 def remove_empty_tags(soup: bs4.BeautifulSoup):
     """
@@ -415,11 +417,13 @@ if __name__ == "__main__":
     def replace_sections_with_divs_in_files():
         """
         """
+        og_repl = ("section[id]", "div")
+        #og_repl = ("div", "div")
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
-                replace_section_with_div(soup)
+                replace_section_with_div(soup, og_repl=og_repl)
                 write_soup_to_file(soup, filepath)
 
     # replace section container with div.
