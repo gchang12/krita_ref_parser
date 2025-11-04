@@ -588,11 +588,14 @@ if __name__ == "__main__":
         with open(INDEX_FILE, encoding="utf-8") as rfile:
             index = json.load(rfile)
         root_dir = Path(TARGET_DIR)
+        # NOTE: No longer needed since all directories are indexed now.
         indexed_sections = list(map(lambda item: item[0], filter(lambda item: item[1] is not None, ALL_SECTIONS.items())))
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             if dirpath != root_dir:
+                # NOTE: Can replace easily with `Path.relative_to`
                 path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
                 section = '/'.join(path)
+                # NOTE: Dead code.
                 if section not in indexed_sections:
                     section = None
             else:
@@ -610,7 +613,7 @@ if __name__ == "__main__":
                             continue
                         record_found = True
                         break
-                    if record_found is not True and section is not None:
+                    if record_found is not True and section is not None: # NOTE: Second part may no longer be necessary unless it's the root.
                         raise Exception("'%s' does not exist in index.", filepath)
                 num_levels = len(path)
                 soup = get_soup_from_file(filepath)
