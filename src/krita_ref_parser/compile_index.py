@@ -212,6 +212,18 @@ if __name__ == "__main__":
             index.extend(compile_entries_from_dir(dirpath, filenames, h_level=h_level))
         return index
 
+    def compile_entries_from_root():
+        """
+        """
+        index = []
+        h_level = 1
+        for dirpath, dirnames, filenames in Path(SOURCE_DIR).walk():
+            if dirpath != Path(SOURCE_DIR):
+                continue
+            index.extend(compile_entries_from_dir(dirpath, filenames, h_level=h_level))
+            break
+        return index
+
     # compile index for sections without icons
     INDEX.extend(compile_entries_from_dirs(SECTIONS_WITHOUT_ICONS, h_level=1))
     print("Entries from %s have been compiled." % (SECTIONS_WITHOUT_ICONS,))
@@ -227,6 +239,8 @@ if __name__ == "__main__":
     # compile index for 'blending_modes/hsx' section
     INDEX.extend(compile_entries_from_dirs(BLENDING_MODE_HSX_SECTION, h_level=3))
     print("Entries from %s have been compiled." % (BLENDING_MODE_HSX_SECTION,))
+    INDEX.extend(compile_entries_from_root())
+    print("Entries from root have been compiled.")
     logger.info("(%d) entries compiled into index.", len(INDEX))
     logger.info("Fields of index: %s.", tuple(INDEX[0].keys()))
 
@@ -239,9 +253,14 @@ if __name__ == "__main__":
             + BLENDING_MODE_SECTIONS \
             + BLENDING_MODE_HSX_SECTION
         set_of_all_sections = set(all_sections)
+        set_of_all_sections.add('')
         index_dirs = set(map(lambda entry: '/'.join(entry['path'][:-1]), INDEX))
-        assert set(all_sections) == index_dirs
-        logger.info("These sections compose the entirety of the index: %s.", all_sections)
+        try:
+            assert set_of_all_sections == index_dirs is True
+        except AssertionError as assert_err:
+            print("Expected sections: %r.\n Actual sections: %r" % (set_of_all_sections, index_dirs))
+            raise assert_err
+        logger.info("These sections compose the entirety of the index: %s.", set_of_all_sections)
     affirm_all_sections_are_in_index()
 
     index_path = Path(TARGET_DIR, INDEX_NAME)
