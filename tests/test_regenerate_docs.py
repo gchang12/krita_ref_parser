@@ -19,6 +19,7 @@ from krita_ref_parser.regenerate_docs import (
     promote_h_tags,
     # for updating paths and references
     update_references_to_blending_modes_sections,
+    get_correct_blending_modes_path,
     a_href_exists,
     update_img_src,
     normalize_internal_href,
@@ -75,7 +76,7 @@ class GeneralTestCase(unittest.TestCase):
         """
         html_source_lines = (
             "<section id='GeneralTestCase'>",
-            "<img src='/images/nonexistent-image.svg' />",
+            "<img src='/images/nonexistent-image.svg'/>",
             "<h1>General Test Case</h1>",
             "<ul>",
             "</ul>",
@@ -102,31 +103,48 @@ class GeneralTestCase(unittest.TestCase):
         self.soup = soup
         self.blending_modes = blending_modes
 
+    def test_get_correct_blending_modes_path(self):
+        """
+        """
+        root_dir = "./tests/output/excerpts/"
+        id_text = "#bm-inverse-subtract"
+        file_id = id_text[id_text.index("#"):]
+        expected = (
+            "arithmetic",
+            "inverse-subtract.html",
+            "#bm-inverse-subtract",
+        )
+        actual = get_correct_blending_modes_path(file_id, root_dir)
+        self.assertTupleEqual(actual, expected)
+
     def test_replace_section_with_div(self):
         """
         """
         html_source_lines = (
-            "<div id='GeneralTestCase'>",
-            "<img src='/images/nonexistent-image.svg' />",
-            "<h1>General Test Case</h1>",
-            "<ul>",
-            "</ul>",
-            "<div id='empty-tag'></div>"
-            "</div>",
+            '<div class="excerpt" id="GeneralTestCase">',
+            '<img src="/images/nonexistent-image.svg"/>',
+            '<h1>General Test Case</h1>',
+            '<ul>',
+            '</ul>',
+            '<div id="empty-tag"></div>',
+            '</div>',
         )
-        expected = get_soup("\n".join(html_source_lines))
+        #expected = get_soup("\n".join(html_source_lines))
+        expected = html_source_lines
         html_source_lines = (
-            "<section id='GeneralTestCase'>",
-            "<img src='/images/nonexistent-image.svg' />",
-            "<h1>General Test Case</h1>",
-            "<ul>",
-            "</ul>",
-            "<div id='empty-tag'></div>"
-            "</section>",
+            '<section id="GeneralTestCase">',
+            '<img src="/images/nonexistent-image.svg"/>',
+            '<h1>General Test Case</h1>',
+            '<ul>',
+            '</ul>',
+            '<div id="empty-tag"></div>',
+            '</section>',
         )
         actual = get_soup("\n".join(html_source_lines))
         replace_section_with_div(actual)
-        self.assertEqual(actual, expected)
+        #logger.critical("actual: %s, expected: %s", actual, expected)
+        actual = tuple(filter(lambda tag: tag, str(actual).splitlines()))
+        self.assertTupleEqual(actual, expected)
 
     #@unittest.skip("")
     def test_prepend_link_tags_to_soup(self):

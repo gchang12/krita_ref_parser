@@ -135,6 +135,23 @@ def update_references_to_blending_modes_sections(root_dir: Path | str, internal_
     # if link exists: further normalize
     # o.w.: raise Exception | replace with link to official docs.
 
+def get_correct_blending_modes_path(file_id: str, root_dir: Path | str):
+    """
+    """
+    for dirpath, dirnames, filenames in Path(root_dir).walk():
+        if "blending_modes" not in dirpath.parts:
+            continue
+        for filename in filenames:
+            filepath = dirpath.joinpath(filename)
+            soup = BeautifulSoup(
+                filepath.read_text(encoding="utf-8"),
+                "html.parser",
+                )
+            matching_elt = soup.css.select_one(file_id)
+            if matching_elt is None:
+                continue
+            return (dirpath.name, filename, file_id)
+
 # - Delete references to extracted sections
 def replace_internal_reference_with_official(internal_a: bs4.Tag):
     """
@@ -306,6 +323,7 @@ if __name__ == "__main__":
         logger.debug("Cloning from '%s' to '%s'.", SOURCE_DIR, TARGET_DIR)
         shutil.copytree(SOURCE_DIR, TARGET_DIR)
         Path(TARGET_DIR, "..", "hrefs.txt").unlink(missing_ok=True)
+        logger.debug("Removed 'hrefs.txt'.")
 
     # rename 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
     # - update index s.t. header = "Fill Layer Generators"
@@ -588,19 +606,13 @@ if __name__ == "__main__":
         with open(INDEX_FILE, encoding="utf-8") as rfile:
             index = json.load(rfile)
         root_dir = Path(TARGET_DIR)
-        # NOTE: No longer needed since all directories are indexed now.
-        indexed_sections = list(map(lambda item: item[0], filter(lambda item: item[1] is not None, ALL_SECTIONS.items())))
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            # NOTE: Can replace with `Path.relative_to`
             if dirpath != root_dir:
-                # NOTE: Can replace easily with `Path.relative_to`
-                path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
                 section = '/'.join(path)
-                # NOTE: Dead code.
-                if section not in indexed_sections:
-                    section = None
             else:
-                path = []
                 section = None
+            path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
             record_found = False
             logger.debug("dirpath: %r", dirpath)
             for filename in filenames:
@@ -625,6 +637,12 @@ if __name__ == "__main__":
                         a['href'] = '/' + href.lstrip('./_')
                     elif href.startswith('#'):
                         pass
+                    elif "#" in href and "blending_modes" in dirpath.parts:
+                        href = a['href']
+                        file_id = href[href.index("#"):]
+                        correct_bm_path = get_correct_blending_modes_path(file_id, TARGET_DIR)
+                        a['href'] = "/blending_modes/" + '/'.join(correct_bm_path)
+                        a['href'] = a['href'].replace('/#', '#')
                     elif internal_link_should_become_external(a, num_levels=num_levels):
                         logger.debug("Linking a['href'] ('%s') to official docs.", href)
                         replace_internal_reference_with_official(a)
@@ -674,3 +692,4 @@ if __name__ == "__main__":
     compile_all_hrefs()
     print("Finished updating a.href references.")
     view_files_with_vim(["../hrefs.txt"])
+

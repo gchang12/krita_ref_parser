@@ -27,6 +27,7 @@ split_docs.py
 amputate_images.py
 compile_index.py
 modify_dom.py
+grep -P "blending_modes/(lighten|darken)/arith" output/excerpts/*/*/*
 
 TODO
 ====
