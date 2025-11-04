@@ -27,3 +27,9 @@ split_docs.py
 amputate_images.py
 compile_index.py
 modify_dom.py
+
+TODO
+====
+Clear out archived files.
+Add docstrings.
+Shake the proverbial trees of this program.
