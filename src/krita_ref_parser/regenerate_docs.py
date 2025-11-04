@@ -151,6 +151,7 @@ def get_correct_blending_modes_path(file_id: str, root_dir: Path | str):
             if matching_elt is None:
                 continue
             return (dirpath.name, filename, file_id)
+    raise KeyError("'%s' not found in '%s/blending_modes/**'" % (file_id, root_dir))
 
 # - Delete references to extracted sections
 def replace_internal_reference_with_official(internal_a: bs4.Tag):
@@ -607,11 +608,11 @@ if __name__ == "__main__":
             index = json.load(rfile)
         root_dir = Path(TARGET_DIR)
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            # NOTE: Can replace with `Path.relative_to`
             if dirpath != root_dir:
                 section = '/'.join(path)
             else:
                 section = None
+            # NOTE: Can replace with `Path.relative_to`
             path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
             record_found = False
             logger.debug("dirpath: %r", dirpath)
@@ -637,12 +638,6 @@ if __name__ == "__main__":
                         a['href'] = '/' + href.lstrip('./_')
                     elif href.startswith('#'):
                         pass
-                    elif "#" in href and "blending_modes" in dirpath.parts:
-                        href = a['href']
-                        file_id = href[href.index("#"):]
-                        correct_bm_path = get_correct_blending_modes_path(file_id, TARGET_DIR)
-                        a['href'] = "/blending_modes/" + '/'.join(correct_bm_path)
-                        a['href'] = a['href'].replace('/#', '#')
                     elif internal_link_should_become_external(a, num_levels=num_levels):
                         logger.debug("Linking a['href'] ('%s') to official docs.", href)
                         replace_internal_reference_with_official(a)
@@ -655,6 +650,18 @@ if __name__ == "__main__":
                             new_path.pop()
                         new_href = '/'.join([*new_path, href.lstrip('./')])
                         a['href'] = '/' + new_href
+                    if "#" in href and ("blending_modes" in dirpath.parts or "blending_modes" in href):
+                        href = a['href']
+                        file_id = href[href.index("#"):]
+                        try:
+                            correct_bm_path = get_correct_blending_modes_path(file_id, TARGET_DIR)
+                            if "blending_modes" in correct_bm_path:
+                                a['href'] = "/" + '/'.join(correct_bm_path)
+                            else:
+                                a['href'] = "/blending_modes/" + '/'.join(correct_bm_path)
+                            a['href'] = a['href'].replace('/#', '#')
+                        except KeyError as key_err:
+                            logger.debug("%s", key_err)
                 write_soup_to_file(soup, filepath)
                 path.pop()
 
@@ -691,5 +698,6 @@ if __name__ == "__main__":
     update_all_hrefs()
     compile_all_hrefs()
     print("Finished updating a.href references.")
+    INTERACTIVE_MODE = True
     view_files_with_vim(["../hrefs.txt"])
 
