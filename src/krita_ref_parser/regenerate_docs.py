@@ -655,7 +655,7 @@ if __name__ == "__main__":
                     href = a['href']
                     if href.count('/') == 1 and '#' in href:
                         filename, file_id = tuple(href.split("#"))
-                        filename = filename[1:]
+                        filename = filename.lstrip('/')
                         if not Path(TARGET_DIR, filename).exists():
                             logger.debug("Filename %s does not exist in root. Linking to official docs.", filename)
                             a['href'] = OFFICIAL_DOCS_ROOT + "reference_manual" + href
