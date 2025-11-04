@@ -27,8 +27,6 @@ SOURCE_DIR = "./output/raw-excerpts/"
 TARGET_DIR = "./output/excerpts/"
 INDEX_FILE = "./output/index.json"
 
-INTERACTIVE_MODE = False
-
 # ADD-AND-DELETE CONTENT
 
 # - Prepend CSS link lines for files of these types: with-icon, without-icon, blending_modes, blending_mode-hsx
@@ -291,10 +289,10 @@ if __name__ == "__main__":
         """
         return filepath.write_text(str(soup), encoding="utf-8")
 
-    def view_files_with_vim(files: list[Path | str], *, pattern: str = None):
+    def view_files_with_vim(files: list[Path | str], *, pattern: str = None, view=False):
         """
         """
-        if not INTERACTIVE_MODE:
+        if not view:
             return
         #return
         user_response = input("These files have changed: %r\nView them? (y/n) " % files)
@@ -443,6 +441,9 @@ if __name__ == "__main__":
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
                 replace_section_with_div(soup, og_repl=og_repl)
+                if is_index_file(Path(dirpath, filename)):
+                    div = soup.css.select_one("div")
+                    div['class'] += " index"
                 write_soup_to_file(soup, filepath)
 
     # replace section container with div.
@@ -613,7 +614,8 @@ if __name__ == "__main__":
             else:
                 section = None
             # NOTE: Can replace with `Path.relative_to`
-            path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
+            path = list(dirpath.relative_to(root_dir).parts)
+            #path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
             record_found = False
             logger.debug("dirpath: %r", dirpath)
             for filename in filenames:
@@ -662,6 +664,8 @@ if __name__ == "__main__":
                             a['href'] = a['href'].replace('/#', '#')
                         except KeyError as key_err:
                             logger.debug("%s", key_err)
+                    if a['href'].endswith("#hsx-blending-modes"):
+                        a['href'] = a['href'][:a['href'].index("#hsx-blending-modes")]
                 write_soup_to_file(soup, filepath)
                 path.pop()
 
@@ -698,6 +702,5 @@ if __name__ == "__main__":
     update_all_hrefs()
     compile_all_hrefs()
     print("Finished updating a.href references.")
-    INTERACTIVE_MODE = True
-    view_files_with_vim(["../hrefs.txt"])
+    view_files_with_vim(["../hrefs.txt"], view=True)
 
