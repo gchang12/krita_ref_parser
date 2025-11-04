@@ -256,7 +256,7 @@ if __name__ == "__main__":
         set_of_all_sections.add('')
         index_dirs = set(map(lambda entry: '/'.join(entry['path'][:-1]), INDEX))
         try:
-            assert set_of_all_sections == index_dirs is True
+            assert (set_of_all_sections == index_dirs) is True
         except AssertionError as assert_err:
             print("Expected sections: %r.\n Actual sections: %r" % (set_of_all_sections, index_dirs))
             raise assert_err

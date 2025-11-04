@@ -261,14 +261,14 @@ def update_filename_record_of_index(index: list[dict], path_id: list[str], new_r
     for record in index:
         if record['path'] == path_id:
             break
+    if record['path'] != path_id:
+        return
     for key in record:
         try:
             record[key] = new_record[key]
             logger.info("Setting record['%s'] = %r.", key, new_record[key])
         except KeyError:
             logger.debug("'%s' not found in provided record.", key)
-    #with open(index_file, encoding="utf-9", mode="w") as wfile:
-        #json.dump(index, wfile)
     # - modify index.json as necessary. (NOTE: Warrants manual operation).
     # - Do NOT extract SampleImageType figures.
 
@@ -295,9 +295,9 @@ if __name__ == "__main__":
         if not view:
             return
         #return
-        user_response = input("These files have changed: %r\nView them? (y/n) " % files)
-        if user_response != "y":
-            return
+        #user_response = input("These files have changed: %r\nView them? (y/n) " % files)
+        #if user_response != "y":
+            #return
         args = ["vim", "-R"]
         args.extend([str(Path(TARGET_DIR, file)) for file in files])
         if pattern is not None:
@@ -307,7 +307,7 @@ if __name__ == "__main__":
         elif not isinstance(pattern, str):
             raise TypeError("Pass in an argument of type 'str'. Argument was of type: %r" % type(pattern))
         subprocess.run(args)
-        user_response = input("Stop building and inspect? (y/n) ")
+        user_response = input("Stop building? (y/n) ")
         if user_response == "y":
             #subprocess.run(args)
             sys.exit()
@@ -339,21 +339,14 @@ if __name__ == "__main__":
         tgt_name = "fill_layer_generators.html"
         logger.info("Moving '%s/%s/%s' to '%s/%s/%s'.", TARGET_DIR, section, src_name, TARGET_DIR, section, tgt_name)
         update_filename(
-            TARGET_DIR,
-            Path(section, src_name),
-            Path(section, tgt_name),
+            TARGET_DIR, Path(section, src_name), Path(section, tgt_name),
         )
         logger.info("Replacing all references to '%s/%s' with '%s/%s'.", section, src_name, section, tgt_name)
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
-                update_references_to_filename(
-                    soup,
-                    section,
-                    src_name,
-                    tgt_name,
-                )
+                update_references_to_filename(soup, section, src_name, tgt_name)
                 write_soup_to_file(soup, filepath)
             logger.info("Replaced references in '%s' section.", dirpath.name)
         with open(INDEX_FILE, encoding="utf-8") as rfile:
@@ -361,11 +354,7 @@ if __name__ == "__main__":
         path = [section, src_name]
         new_record = {"path": [section, tgt_name], "header": "Fill Layer Generators"}
         logger.info("Updating record where 'path'=%s to %s.", path, new_record)
-        update_filename_record_of_index(
-            index,
-            path,
-            new_record,
-        )
+        update_filename_record_of_index(index, path, new_record)
         with open(INDEX_FILE, encoding="utf-8", mode="w") as wfile:
             json.dump(index, wfile, indent=2)
 
@@ -602,6 +591,15 @@ if __name__ == "__main__":
         list_file = Path(TARGET_DIR, "..", "hrefs.txt")
         list_file.write_text(text_to_write, encoding="utf-8")
 
+    def check_if_path_is_in_index(path: list[str], index: list[dict]):
+        """
+        """
+        for record in index:
+            if record['path'] != path:
+                continue
+            return True
+        raise KeyError("'%s' does not exist in index.", path)
+
     def update_all_hrefs():
         """
         """
@@ -609,27 +607,14 @@ if __name__ == "__main__":
             index = json.load(rfile)
         root_dir = Path(TARGET_DIR)
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            if dirpath != root_dir:
-                section = '/'.join(path)
-            else:
-                section = None
-            # NOTE: Can replace with `Path.relative_to`
             path = list(dirpath.relative_to(root_dir).parts)
-            #path = list(filter(lambda part: part not in root_dir.parts, dirpath.parts))
             record_found = False
             logger.debug("dirpath: %r", dirpath)
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 path.append(filename)
                 logger.debug("path: %r", path)
-                if section is not None:
-                    for record in index:
-                        if record['path'] != path:
-                            continue
-                        record_found = True
-                        break
-                    if record_found is not True and section is not None: # NOTE: Second part may no longer be necessary unless it's the root.
-                        raise Exception("'%s' does not exist in index.", filepath)
+                check_if_path_is_in_index(path, index)
                 num_levels = len(path)
                 soup = get_soup_from_file(filepath)
                 for a in soup.css.select("a"):
@@ -652,8 +637,8 @@ if __name__ == "__main__":
                             new_path.pop()
                         new_href = '/'.join([*new_path, href.lstrip('./')])
                         a['href'] = '/' + new_href
+                    #href = a['href']
                     if "#" in href and ("blending_modes" in dirpath.parts or "blending_modes" in href):
-                        href = a['href']
                         file_id = href[href.index("#"):]
                         try:
                             correct_bm_path = get_correct_blending_modes_path(file_id, TARGET_DIR)
@@ -663,44 +648,76 @@ if __name__ == "__main__":
                                 a['href'] = "/blending_modes/" + '/'.join(correct_bm_path)
                             a['href'] = a['href'].replace('/#', '#')
                         except KeyError as key_err:
-                            logger.debug("%s", key_err)
-                    if a['href'].endswith("#hsx-blending-modes"):
-                        a['href'] = a['href'][:a['href'].index("#hsx-blending-modes")]
+                            logger.debug("KeyError: %s", key_err)
+                    #href = a['href']
+                    if href.endswith("#hsx-blending-modes"):
+                        a['href'] = "/" + href[:href.index("#hsx-blending-modes")]
+                    href = a['href']
+                    if href.count('/') == 1 and '#' in href:
+                        filename, file_id = tuple(href.split("#"))
+                        filename = filename[1:]
+                        if not Path(TARGET_DIR, filename).exists():
+                            logger.debug("Filename %s does not exist in root. Linking to official docs.", filename)
+                            a['href'] = OFFICIAL_DOCS_ROOT + "reference_manual" + href
+                            a['class'] = "reference external " + LINK_TO_OFFICIAL_DOCS_CLASSNAME
                 write_soup_to_file(soup, filepath)
                 path.pop()
+
+    def check_index():
+        """
+        """
+        return
+        with open(INDEX_FILE, encoding="utf-8") as rfile:
+            index = json.load(rfile)
+        for record in index:
+            path = record['path']
+            if len(path) == 1:
+                return True
+        raise Exception("Unable to find path in index whose length is equal to one. ")
 
     clone_from_raw()
     print("Finished cloning files.")
     view_files_with_vim(["../index.json"])
+    check_index()
     rename_fill_layers_to_fill_layer_generators()
-    print("Finished renaming fill_layers.html.")
+    #check_index()
+    print("Finished renaming 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'.")
     view_files_with_vim(["dockers/layers.html", "dockers/palette_docker.html", "filters/artistic.html"], pattern="fill_layer_generators.html")
     update_img_sources_in_files()
+    check_index()
     print("Finished updating image sources.")
     view_files_with_vim(["blending_modes/arithmetic/addition.html"], pattern="src=")
     update_references_to_blending_modes_sections_in_files()
+    check_index()
     print("Finished updating references to blending_mode sources.")
     view_files_with_vim(["blending_modes.html"], pattern="blending_modes/binary/xnor.html")
     strip_headers_from_files()
+    check_index()
     print("Finished stripping <h[1-6]> tags.")
     view_files_with_vim(["tools.html"], pattern="<h")
     strip_icons_from_all_files()
+    check_index()
     print("Finished stripping <img /> tags.")
     view_files_with_vim(["tools/assistant.html"], pattern="<img ")
     strip_index_files()
+    check_index()
     print("Finished cleaning up index files.")
     view_files_with_vim(["tools.html", "brushes/brush_engines.html", "blending_modes/arithmetic.html"], pattern="<a href=")
     have_all_a_tags_open_new_tabs()
+    check_index()
     print("Finished setting target='_blank' for external links.")
     view_files_with_vim(["layers_and_masks/fill_layer_generators/seexpr.html"], pattern="target=")
     replace_sections_with_divs_in_files()
+    check_index()
     print("Finished replacing section[id] with div[id].")
     view_files_with_vim(["layers_and_masks.html"], pattern="<div id=")
     prepend_link_tags_to_all_excerpts()
+    check_index()
     print("Finished prepending <link /> tags.")
     view_files_with_vim(["brushes/brush_engines.html"], pattern="<link ")
     update_all_hrefs()
     compile_all_hrefs()
+    check_index()
     print("Finished updating a.href references.")
     view_files_with_vim(["../hrefs.txt"], view=True)
 
