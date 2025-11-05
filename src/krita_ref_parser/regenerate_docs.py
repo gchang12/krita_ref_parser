@@ -20,6 +20,7 @@ from krita_ref_parser.compile_index import (
 from krita_ref_parser._logging import logger
 
 PILCROW = "¶"
+
 OFFICIAL_DOCS_ROOT = "https://docs.krita.org/en/"
 LINK_TO_OFFICIAL_DOCS_CLASSNAME = "link-to-official-docs"
 
@@ -258,10 +259,9 @@ def update_filename_record_of_index(index: list[dict], path_id: list[str], new_r
     #}
     #with open(index_file, encoding="utf-8") as rfile:
         #index = json.load(rfile)
-    for record in index:
-        if record['path'] == path_id:
-            break
-    if record['path'] != path_id:
+    try:
+        record = list(filter(lambda record: record['path'] == path_id, index)).pop()
+    except IndexError:
         return
     for key in record:
         try:
@@ -594,11 +594,11 @@ if __name__ == "__main__":
     def check_if_path_is_in_index(path: list[str], index: list[dict]):
         """
         """
-        for record in index:
-            if record['path'] != path:
-                continue
+        try:
+            record = list(filter(lambda record: record['path'] == path, index)).pop()
             return True
-        raise KeyError("'%s' does not exist in index.", path)
+        except IndexError:
+            raise KeyError("'%s' does not exist in index.", path)
 
     def update_all_hrefs():
         """
@@ -662,10 +662,11 @@ if __name__ == "__main__":
                 write_soup_to_file(soup, filepath)
                 path.pop()
 
-    def check_index():
+    def check_index(check=False):
         """
         """
-        return
+        if not check:
+            return
         with open(INDEX_FILE, encoding="utf-8") as rfile:
             index = json.load(rfile)
         for record in index:
