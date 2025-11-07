@@ -659,6 +659,7 @@ if __name__ == "__main__":
                             logger.debug("Filename %s does not exist in root. Linking to official docs.", filename)
                             a['href'] = OFFICIAL_DOCS_ROOT + "reference_manual" + href
                             a['class'] = "reference external " + LINK_TO_OFFICIAL_DOCS_CLASSNAME
+                            #a['target'] = "_blank"
                 write_soup_to_file(soup, filepath)
                 path.pop()
 
@@ -703,10 +704,6 @@ if __name__ == "__main__":
     check_index()
     print("Finished cleaning up index files.")
     view_files_with_vim(["tools.html", "brushes/brush_engines.html", "blending_modes/arithmetic.html"], pattern="<a href=")
-    have_all_a_tags_open_new_tabs()
-    check_index()
-    print("Finished setting target='_blank' for external links.")
-    view_files_with_vim(["layers_and_masks/fill_layer_generators/seexpr.html"], pattern="target=")
     replace_sections_with_divs_in_files()
     check_index()
     print("Finished replacing section[id] with div[id].")
@@ -720,4 +717,8 @@ if __name__ == "__main__":
     check_index()
     print("Finished updating a.href references.")
     view_files_with_vim(["../hrefs.txt"], view=True)
+    have_all_a_tags_open_new_tabs()
+    check_index()
+    print("Finished setting target='_blank' for external links.")
+    view_files_with_vim(["layers_and_masks/fill_layer_generators/seexpr.html"], pattern="target=")
 

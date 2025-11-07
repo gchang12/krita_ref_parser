@@ -189,9 +189,10 @@ if __name__ == "__main__":
             article = {
                 "path": path_root + [filename],
                 "header": header_text,
-                "section": section_id,
+                "id": section_id,
                 "icon": icon,
                 "figures": figures,
+                "isIndexFile": filepath.with_suffix("").exists(),
             }
             index.append(article)
         logger.info("Indexed (%d) sections from '%s'.", len(filenames), dirpath)
