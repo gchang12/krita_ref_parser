@@ -189,7 +189,7 @@ if __name__ == "__main__":
             article = {
                 "path": path_root + [filename],
                 "header": header_text,
-                "id": section_id,
+                "id": section_id.lstrip('#'),
                 "icon": icon,
                 "figures": figures,
                 "isIndexFile": filepath.with_suffix("").exists(),
@@ -244,6 +244,13 @@ if __name__ == "__main__":
     print("Entries from root have been compiled.")
     logger.info("(%d) entries compiled into index.", len(INDEX))
     logger.info("Fields of index: %s.", tuple(INDEX[0].keys()))
+
+    def sort_index():
+        """
+        """
+        INDEX.sort(key=lambda record: '/'.join(record['path']))
+
+    sort_index()
 
     def affirm_all_sections_are_in_index():
         """
