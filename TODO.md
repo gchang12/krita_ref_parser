@@ -31,6 +31,7 @@ grep -P "blending_modes/(lighten|darken)/arith" output/excerpts/*/*/*
 
 TODO
 ====
+Regenerate index with the new `pathAsStr` field.
 Clear out archived files.
 Add docstrings.
 Shake the proverbial trees of this program.

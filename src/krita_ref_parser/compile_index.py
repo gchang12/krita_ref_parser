@@ -193,6 +193,7 @@ if __name__ == "__main__":
                 "icon": icon,
                 "figures": figures,
                 "isIndexFile": filepath.with_suffix("").exists(),
+                "pathAsStr": str(filepath.relative_to(Path(SOURCE_DIR)).with_suffix("")),
             }
             index.append(article)
         logger.info("Indexed (%d) sections from '%s'.", len(filenames), dirpath)

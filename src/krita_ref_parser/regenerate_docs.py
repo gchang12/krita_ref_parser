@@ -352,7 +352,7 @@ if __name__ == "__main__":
         with open(INDEX_FILE, encoding="utf-8") as rfile:
             index = json.load(rfile)
         path = [section, src_name]
-        new_record = {"path": [section, tgt_name], "header": "Fill Layer Generators"}
+        new_record = {"path": [section, tgt_name], "header": "Fill Layer Generators", "isIndexFile": True}
         logger.info("Updating record where 'path'=%s to %s.", path, new_record)
         update_filename_record_of_index(index, path, new_record)
         with open(INDEX_FILE, encoding="utf-8", mode="w") as wfile:
