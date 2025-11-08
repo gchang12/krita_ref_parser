@@ -352,7 +352,12 @@ if __name__ == "__main__":
         with open(INDEX_FILE, encoding="utf-8") as rfile:
             index = json.load(rfile)
         path = [section, src_name]
-        new_record = {"path": [section, tgt_name], "header": "Fill Layer Generators", "isIndexFile": True}
+        new_record = {
+            "path": [section, tgt_name],
+            "header": "Fill Layer Generators",
+            "isIndexFile": True,
+            "pathAsStr": "layers_and_masks/fill_layer_generators",
+            }
         logger.info("Updating record where 'path'=%s to %s.", path, new_record)
         update_filename_record_of_index(index, path, new_record)
         with open(INDEX_FILE, encoding="utf-8", mode="w") as wfile:
@@ -716,7 +721,7 @@ if __name__ == "__main__":
     compile_all_hrefs()
     check_index()
     print("Finished updating a.href references.")
-    view_files_with_vim(["../hrefs.txt"], view=True)
+    view_files_with_vim(["../hrefs.txt"])
     have_all_a_tags_open_new_tabs()
     check_index()
     print("Finished setting target='_blank' for external links.")
