@@ -571,15 +571,15 @@ if __name__ == "__main__":
         """
         """
         href_list = [
-            "<!DOCTYPE html>",
             "/stylesheets/iframe.css",
         ]
+        doctype = "<!DOCTYPE html>"
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
                 prepend_link_tags_to_soup(soup, href_list, container="div")
-                write_soup_to_file(soup, filepath)
+                write_soup_to_file(doctype + str(soup), filepath)
 
     def compile_all_hrefs():
         """
