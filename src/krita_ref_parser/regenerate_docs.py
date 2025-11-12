@@ -571,6 +571,7 @@ if __name__ == "__main__":
         """
         """
         href_list = [
+            "<!DOCTYPE html>",
             "/stylesheets/iframe.css",
         ]
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
