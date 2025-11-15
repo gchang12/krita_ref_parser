@@ -1,8 +1,3 @@
-Replace 'link-replacement' function with pure equivalent.
-
-search feature
-shortcut display
-Delay: Krita Shortcut menu.
 
 Modify only when you want support from others.
 - CONTRIBUTING.md
@@ -31,6 +26,7 @@ Extract header.
 Extract header image.
 Parse source and section into different HTML files. (What?)
 Make sure to convert those things to Link objects. (bs4 limitations)
+Replace 'link-replacement' function with pure equivalent.
 
 TODO
 ====
@@ -38,3 +34,9 @@ Regenerate index with the new `pathAsStr` field.
 Clear out archived files.
 Add docstrings.
 Shake the proverbial trees of this program.
+
+DEFERRED
+========
+search feature
+shortcut display
+Delay: Krita Shortcut menu.
