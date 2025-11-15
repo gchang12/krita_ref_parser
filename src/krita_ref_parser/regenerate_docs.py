@@ -668,6 +668,12 @@ if __name__ == "__main__":
                             #a['target'] = "_blank"
                 write_soup_to_file(soup, filepath)
                 path.pop()
+        logger.debug("Replacing all internal links on 'blending_modes.html' to excerpt-links.")
+        filepath = Path(TARGET_DIR, "blending_modes.html")
+        soup = get_soup_from_file(filepath)
+        for a in filter(lambda a: "internal" in a['class'], soup.css.select("a")):
+            a['href'] = '/excerpts' + a['href']
+        write_soup_to_file(soup, filepath)
 
     def check_index(check=False):
         """
