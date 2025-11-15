@@ -505,6 +505,10 @@ if __name__ == "__main__":
                 remove_links_from_index(soup, section)
                 write_soup_to_file(soup, filepath)
             logger.debug("Finished stripping index for '%s'.", section)
+
+    def strip_blending_modes_index_files():
+        """
+        """
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             logger.debug("dirpath.parts: %r", dirpath.parts)
             if dirpath.name != "blending_modes": # target only blending mode subsections
@@ -542,6 +546,17 @@ if __name__ == "__main__":
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
                 remove_empty_tags(soup)
+                write_soup_to_file(soup, filepath)
+
+    def remove_empty_toc_tags_from_files():
+        """
+        """
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filter(lambda filename: filename != "blending_modes.html", filenames):
+                filepath = dirpath.joinpath(filename)
+                soup = get_soup_from_file(filepath)
+                for tag in soup.css.select('div[class="toctree-wrapper compound"]'):
+                    tag.decompose()
                 write_soup_to_file(soup, filepath)
 
     #replace_a_tags_with_reactlink_tags,
@@ -693,46 +708,39 @@ if __name__ == "__main__":
     clone_from_raw()
     print("Finished cloning files.")
     view_files_with_vim(["../index.json"])
-    check_index()
     rename_fill_layers_to_fill_layer_generators()
-    #check_index()
     print("Finished renaming 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'.")
     view_files_with_vim(["dockers/layers.html", "dockers/palette_docker.html", "filters/artistic.html"], pattern="fill_layer_generators.html")
     update_img_sources_in_files()
-    check_index()
     print("Finished updating image sources.")
     view_files_with_vim(["blending_modes/arithmetic/addition.html"], pattern="src=")
     update_references_to_blending_modes_sections_in_files()
-    check_index()
     print("Finished updating references to blending_mode sources.")
     view_files_with_vim(["blending_modes.html"], pattern="blending_modes/binary/xnor.html")
     strip_headers_from_files()
-    check_index()
     print("Finished stripping <h[1-6]> tags.")
     view_files_with_vim(["tools.html"], pattern="<h")
     strip_icons_from_all_files()
-    check_index()
     print("Finished stripping <img /> tags.")
     view_files_with_vim(["tools/assistant.html"], pattern="<img ")
-    strip_index_files()
-    check_index()
-    print("Finished cleaning up index files.")
+    strip_blending_modes_index_files()
+    #strip_index_files()
+    #remove_empty_toc_tags_from_files()
+    view_files_with_vim(["brushes.html", "blending_modes.html", "layers_and_masks/fill_layer_generators.html"])
+    #print("Finished cleaning up index files.")
+    print("Finished stripping 'blending_modes' index files.")
     view_files_with_vim(["tools.html", "brushes/brush_engines.html", "blending_modes/arithmetic.html"], pattern="<a href=")
     replace_sections_with_divs_in_files()
-    check_index()
     print("Finished replacing section[id] with div[id].")
     view_files_with_vim(["layers_and_masks.html"], pattern="<div id=")
     prepend_link_tags_to_all_excerpts()
-    check_index()
     print("Finished prepending <link /> tags.")
     view_files_with_vim(["brushes/brush_engines.html"], pattern="<link ")
     update_all_hrefs()
     compile_all_hrefs()
-    check_index()
     print("Finished updating a.href references.")
     view_files_with_vim(["../hrefs.txt"])
     have_all_a_tags_open_new_tabs()
-    check_index()
     print("Finished setting target='_blank' for external links.")
     view_files_with_vim(["layers_and_masks/fill_layer_generators/seexpr.html"], pattern="target=")
 
