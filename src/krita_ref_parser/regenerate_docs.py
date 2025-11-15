@@ -614,10 +614,11 @@ if __name__ == "__main__":
         root_dir = Path(TARGET_DIR)
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             path = list(dirpath.relative_to(root_dir).parts)
-            record_found = False
+            #record_found = False
             logger.debug("dirpath: %r", dirpath)
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
+                #record = filter(lambda record: record['path'] == list(filepath.parts), index)
                 path.append(filename)
                 logger.debug("path: %r", path)
                 check_if_path_is_in_index(path, index)
@@ -663,16 +664,17 @@ if __name__ == "__main__":
                         filename, file_id = tuple(href.lstrip('/').split("#"))
                         if not Path(TARGET_DIR, filename).exists():
                             logger.debug("Filename %s does not exist in root. Linking to official docs.", filename)
+                            a['title'] = "Link to official Krita docs"
                             a['href'] = OFFICIAL_DOCS_ROOT + "reference_manual" + href
                             a['class'] = "reference external " + LINK_TO_OFFICIAL_DOCS_CLASSNAME
-                            #a['target'] = "_blank"
+                            a['target'] = "_blank"
                 write_soup_to_file(soup, filepath)
                 path.pop()
                 logger.debug("Replacing all internal links on 'blending_modes.html' to excerpt-links.")
                 for a in filter(lambda a: "internal" in a['class'], soup.css.select("a")):
+                    a['title'] = "Link to excerpt of '%s'" % a['href'].lstrip('/')
                     a['href'] = '/excerpts' + a['href']
                     a['target'] = '_blank'
-                    a['title'] = "Link to excerpt of '%s'" % a['href'].lstrip('/')
                 write_soup_to_file(soup, filepath)
 
     def check_index(check=False):
