@@ -19,7 +19,7 @@ from krita_ref_parser._logging import logger
 PILCROW = "¶"
 
 SOURCE_DIR = "./output/raw-excerpts/"
-TARGET_DIR = "./output/"
+INDEX_PATH = "./output/index.json"
 
 DIRS_WITH_NO_INDICES = (
     Path(SOURCE_DIR, "layers_and_masks", "fill_layer_generators"),
@@ -146,7 +146,6 @@ if __name__ == "__main__":
     '''
     ROOT_LEN = 2
     INDEX = []
-    INDEX_NAME = "index.json"
 
     def validate_directory(dirname: Path | str):
         """
@@ -292,7 +291,7 @@ if __name__ == "__main__":
         logger.info("These sections compose the entirety of the index: %s.", set_of_all_sections)
     affirm_all_sections_are_in_index()
 
-    index_path = Path(TARGET_DIR, INDEX_NAME)
+    index_path = Path(INDEX_PATH)
     print("Saving index to: '%s'" % index_path)
     with open(index_path, mode="w") as wfile:
         json.dump(INDEX, wfile, indent=2)
