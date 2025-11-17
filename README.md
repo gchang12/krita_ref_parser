@@ -1,9 +1,9 @@
 <!-- These are examples of badges you might want to add to your README:
      please update the URLs accordingly
 
-[![Built Status](https://api.cirrus-ci.com/github/<USER>/krita_ref_parser.svg?branch=main)](https://cirrus-ci.com/github/<USER>/krita_ref_parser)
+[![Built Status](https://api.cirrus-ci.com/github/gchang12/krita_ref_parser.svg?branch=main)](https://cirrus-ci.com/github/gchang12/krita_ref_parser)
 [![ReadTheDocs](https://readthedocs.org/projects/krita_ref_parser/badge/?version=latest)](https://krita_ref_parser.readthedocs.io/en/stable/)
-[![Coveralls](https://img.shields.io/coveralls/github/<USER>/krita_ref_parser/main.svg)](https://coveralls.io/r/<USER>/krita_ref_parser)
+[![Coveralls](https://img.shields.io/coveralls/github/gchang12/krita_ref_parser/main.svg)](https://coveralls.io/r/gchang12/krita_ref_parser)
 [![PyPI-Server](https://img.shields.io/pypi/v/krita_ref_parser.svg)](https://pypi.org/project/krita_ref_parser/)
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/krita_ref_parser.svg)](https://anaconda.org/conda-forge/krita_ref_parser)
 [![Monthly Downloads](https://pepy.tech/badge/krita_ref_parser/month)](https://pepy.tech/project/krita_ref_parser)
