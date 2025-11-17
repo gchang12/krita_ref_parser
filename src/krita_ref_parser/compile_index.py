@@ -184,6 +184,12 @@ if __name__ == "__main__":
             icon = get_icon(soup)
             # icon: DONE
             figures = get_figures(soup)
+            for p in soup.find_all("p"):
+                first_sentence = p.text
+                if first_sentence:
+                    break
+            if not first_sentence:
+                first_sentence = None
             # figures: DONE
             article = {
                 "path": path_root + [filename],
@@ -193,6 +199,7 @@ if __name__ == "__main__":
                 "figures": figures,
                 "isIndexFile": filepath.with_suffix("").exists(),
                 "pathAsStr": str(filepath.relative_to(Path(SOURCE_DIR)).with_suffix("")),
+                "firstSentence": first_sentence,
             }
             index.append(article)
         logger.info("Indexed (%d) sections from '%s'.", len(filenames), dirpath)
