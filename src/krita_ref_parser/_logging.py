@@ -1,15 +1,14 @@
 """
-Logging configuration.
+Defines logging configuration.
 """
 
 import logging
 
-logger = logging.getLogger(name="kritaref_palette")
+logger = logging.getLogger(name="krita_ref_parser")
 
 logging.basicConfig(
     level=logging.DEBUG,
-    #filename=".kritaref_palette.log",
+    filename="krita_ref_parser.log",
     format="%(levelname)s:%(module)s.%(funcName)s: %(message)s",
     filemode="w",
 )
-

@@ -1,6 +1,6 @@
 import pytest
 
-from kritaref_palette.skeleton import fib, main
+from krita_ref_parser.skeleton import fib, main
 
 __author__ = "gchang12"
 __copyright__ = "gchang12"
