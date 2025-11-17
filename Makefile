@@ -1,5 +1,8 @@
 VENV_NAME := .venv-krita_ref_parser
 
+_ALL: output/excerpts/ output/index.json output/images/
+	echo -ne "Success! Created and populated: 'output'/{excerpts,index.json,images}/"
+
 # C: Parse raw HTML for text and images to insert into logical sections.
 
 ## 5: Format and clean generated HTML files.
