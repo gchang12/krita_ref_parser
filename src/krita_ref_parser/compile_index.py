@@ -246,6 +246,26 @@ if __name__ == "__main__":
     logger.info("(%d) entries compiled into index.", len(INDEX))
     logger.info("Fields of index: %s.", tuple(INDEX[0].keys()))
 
+    def set_icons_to_null():
+        """
+        """
+        record_found = False
+        id_list = (
+            "chalk-brush-engine",
+            "crop-tool",
+            "color-sampler-tool",
+            )
+        for id in id_list:
+            for record in INDEX:
+                if record['id'] == id:
+                    record_found = True
+                    break
+            if not record_found:
+                raise KeyError("Record with id='%s' not found." % id)
+            record['icon'] = None
+
+    set_icons_to_null()
+
     def sort_index():
         """
         """
