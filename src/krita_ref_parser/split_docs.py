@@ -326,6 +326,6 @@ if __name__ == "__main__":
         subprocess.run(args)
 
     split_docs()
-    inspect_output()
+    #inspect_output()
     #_get_blendingmode_dict()
 
