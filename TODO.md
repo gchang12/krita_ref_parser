@@ -1,5 +1,11 @@
 
-Modify only when you want support from others.
+TODO
+====
+Shake the proverbial trees of this program.
+For Support From Others
+-----------------------
+Add docstrings.
+Modify:
 - CONTRIBUTING.md
 - AUTHORS.md
 - CHANGELOG.md
@@ -19,24 +25,13 @@ Grouping of different blending modes.
 Clean up files:
 Replace links where appropriate.
 Segregate build and deployment
+Regenerate index with the new `pathAsStr` field.
+Clear out archived files.
 
-ABORTED
-=======
+ABANDONED
+=========
 Extract header.
 Extract header image.
 Parse source and section into different HTML files. (What?)
 Make sure to convert those things to Link objects. (bs4 limitations)
 Replace 'link-replacement' function with pure equivalent.
-
-TODO
-====
-Regenerate index with the new `pathAsStr` field.
-Clear out archived files.
-Add docstrings.
-Shake the proverbial trees of this program.
-
-DEFERRED
-========
-search feature
-shortcut display
-Delay: Krita Shortcut menu.
