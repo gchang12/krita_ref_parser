@@ -272,6 +272,26 @@ if __name__ == "__main__":
 
     set_icons_to_null()
 
+    def update_renamed_records():
+        """
+        """
+        src_path = ["layers_and_masks", "fill_layers.html"]
+        tgt_path = ["layers_and_masks", "fill_layer_generators.html"]
+        new_record = {
+            "path": tgt_path,
+            "header": "Fill Layer Generators",
+            "isIndexFile": True,
+            "pathAsStr": "layers_and_masks/fill_layer_generators",
+            }
+        try:
+            record = list(filter(lambda record: record['path'] == src_path, INDEX)).pop()
+        except IndexError:
+            logger.warning("Record with path_id='%s' has already been updated.", src_path)
+            return
+        record.update(new_record)
+
+    update_renamed_records()
+
     def sort_index():
         """
         """

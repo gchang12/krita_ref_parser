@@ -262,6 +262,7 @@ def update_filename_record_of_index(index: list[dict], path_id: list[str], new_r
     try:
         record = list(filter(lambda record: record['path'] == path_id, index)).pop()
     except IndexError:
+        logger.warning("Record with path_id='%s' has already been updated.", path_id)
         return
     for key in record:
         try:
