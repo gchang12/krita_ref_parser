@@ -170,7 +170,7 @@ if __name__ == "__main__":
         """
         index = []
         path_root = list(dirpath.parts[ROOT_LEN:])
-        for filename in filenames:
+        for index_no, filename in enumerate(filenames):
             #path = path_buf.copy()
             #path.append(filename)
             # path: DONE
@@ -192,9 +192,10 @@ if __name__ == "__main__":
                 first_sentence = None
             # figures: DONE
             article = {
+                "id": '-'.join((path_root + ['%02d' % index_no])),
                 "path": path_root + [filename],
                 "header": header_text,
-                "id": section_id.lstrip('#'),
+                "articleId": section_id.lstrip('#'),
                 "icon": icon,
                 "figures": figures,
                 "isIndexFile": filepath.with_suffix("").exists(),
@@ -262,13 +263,11 @@ if __name__ == "__main__":
             "color-sampler-tool",
             )
         for id in id_list:
-            for record in INDEX:
-                if record['id'] == id:
-                    record_found = True
-                    break
-            if not record_found:
-                raise KeyError("Record with id='%s' not found." % id)
-            record['icon'] = None
+            try:
+                record = list(filter(lambda record: record['id'] == id, INDEX)).pop()
+                record['icon'] = None
+            except IndexError:
+                logger.warning("Record with id='%s' not found.", id)
 
     set_icons_to_null()
 
@@ -318,6 +317,14 @@ if __name__ == "__main__":
         logger.info("These sections compose the entirety of the index: %s.", set_of_all_sections)
     affirm_all_sections_are_in_index()
 
+    def confirm_uniqueness_of_ids():
+        """
+        """
+        ids = list(map(lambda record: record['id'], INDEX))
+        id_set = set(ids)
+        assert len(ids) == len(id_set)
+
+    confirm_uniqueness_of_ids()
     index_path = Path(INDEX_PATH)
     print("Saving index to: '%s'" % index_path)
     with open(index_path, mode="w") as wfile:
