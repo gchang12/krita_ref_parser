@@ -256,7 +256,6 @@ if __name__ == "__main__":
     def set_icons_to_null():
         """
         """
-        record_found = False
         id_list = (
             "chalk-brush-engine",
             "crop-tool",
@@ -264,10 +263,10 @@ if __name__ == "__main__":
             )
         for id in id_list:
             try:
-                record = list(filter(lambda record: record['id'] == id, INDEX)).pop()
+                record = list(filter(lambda record: record['articleId'] == id, INDEX)).pop()
                 record['icon'] = None
             except IndexError:
-                logger.warning("Record with id='%s' not found.", id)
+                logger.warning("Record with articleId='%s' not found.", id)
 
     set_icons_to_null()
 
