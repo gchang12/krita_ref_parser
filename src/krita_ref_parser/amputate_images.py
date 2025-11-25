@@ -7,6 +7,7 @@ import shutil
 from pathlib import Path
 
 from PIL import Image
+from PIL import ImageOps
 from bs4 import BeautifulSoup
 
 from krita_ref_parser._logging import logger
@@ -96,10 +97,10 @@ def get_thirds_of_image_file(filename: str, *, get_last_third: bool):
         full_height = img.size[1]
         two_thirds_width = int(full_width * 2 / 3)
         if get_last_third:
-            logger.debug("Getting last third.")
+            logger.debug("getting last third.")
             box = (two_thirds_width, 0, full_width, full_height)
         else:
-            logger.debug("Getting first two-thirds.")
+            logger.debug("getting first two-thirds.")
             box = (0, 0, two_thirds_width, full_height)
         cropped_image = img.crop(box)
     return cropped_image
@@ -136,6 +137,11 @@ def delete_unused_images(index: list[str], *, target_dir: Path | str):
         imagefile.unlink()
         num_unused_images += 1
     logger.debug("Deleted %d unused image files in '%s'. Number of images remaining: %d.", num_unused_images, target_dir, num_image_files - num_unused_images)
+
+def resize_image_file(image_file: Path | str):
+    """
+    """
+    image_file.save()
 
 if __name__ == "__main__":
     GENERIC_IMAGE_PREFIX = "."
@@ -216,5 +222,34 @@ if __name__ == "__main__":
         partition_blendingmodes_images_inplace()
         print("Images with the suffixes: '%s'\nhave been partitioned in-place." % list(SampleImageType))
 
-    amputate_images()
+    def shrink_blending_mode_images():
+        """
+        """
+        for imagefile in filter(
+            lambda path: SampleImageType.get_sample_image_type(path.name) is not None,# and not path.name.startswith(GENERIC_IMAGE_PREFIX),
+            Path(TARGET_DIR).iterdir(),
+        ):
+            # TODO: Change upon deciding the true size of the images.
+            factor = 1
+            with Image.open(str(imagefile)) as img:
+                scaled_image = ImageOps.scale(img, factor=factor)
+            scaled_image.save(str(imagefile))
 
+    amputate_images()
+    shrink_blending_mode_images()
+
+    def rotate_gradient_comparison_images():
+        """
+        """
+        for imagefile in filter(
+            lambda path: SampleImageType.get_sample_image_type(path.name) == SampleImageType.GRADIENT_COMPARISON,
+            Path(TARGET_DIR).iterdir(),
+        ):
+            with Image.open(str(imagefile)) as img:
+                new_size = (img.size[1], img.size[0])
+                img = img.rotate(-90, expand=True)
+                #resize_func = ImageOps.fit
+                #img = resize_func(img, new_size)
+            img.save(str(imagefile))
+
+    rotate_gradient_comparison_images()

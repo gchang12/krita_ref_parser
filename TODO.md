@@ -27,6 +27,8 @@ Replace links where appropriate.
 Segregate build and deployment
 Regenerate index with the new `pathAsStr` field.
 Clear out archived files.
+Add some `resize_image_file` function to `amputate_images.py`.
+Rotate `Gradients_Comparison` image file 90 degrees clockwise.
 
 ABANDONED
 =========
