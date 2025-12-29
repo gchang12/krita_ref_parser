@@ -325,7 +325,23 @@ if __name__ == "__main__":
         import subprocess
         subprocess.run(args)
 
-    split_docs()
+    def scan_files_for_script_nodes():
+        """
+        """
+        possible_script_nodes = {}
+        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
+                script_node = soup.css.select_one("script")
+                possible_script_nodes[str(filepath)] = script_node
+        script_nodes = list(filter(lambda filepath_scriptnode: filepath_scriptnode[1] is not None, possible_script_nodes.items()))
+        logger.info("There were (%d) script nodes in the excerpts.", len(script_nodes))
+        for filepath, _ in script_nodes:
+            logger.warning("A script node has been found in: %s", filepath)
+
+    #split_docs()
+    scan_files_for_script_nodes()
     #inspect_output()
     #_get_blendingmode_dict()
 

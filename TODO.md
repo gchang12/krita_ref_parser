@@ -1,10 +1,9 @@
 
 TODO
 ====
+Add function to inspect for script tags and remove them also.
+Add docstrings before I forget what all this does.
 Shake the proverbial trees of this program.
-For Support From Others
------------------------
-Add docstrings.
 Modify:
 - CONTRIBUTING.md
 - AUTHORS.md
