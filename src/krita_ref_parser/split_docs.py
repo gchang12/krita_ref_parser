@@ -52,6 +52,7 @@ def write_stripped_soup(soup: BeautifulSoup, filename: str):
     return num_lines
 
 if __name__ == "__main__":
+    import subprocess
 
     def create_main_directories_and_indices():
         """
@@ -277,44 +278,51 @@ if __name__ == "__main__":
             num_files += 1
         logger.info("(%d) HTML files have been created.", num_files)
 
-    def split_docs():
+    def inspect_output(filename: str, to_inspect: bool):
         """
-        Populates `TARGET_DIR` while mostly retaining original filetree structure.
-        """
-        create_main_directories_and_indices()
-        print("Created main directories and indices in: '%s'" % TARGET_DIR)
-        populate_main_directories()
-        print("Populated main directories.")
-        populate_main_subdirectories()
-        print("Populated main subdirectories.")
-        populate_blendingmodes_subdirectories()
-        print("Populated blending-mode subdirectories.")
-        populate_hsx_blendingmodes_subdirectories()
-        print("Populated blending-mode-hsx subdirectory.")
-
-    def inspect_output():
-        """
+        Pauses program to let user inspect text output via 'vim '.
         """
         args = ["vi"]
         root_dir = "output/raw-excerpts"
-        filelist = (
-            "dockers.html", # create_main_directories_and_indices, populate_main_directories
-            "filters/map.html", # populate_main_subdirectories
-            "brushes/brush_settings/options.html", # populate_main_subdirectories
-            "blending_modes/arithmetic/addition.html", # populate_blendingmodes_subdirectories
-            "blending_modes/hsx/increase-value_lightness-intensity-luminosity.html", # populate_hsx_blendingmodes_subdirectories
-        )
-        for file in filelist:
-            args.append("/".join([root_dir, file]))
-        import subprocess
-        subprocess.run(args)
+        args.append("/".join([TARGET_DIR, filename]))
+        if to_inspect:
+            subprocess.run(args)
+        else:
+            logger.debug("Skipped execution of command: %s", " ".join(args))
+
+    def split_docs(*, to_inspect: bool):
+        """
+        Populates `TARGET_DIR` while mostly retaining original filetree structure.
+        """
+        filename: str
+        create_main_directories_and_indices()
+        print("Created main directories and indices in: '%s'" % TARGET_DIR)
+        filename = "dockers.html"
+        inspect_output(filename, to_inspect=to_inspect)
+        populate_main_directories()
+        print("Populated main directories.")
+        filename = "filters/map.html"
+        inspect_output(filename, to_inspect=to_inspect)
+        populate_main_subdirectories()
+        print("Populated main subdirectories.")
+        filename = "brushes/brush_settings/options.html"
+        inspect_output(filename, to_inspect=to_inspect)
+        populate_blendingmodes_subdirectories()
+        print("Populated blending-mode subdirectories.")
+        filename = "blending_modes/arithmetic/addition.html"
+        inspect_output(filename, to_inspect=to_inspect)
+        populate_hsx_blendingmodes_subdirectories()
+        print("Populated blending-mode-hsx subdirectory.")
+        filename = "blending_modes/hsx/increase-value_lightness-intensity-luminosity.html"
+        inspect_output(filename, to_inspect=to_inspect)
 
     def scan_files_for_script_nodes():
         """
         Raises Exception if any parsed content contains a <script> node.
         """
+        logger.info("Now scanning all <section> contents for <script> nodes.")
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            logger.info("Now scanning files in '%s' for <script> tags.", dirpath)
+            logger.debug("Scanning files in '%s'.", dirpath)
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
@@ -322,8 +330,10 @@ if __name__ == "__main__":
                 if script_node is None:
                     continue
                 raise Exception("'%s' contains a <script> tag." % filepath)
+            logger.debug("'%s' contained no files with <script> nodes.", dirpath)
+        logger.info("No <section> contained a <script> tag.")
 
-    split_docs()
+    split_docs(to_inspect=False)
     scan_files_for_script_nodes()
     #inspect_output()
 
