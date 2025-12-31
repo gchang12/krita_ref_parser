@@ -16,6 +16,7 @@ TARGET_DIR = "./output/raw-excerpts/"
 
 def split_from_page(soup: BeautifulSoup):
     """
+    Returns first <section> in `soup` in a list.
     """
     sections = [soup.css.select_one("section[id]")]
     logger.debug("(%d) sections found. Returning as list.", len(sections))
@@ -23,6 +24,7 @@ def split_from_page(soup: BeautifulSoup):
 
 def split_from_blendingmodes_page(soup: BeautifulSoup):
     """
+    Returns all <section> parented by <section> from `soup`.
     """
     sections = list(soup.css.select("section[id] > section[id]"))
     logger.debug("(%d) sections found. Returning as list.", len(sections))
@@ -30,6 +32,7 @@ def split_from_blendingmodes_page(soup: BeautifulSoup):
 
 def split_from_hsx_blendingmodes_page(soup: BeautifulSoup):
     """
+    Returns all <section> parented by '#hsx-blending-modes' in `soup`.
     """
     sections = list(soup.css.select("#hsx-blending-modes > section[id]"))
     logger.debug("(%d) sections found. Returning as list.", len(sections))
@@ -37,6 +40,7 @@ def split_from_hsx_blendingmodes_page(soup: BeautifulSoup):
 
 def write_stripped_soup(soup: BeautifulSoup, filename: str):
     """
+    Strips whitespace from `soup` and writes it to `filename`.
     """
     logger.debug("Writing lines to '%s'. Calculating number of lines.", filename)
     soup_as_lines = [line.strip() for line in str(soup).splitlines() if line.strip()]
@@ -79,6 +83,7 @@ if __name__ == "__main__":
 
     def populate_main_directories():
         """
+        Parses first-level <section> from source and writes each <section> to one file.
         """
         for dirpath in filter(lambda path_: path_.is_dir(), Path(SOURCE_DIR).iterdir()):
             logger.info("Populating '%s'.", dirpath)
@@ -97,6 +102,7 @@ if __name__ == "__main__":
 
     def populate_main_subdirectories():
         """
+        Parses most second-level <section> and writes each <section> to a file.
         """
         for dir_path in filter(lambda path_: path_.is_dir(), Path(SOURCE_DIR).iterdir()):
             # brushes/
@@ -131,16 +137,12 @@ if __name__ == "__main__":
                 blending_mode = re.sub(r" \((.+?)\)", r"_\1", h2_text.replace(" & ", "_and_").replace(" - ", "_")).replace(" ", "-").lower()
                 blendingmode_dict[h2_text] = blending_mode
         import json
-        #import tempfile
-        #import subprocess
-        #with tempfile.NamedTemporaryFile(mode="w", encoding='utf-8') as wfile:
         bm_dict_as_json = json.dumps(blendingmode_dict, indent=4)
         print(bm_dict_as_json)
-        #tempfile_name = wfile.name
-        #subprocess.run(["vi", tempfile_name])
 
     def populate_blendingmodes_subdirectories():
         """
+        Creates new 'blending_modes' subdirectories and populates them.
         """
         blendingmode_dict = {
             "Luminosity/Shine (SAI)": "luminosity-shine_sai",
@@ -244,10 +246,6 @@ if __name__ == "__main__":
             sections = split_from_blendingmodes_page(soup)
             num_files = 0
             for section in sections:
-                #h2_text = section.find("h2").text
-                #h2_text = section.find("h2").text.replace(PILCROW, "")
-                #h2_text = h2_text[:h2_text.index(PILCROW)]
-                #blending_mode = blendingmode_dict[h2_text]
                 blending_mode = section['id']
                 target_file = blendingmodes_subdir.joinpath(blending_mode + ".html")
                 soup = BeautifulSoup(str(section), 'html.parser')
@@ -260,6 +258,7 @@ if __name__ == "__main__":
 
     def populate_hsx_blendingmodes_subdirectories():
         """
+        Creates HSX 'blending_modes' subdirectory and populates it.
         """
         hsx_blendingmode_dict = {
             "Color, HSV, HSI, HSL, HSY": "color_hsv-hsi-hsl-hsy",
@@ -296,6 +295,7 @@ if __name__ == "__main__":
 
     def split_docs():
         """
+        Populates `TARGET_DIR` while mostly retaining original filetree structure.
         """
         create_main_directories_and_indices()
         print("Created main directories and indices in: '%s'" % TARGET_DIR)
@@ -314,11 +314,11 @@ if __name__ == "__main__":
         args = ["vi"]
         root_dir = "output/raw-excerpts"
         filelist = (
-            "dockers.html",
-            "filters/map.html",
-            "brushes/brush_settings/options.html",
-            "blending_modes/arithmetic/addition.html",
-            "blending_modes/hsx/increase-value_lightness-intensity-luminosity.html",
+            "dockers.html", # create_main_directories_and_indices, populate_main_directories
+            "filters/map.html", # populate_main_subdirectories
+            "brushes/brush_settings/options.html", # populate_main_subdirectories
+            "blending_modes/arithmetic/addition.html", # populate_blendingmodes_subdirectories
+            "blending_modes/hsx/increase-value_lightness-intensity-luminosity.html", # populate_hsx_blendingmodes_subdirectories
         )
         for file in filelist:
             args.append("/".join([root_dir, file]))
@@ -327,13 +327,17 @@ if __name__ == "__main__":
 
     def scan_files_for_script_nodes():
         """
+        Raises Exception if any parsed content contains a <script> node.
         """
         possible_script_nodes = {}
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+            logger.info("Now scanning files in '%s' for <script> tags.", dirpath)
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
                 script_node = soup.css.select_one("script")
+                if script_node is not None:
+                    raise Exception("'%s' contains a <script> tag." % filepath)
                 possible_script_nodes[str(filepath)] = script_node
         script_nodes = list(filter(lambda filepath_scriptnode: filepath_scriptnode[1] is not None, possible_script_nodes.items()))
         logger.info("There were (%d) script nodes in the excerpts.", len(script_nodes))
