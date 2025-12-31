@@ -126,15 +126,13 @@ def delete_unused_images(index: list[str], *, target_dir: Path | str):
     """
     logger.debug("Found (%d) filenames in index.", len(index))
     image_files = tuple(filter(lambda file: file.is_file(), Path(target_dir).iterdir()))
-    logger.debug("Found (%d) files in '%s'.", len(image_files), target_dir)
-    # TODO: rm: tuple-coercion. What happens?
+    num_image_files = len(image_files)
+    logger.debug("Found (%d) files in '%s'.", num_image_files, target_dir)
     unused_images = map(
         lambda file: file.name,
-        tuple(
-            filter(
-                lambda file: file.name not in index,
-                image_files,
-            )
+        filter(
+            lambda file: file.name not in index,
+            image_files,
         )
     )
     num_unused_images = 0
@@ -147,17 +145,17 @@ def delete_unused_images(index: list[str], *, target_dir: Path | str):
 if __name__ == "__main__":
     GENERIC_IMAGE_PREFIX = "."
 
-    # Copy images directory from source to target.
     def copy_all_images():
         """
+        Copies images directory from source to target.
         """
         shutil.rmtree(TARGET_DIR, ignore_errors=True)
         shutil.copytree(SOURCE_DIR, TARGET_DIR)
         logger.info("'%s' has been copied to '%s'", SOURCE_DIR, TARGET_DIR)
 
-    # Compile list of used images and delete them.
-    def compile_and_delete_used_images():
+    def compile_and_delete_unused_images():
         """
+        Compiles list of unused images and delete them.
         """
         images = set()
         for (dirpath, dirs, filenames) in Path(EXCERPT_DIR).walk():
@@ -169,9 +167,9 @@ if __name__ == "__main__":
         logger.info("Compiled (%d) images being referenced in HTML.", len(images))
         delete_unused_images(images, target_dir=TARGET_DIR)
 
-    # Generate generic blending-mode images
     def generate_default_blendingmodes_images():
         """
+        Generates generic blending-mode sample images.
         """
         for sample_image_type in SampleImageType:
             number_of_partitions = sample_image_type.get_number_of_partitions()
@@ -184,20 +182,26 @@ if __name__ == "__main__":
             logger.debug("Extracting generic part from sample file: '%s'.", sample_img_filename)
             cropped_image = partitioning_func(sample_img_filename, **kwds)
             target_filename = sample_image_type.get_filename_for_default(prefix=GENERIC_IMAGE_PREFIX)
-            #cropped_image.filename = "/".join([TARGET_DIR, target_filename])
             target_path = Path(TARGET_DIR, target_filename)
             cropped_image.save(target_path)
             logger.info("Generic %s image has been saved to: '%s'", sample_image_type, target_path)
 
-    # Partition the existing images in-place.
     def partition_blendingmodes_images_inplace():
         """
+        Partitions the existing blending-mode sample images in-place.
         """
         partition_log = {}
         for imgtype in SampleImageType:
             partition_log[imgtype] = 0
+        def is_nongeneric_blendingmode_sample_image(path: Path):
+            """
+            Returns True if the path represents a non-generic blending_modes sample image, False otherwise.
+            """
+            is_sample_image = SampleImageType.get_sample_image_type(path.name) is not None
+            is_nongeneric = not path.name.startswith(GENERIC_IMAGE_PREFIX)
+            return all([is_sample_image, is_nongeneric])
         for imagefile in filter(
-            lambda path: SampleImageType.get_sample_image_type(path.name) is not None and not path.name.startswith(GENERIC_IMAGE_PREFIX),
+            lambda path: is_nongeneric_blendingmode_sample_image,
             Path(TARGET_DIR).iterdir(),
         ):
             sample_image_type = SampleImageType.get_sample_image_type(imagefile.name)
@@ -213,31 +217,33 @@ if __name__ == "__main__":
 
     def amputate_images():
         """
+        Copies images, deletes unused images, and partitions blending_modes sample images.
         """
         copy_all_images()
         print("All images in '%s' have been copied into '%s'." % (TARGET_DIR, SOURCE_DIR))
-        compile_and_delete_used_images()
+        compile_and_delete_unused_images()
         print("Unused images in '%s' have been deleted." % TARGET_DIR)
         generate_default_blendingmodes_images()
         print("Generic images for images with the suffixes: '%s'\nhave been created." % list(SampleImageType))
         partition_blendingmodes_images_inplace()
         print("Images with the suffixes: '%s'\nhave been partitioned in-place." % list(SampleImageType))
 
+    # TODO: Determine factor.
     def shrink_blending_mode_images():
         """
+        Shrinks blending_modes sample images, generic and otherwise.
         """
         for imagefile in filter(
             lambda path: SampleImageType.get_sample_image_type(path.name) is not None,
             Path(TARGET_DIR).iterdir(),
         ):
-            # TODO: Change upon deciding the true size of the images.
-            factor = 1
             with Image.open(str(imagefile)) as img:
                 scaled_image = ImageOps.scale(img, factor=factor)
             scaled_image.save(str(imagefile))
 
     def rotate_gradient_comparison_images():
         """
+        Rotates GRADIENT_COMPARISON sample images ninety degrees counterclockwise.
         """
         for imagefile in filter(
             lambda path: SampleImageType.get_sample_image_type(path.name) == SampleImageType.GRADIENT_COMPARISON,
@@ -246,11 +252,9 @@ if __name__ == "__main__":
             with Image.open(str(imagefile)) as img:
                 new_size = (img.size[1], img.size[0])
                 img = img.rotate(-90, expand=True)
-                #resize_func = ImageOps.fit
-                #img = resize_func(img, new_size)
             img.save(str(imagefile))
 
     amputate_images()
-    shrink_blending_mode_images()
     rotate_gradient_comparison_images()
+    #shrink_blending_mode_images()
 
