@@ -792,6 +792,7 @@ class BlendingModesHSXTestCase(unittest.TestCase):
 
     def setUp(self):
         """
+        Defines path to test file and creates it.
         """
         subdirectory = "blending_modes/"
         filename = "hsx.html"
@@ -1347,6 +1348,7 @@ Checks whether the upper layer’s pixel has a lower Saturation than the lower l
 
     def test_split_from_hsx_blendingmodes_pages(self):
         """
+        Tests functionality to extract 'blending_modes/hsx' subsubsections.
         """
         soup = bs4.BeautifulSoup(self.path_to_test_file.read_text(encoding="utf-8"), 'html.parser')
         sections = split_from_hsx_blendingmodes_page(soup)
@@ -1365,6 +1367,7 @@ class CalligraphyToolTestCase(unittest.TestCase):
 
     def setUp(self):
         """
+        Defines path to test file and creates it.
         """
         subdirectory = "tools/"
         filename = "calligraphy.html"
@@ -1677,6 +1680,7 @@ Press down with the stylus/left mouse button on the canvas to make a line, lifti
     @patch("pathlib.Path.write_text")
     def test_write_stripped_soup(self, MOCK_write_text):
         """
+        Tests functionality to write HTML after whitespace has been stripped.
         """
         soup = bs4.BeautifulSoup("""<section id="calligraphy-tool">
 <span id="index-0"></span><span id="id1"></span><h1>Calligraphy Tool<a class="headerlink" href="#calligraphy-tool" title="Link to this heading">¶</a></h1>
@@ -1715,6 +1719,7 @@ Press down with the stylus/left mouse button on the canvas to make a line, lifti
 <p class="admonition-title">Note</p>
 <p>The calligraphy tool can be edited by the edit-line tool, but currently you can’t add or remove nodes without converting it to a normal path.</p>
 </div>
+
 </section>
 </section>""", 'html.parser')
         num_lines = write_stripped_soup(soup, self.path_to_test_file)
