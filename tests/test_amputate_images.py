@@ -31,6 +31,7 @@ class ImageWithDotsTestCase(unittest.TestCase):
 
     def setUp(self):
         """
+        Declares filename and number of partitions to its type.
         """
         filename = "Blending_modes_Addition_Sample_image_with_dots.png"
         self.number_of_partitions = 2
@@ -40,6 +41,7 @@ class ImageWithDotsTestCase(unittest.TestCase):
 
     def test_get_sample_image_type(self):
         """
+        Validates sample-image-type returned.
         """
         expected = SampleImageType.WITH_DOTS
         actual = SampleImageType.get_sample_image_type("/".join([SOURCE_DIR, self.filename]))
@@ -47,6 +49,7 @@ class ImageWithDotsTestCase(unittest.TestCase):
 
     def test_get_filename_for_default(self):
         """
+        Validates string for default-filename.
         """
         prefix = "?"
         expected = prefix + "_Sample_image_with_dots.png"
@@ -55,6 +58,7 @@ class ImageWithDotsTestCase(unittest.TestCase):
 
     def test_get_number_of_partitions(self):
         """
+        Validates number of partitions appropriate.
         """
         expected = self.number_of_partitions
         actual = SampleImageType.WITH_DOTS.get_number_of_partitions()
@@ -62,6 +66,7 @@ class ImageWithDotsTestCase(unittest.TestCase):
 
     def test_get_half_of_image_file1(self):
         """
+        Validates image returned and its dimensions also.
         """
         filename = self.filename
         with Image.open(filename) as img:
@@ -78,6 +83,7 @@ class ImageWithDotsTestCase(unittest.TestCase):
 
     def test_get_half_of_image_file2(self):
         """
+        Validates image returned and its dimensions also.
         """
         filename = self.filename
         with Image.open(filename) as img:
@@ -94,10 +100,12 @@ class ImageWithDotsTestCase(unittest.TestCase):
 
 class GradientComparisonTestCase(unittest.TestCase):
     """
+    Validates behavior of module on GradientComparison sample image.
     """
 
     def setUp(self):
         """
+        Declares filename and number of partitions to its type.
         """
         filename = "Blending_modes_Divisive_Modulo_Gradient_Comparison.png"
         self.number_of_partitions = 3
@@ -107,6 +115,7 @@ class GradientComparisonTestCase(unittest.TestCase):
 
     def test_get_sample_image_type(self):
         """
+        Validates sample-image-type returned.
         """
         expected = SampleImageType.GRADIENT_COMPARISON
         actual = SampleImageType.get_sample_image_type("/".join([SOURCE_DIR, self.filename]))
@@ -114,6 +123,7 @@ class GradientComparisonTestCase(unittest.TestCase):
 
     def test_get_filename_for_default(self):
         """
+        Validates string for default-filename.
         """
         prefix = "!"
         expected = prefix + "_Gradient_Comparison.png"
@@ -122,6 +132,7 @@ class GradientComparisonTestCase(unittest.TestCase):
 
     def test_get_number_of_partitions(self):
         """
+        Validates number of partitions appropriate.
         """
         expected = self.number_of_partitions
         actual = SampleImageType.GRADIENT_COMPARISON.get_number_of_partitions()
@@ -129,6 +140,7 @@ class GradientComparisonTestCase(unittest.TestCase):
 
     def test_get_thirds_of_image_file23(self):
         """
+        Validates image returned when attempting to get the first two-thirds of the original.
         """
         filename = self.filename
         with Image.open(filename) as img:
@@ -145,6 +157,7 @@ class GradientComparisonTestCase(unittest.TestCase):
 
     def test_get_thirds_of_image_file13(self):
         """
+        Validates image returned when attempting to get the last third of the original.
         """
         filename = self.filename
         with Image.open(filename) as img:
@@ -161,10 +174,12 @@ class GradientComparisonTestCase(unittest.TestCase):
 
 class NotASampleImageTestCase(unittest.TestCase):
     """
+    Validates behavior of module when it acts upon a non-sample-image.
     """
 
     def setUp(self):
         """
+        Declares filename of non-sample-image.
         """
         filename = "Color-adjustment-curve.png"
         path_to_og_file = Path(SOURCE_DIR, filename)
@@ -173,16 +188,19 @@ class NotASampleImageTestCase(unittest.TestCase):
 
     def test_get_sample_image_type(self):
         """
+        Validates return-value of class-method.
         """
         actual = SampleImageType.get_sample_image_type(self.filename)
         self.assertIsNone(actual)
 
 class ImageDirectoryTestCase(unittest.TestCase):
     """
+    Creates a mini filetree to test deletion functionality of module.
     """
 
     def setUp(self):
         """
+        Initializes filetree.
         """
         filenames = (
             "Blending_modes_Addition_Sample_image_with_dots.png",
@@ -198,6 +216,7 @@ class ImageDirectoryTestCase(unittest.TestCase):
     @patch("pathlib.Path.unlink")
     def test_delete_unused_images(self, mock_unlink, mock_iterdir):
         """
+        Tests that the expected number of images have been deleted.
         """
         index = ["Color-adjustment-curve.png"]
         mock_iterdir.return_value = (
@@ -214,10 +233,12 @@ class ImageDirectoryTestCase(unittest.TestCase):
 
 class ImageSoupTestCase(unittest.TestCase):
     """
+    Declares soup stub with which one can test <img>-src compilation.
     """
 
     def setUp(self):
         """
+        Declares initial soup.
         """
         self.soup_as_str = """<article id='img-soup'>
 <h2>Image Soup</h2>
@@ -225,6 +246,7 @@ class ImageSoupTestCase(unittest.TestCase):
 
     def test_compile_images_from_soup(self):
         """
+        Validates list of compiled image sources.
         """
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
         expected = set(
