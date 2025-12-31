@@ -5,6 +5,11 @@ Models sample-image types, partitions images, and deletes images.
 import enum
 import shutil
 from pathlib import Path
+from typing import (
+    Self,
+    Any,
+    Set,
+)
 
 from PIL import Image
 from PIL import ImageOps
@@ -33,7 +38,7 @@ class SampleImageType(enum.Enum):
     GRADIENTS = "_Gradients.png"
 
     @classmethod
-    def get_sample_image_type(cls, filename: str):
+    def get_sample_image_type(cls, filename: str) -> None | Self:
         """
         Determines the sample image type of `filename`.
         """
@@ -46,7 +51,7 @@ class SampleImageType(enum.Enum):
             logger.debug("'%s' does not fall into one of the declared SampleImageType enumerations.", filename)
             return None
 
-    def get_filename_for_default(self, *, prefix: str):
+    def get_filename_for_default(self, *, prefix: str) -> str:
         """
         Returns the filename for the default version of a sample image, given a `prefix`.
         """
@@ -54,7 +59,7 @@ class SampleImageType(enum.Enum):
         logger.debug("Returning: '%s'", filename_for_default_image)
         return filename_for_default_image
 
-    def get_number_of_partitions(self):
+    def get_number_of_partitions(self) -> int:
         """
         Defines the number of partitions a sample image ought to have.
         """
@@ -71,7 +76,7 @@ class SampleImageType(enum.Enum):
             self.GRADIENTS: 3,
         }[self]
 
-def get_half_of_image_file(filename: str, *, get_first_half: bool):
+def get_half_of_image_file(filename: str | Path, *, get_first_half: bool) -> Any:
     """
     Returns one of two halves of image specified by `filename`.
     """
@@ -91,7 +96,7 @@ def get_half_of_image_file(filename: str, *, get_first_half: bool):
         cropped_image = img.crop(box)
     return cropped_image
 
-def get_thirds_of_image_file(filename: str, *, get_last_third: bool):
+def get_thirds_of_image_file(filename: str | Path, *, get_last_third: bool) -> Any:
     """
     Returns either first two-thirds or last third of image specified by `filename`.
     """
@@ -109,18 +114,18 @@ def get_thirds_of_image_file(filename: str, *, get_last_third: bool):
         cropped_image = img.crop(box)
     return cropped_image
 
-def compile_images_from_soup(soup: BeautifulSoup):
+def compile_images_from_soup(soup: BeautifulSoup) -> Set[str]:
     """
     Compiles list of <img> and <a> references in `soup`.
     """
     images = set()
     for img in soup.find_all("img"):
-        images.add(Path(img['src']).name)
+        images.add(Path(str(img['src'])).name)
     for a in soup.find_all("a"):
-        images.add(Path(a['href']).name)
+        images.add(Path(str(a['href'])).name)
     return images
 
-def delete_unused_images(index: list[str], *, target_dir: Path | str):
+def delete_unused_images(index: Set[str], *, target_dir: Path | str) -> None:
     """
     Deletes images from `target_dir` that aren't referenced in `index`.
     """
@@ -145,7 +150,7 @@ def delete_unused_images(index: list[str], *, target_dir: Path | str):
 if __name__ == "__main__":
     GENERIC_IMAGE_PREFIX = "."
 
-    def copy_all_images():
+    def copy_all_images() -> None:
         """
         Copies images directory from source to target.
         """
@@ -153,7 +158,7 @@ if __name__ == "__main__":
         shutil.copytree(SOURCE_DIR, TARGET_DIR)
         logger.info("'%s' has been copied to '%s'", SOURCE_DIR, TARGET_DIR)
 
-    def compile_and_delete_unused_images():
+    def compile_and_delete_unused_images() -> None:
         """
         Compiles list of unused images and delete them.
         """
@@ -167,7 +172,7 @@ if __name__ == "__main__":
         logger.info("Compiled (%d) images being referenced in HTML.", len(images))
         delete_unused_images(images, target_dir=TARGET_DIR)
 
-    def generate_default_blendingmodes_images():
+    def generate_default_blendingmodes_images() -> None:
         """
         Generates generic blending-mode sample images.
         """
@@ -186,14 +191,14 @@ if __name__ == "__main__":
             cropped_image.save(target_path)
             logger.info("Generic %s image has been saved to: '%s'", sample_image_type, target_path)
 
-    def partition_blendingmodes_images_inplace():
+    def partition_blendingmodes_images_inplace() -> None:
         """
         Partitions the existing blending-mode sample images in-place.
         """
         partition_log = {}
         for imgtype in SampleImageType:
             partition_log[imgtype] = 0
-        def is_nongeneric_blendingmode_sample_image(path: Path):
+        def is_nongeneric_blendingmode_sample_image(path: Path) -> bool:
             """
             Returns True if the path represents a non-generic blending_modes sample image, False otherwise.
             """
@@ -215,7 +220,7 @@ if __name__ == "__main__":
             partition_log[sample_image_type] += 1
         logger.info("Partition complete. Report: %s", partition_log)
 
-    def amputate_images():
+    def amputate_images() -> None:
         """
         Copies images, deletes unused images, and partitions blending_modes sample images.
         """
@@ -229,7 +234,7 @@ if __name__ == "__main__":
         print("Images with the suffixes: '%s'\nhave been partitioned in-place." % list(SampleImageType))
 
     # TODO: Determine factor.
-    def shrink_blending_mode_images():
+    def shrink_blending_mode_images() -> None:
         """
         Shrinks blending_modes sample images, generic and otherwise.
         """
@@ -241,7 +246,7 @@ if __name__ == "__main__":
                 scaled_image = ImageOps.scale(img, factor=factor)
             scaled_image.save(str(imagefile))
 
-    def rotate_gradient_comparison_images():
+    def rotate_gradient_comparison_images() -> None:
         """
         Rotates GRADIENT_COMPARISON sample images ninety degrees counterclockwise.
         """
