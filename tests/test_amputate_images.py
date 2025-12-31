@@ -1,4 +1,5 @@
 """
+Tests image processing functionality of 'amputate_images'.
 """
 
 import unittest
@@ -25,6 +26,7 @@ for dirname in (SOURCE_DIR, TARGET_DIR):
 
 class ImageWithDotsTestCase(unittest.TestCase):
     """
+    Inspects behavior of module when executed on image with suffix, 'Sample_image_with_dots.png'
     """
 
     def setUp(self):
@@ -32,8 +34,8 @@ class ImageWithDotsTestCase(unittest.TestCase):
         """
         filename = "Blending_modes_Addition_Sample_image_with_dots.png"
         self.number_of_partitions = 2
-        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [filename])
-        self.filename = "/".join([SOURCE_DIR, filename])
+        path_to_og_file = Path(SOURCE_DIR, filename)
+        self.filename = "/".join([TARGET_DIR, filename])
         shutil.copyfile(path_to_og_file, self.filename)
 
     def test_get_sample_image_type(self):
@@ -99,8 +101,8 @@ class GradientComparisonTestCase(unittest.TestCase):
         """
         filename = "Blending_modes_Divisive_Modulo_Gradient_Comparison.png"
         self.number_of_partitions = 3
-        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [filename])
-        self.filename = "/".join([SOURCE_DIR, filename])
+        path_to_og_file = Path(SOURCE_DIR, filename)
+        self.filename = "/".join([TARGET_DIR, filename])
         shutil.copyfile(path_to_og_file, self.filename)
 
     def test_get_sample_image_type(self):
@@ -165,14 +167,14 @@ class NotASampleImageTestCase(unittest.TestCase):
         """
         """
         filename = "Color-adjustment-curve.png"
-        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [filename])
-        self.filename = "/".join([SOURCE_DIR, filename])
+        path_to_og_file = Path(SOURCE_DIR, filename)
+        self.filename = "/".join([TARGET_DIR, filename])
         shutil.copyfile(path_to_og_file, self.filename)
 
     def test_get_sample_image_type(self):
         """
         """
-        actual = SampleImageType.get_sample_image_type("/".join([SOURCE_DIR, self.filename]))
+        actual = SampleImageType.get_sample_image_type(self.filename)
         self.assertIsNone(actual)
 
 class ImageDirectoryTestCase(unittest.TestCase):
@@ -188,8 +190,8 @@ class ImageDirectoryTestCase(unittest.TestCase):
             "Color-adjustment-curve.png",
         )
         for filename in filenames:
-            path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [filename])
-            self.filename = "/".join([SOURCE_DIR, filename])
+            path_to_og_file = Path(SOURCE_DIR, filename)
+            self.filename = "/".join([TARGET_DIR, filename])
             shutil.copyfile(path_to_og_file, self.filename)
 
     @patch("pathlib.Path.iterdir")
