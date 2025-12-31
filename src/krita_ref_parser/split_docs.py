@@ -20,11 +20,14 @@ PILCROW = "¶"
 SOURCE_DIR = "./input/docs-krita-org/_build/html/reference_manual/"
 TARGET_DIR = "./output/raw-excerpts/"
 
-def split_from_page(soup: BeautifulSoup) -> List[Tag | None]:
+def split_from_page(soup: BeautifulSoup) -> List[Tag]:
     """
     Returns first <section> in `soup` in a list.
     """
-    sections = [soup.css.select_one("section[id]")]
+    section = soup.css.select_one("section[id]")
+    sections = []
+    if section is not None:
+        sections.append(section)
     logger.debug("(%d) sections found. Returning as list.", len(sections))
     return sections
 

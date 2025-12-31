@@ -226,7 +226,7 @@ if __name__ == "__main__":
         """
         """
         for imagefile in filter(
-            lambda path: SampleImageType.get_sample_image_type(path.name) is not None,# and not path.name.startswith(GENERIC_IMAGE_PREFIX),
+            lambda path: SampleImageType.get_sample_image_type(path.name) is not None,
             Path(TARGET_DIR).iterdir(),
         ):
             # TODO: Change upon deciding the true size of the images.
@@ -234,9 +234,6 @@ if __name__ == "__main__":
             with Image.open(str(imagefile)) as img:
                 scaled_image = ImageOps.scale(img, factor=factor)
             scaled_image.save(str(imagefile))
-
-    amputate_images()
-    shrink_blending_mode_images()
 
     def rotate_gradient_comparison_images():
         """
@@ -252,4 +249,7 @@ if __name__ == "__main__":
                 #img = resize_func(img, new_size)
             img.save(str(imagefile))
 
+    amputate_images()
+    shrink_blending_mode_images()
     rotate_gradient_comparison_images()
+
