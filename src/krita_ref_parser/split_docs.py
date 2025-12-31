@@ -4,8 +4,14 @@ Extracts raw excerpts from HTML copy of Krita documentation and splits them into
 
 import re
 from pathlib import Path
+from typing import (
+    List,
+    )
 
-from bs4 import BeautifulSoup
+from bs4 import (
+    BeautifulSoup,
+    Tag,
+)
 
 from krita_ref_parser._logging import logger
 
@@ -14,7 +20,7 @@ PILCROW = "¶"
 SOURCE_DIR = "./input/docs-krita-org/_build/html/reference_manual/"
 TARGET_DIR = "./output/raw-excerpts/"
 
-def split_from_page(soup: BeautifulSoup):
+def split_from_page(soup: BeautifulSoup) -> List[Tag | None]:
     """
     Returns first <section> in `soup` in a list.
     """
@@ -22,7 +28,7 @@ def split_from_page(soup: BeautifulSoup):
     logger.debug("(%d) sections found. Returning as list.", len(sections))
     return sections
 
-def split_from_blendingmodes_page(soup: BeautifulSoup):
+def split_from_blendingmodes_page(soup: BeautifulSoup) -> List[Tag]:
     """
     Returns all <section> parented by <section> from `soup`.
     """
@@ -30,7 +36,7 @@ def split_from_blendingmodes_page(soup: BeautifulSoup):
     logger.debug("(%d) sections found. Returning as list.", len(sections))
     return sections
 
-def split_from_hsx_blendingmodes_page(soup: BeautifulSoup):
+def split_from_hsx_blendingmodes_page(soup: BeautifulSoup) -> List[Tag]:
     """
     Returns all <section> parented by '#hsx-blending-modes' in `soup`.
     """
@@ -38,10 +44,12 @@ def split_from_hsx_blendingmodes_page(soup: BeautifulSoup):
     logger.debug("(%d) sections found. Returning as list.", len(sections))
     return sections
 
-def write_stripped_soup(soup: BeautifulSoup, filename: str):
+def write_stripped_soup(soup: Tag | BeautifulSoup | None, filename: str | Path) -> int:
     """
     Strips whitespace from `soup` and writes it to `filename`.
     """
+    if soup is None:
+        raise Exception("Soup to write to '%s' is None." % filename)
     logger.debug("Writing lines to '%s'. Calculating number of lines.", filename)
     soup_as_lines = [line.strip() for line in str(soup).splitlines() if line.strip()]
     soup_as_str = "\n".join(soup_as_lines)
@@ -54,7 +62,7 @@ def write_stripped_soup(soup: BeautifulSoup, filename: str):
 if __name__ == "__main__":
     import subprocess
 
-    def create_main_directories_and_indices():
+    def create_main_directories_and_indices() -> None:
         """
         Creates main directories and their corresponding index files.
         """
@@ -82,7 +90,7 @@ if __name__ == "__main__":
             num_directories += 1
         logger.info("Created (%d) directories.", num_directories)
 
-    def populate_main_directories():
+    def populate_main_directories() -> None:
         """
         Parses first-level <section> from source and writes each <section> to one file.
         """
@@ -101,7 +109,7 @@ if __name__ == "__main__":
                 num_files += 1
             logger.info("(%d) HTML files have been created.", num_files)
 
-    def populate_main_subdirectories():
+    def populate_main_subdirectories() -> None:
         """
         Parses most second-level <section> and writes each <section> to a file.
         """
@@ -125,7 +133,7 @@ if __name__ == "__main__":
                     num_files += 1
                 logger.info("(%d) HTML files have been created.", num_files)
 
-    def populate_blendingmodes_subdirectories():
+    def populate_blendingmodes_subdirectories() -> None:
         """
         Creates new 'blending_modes' subdirectories and populates them.
         """
@@ -138,7 +146,7 @@ if __name__ == "__main__":
             sections = split_from_blendingmodes_page(soup)
             num_files = 0
             for section in sections:
-                blending_mode = section['id']
+                blending_mode = str(section['id'])
                 target_file = blendingmodes_subdir.joinpath(blending_mode + ".html")
                 soup = BeautifulSoup(str(section), 'html.parser')
                 num_lines = write_stripped_soup(section, target_file)
@@ -146,7 +154,7 @@ if __name__ == "__main__":
                 num_files += 1
             logger.info("(%d) HTML files have been created.", num_files)
 
-    def populate_hsx_blendingmodes_subdirectories():
+    def populate_hsx_blendingmodes_subdirectories() -> None:
         """
         Creates HSX 'blending_modes' subdirectory and populates it.
         """
@@ -158,7 +166,7 @@ if __name__ == "__main__":
         sections = split_from_hsx_blendingmodes_page(soup)
         num_files = 0
         for section in sections:
-            blending_mode = section['id']
+            blending_mode = str(section['id'])
             target_file = hsx_blendingmode_subdir.joinpath(blending_mode + ".html")
             soup = BeautifulSoup(str(section), 'html.parser')
             num_lines = write_stripped_soup(section, target_file)
@@ -166,19 +174,18 @@ if __name__ == "__main__":
             num_files += 1
         logger.info("(%d) HTML files have been created.", num_files)
 
-    def inspect_output(filename: str, to_inspect: bool):
+    def inspect_output(filename: str, to_inspect: bool) -> None:
         """
         Pauses program to let user inspect text output via 'vim '.
         """
         args = ["vi"]
-        root_dir = "output/raw-excerpts"
         args.append("/".join([TARGET_DIR, filename]))
         if to_inspect:
             subprocess.run(args)
         else:
             logger.debug("Skipped execution of command: %s", " ".join(args))
 
-    def split_docs(*, to_inspect: bool):
+    def split_docs(*, to_inspect: bool) -> None:
         """
         Populates `TARGET_DIR` while mostly retaining original filetree structure.
         """
@@ -204,7 +211,7 @@ if __name__ == "__main__":
         filename = "blending_modes/hsx/increase-value_lightness-intensity-luminosity.html"
         inspect_output(filename, to_inspect=to_inspect)
 
-    def scan_files_for_script_nodes():
+    def scan_files_for_script_nodes() -> None:
         """
         Raises Exception if any parsed content contains a <script> node.
         """
