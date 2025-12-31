@@ -18,6 +18,7 @@ EXCERPT_DIR = "./output/raw-excerpts/"
 
 class SampleImageType(enum.Enum):
     """
+    Defines list of possible sample image types and functions that relate to them.
     """
     # BLENDING_MODES
     WITH_DOTS = "_Sample_image_with_dots.png"
@@ -34,6 +35,7 @@ class SampleImageType(enum.Enum):
     @classmethod
     def get_sample_image_type(cls, filename: str):
         """
+        Determines the sample image type of `filename`.
         """
         logger.debug("Checking if '%s' is one of the declared SampleImageType enumerations.", filename)
         try:
@@ -46,6 +48,7 @@ class SampleImageType(enum.Enum):
 
     def get_filename_for_default(self, *, prefix: str):
         """
+        Returns the filename for the default version of a sample image, given a `prefix`.
         """
         filename_for_default_image = prefix + self.value
         logger.debug("Returning: '%s'", filename_for_default_image)
@@ -53,6 +56,7 @@ class SampleImageType(enum.Enum):
 
     def get_number_of_partitions(self):
         """
+        Defines the number of partitions a sample image ought to have.
         """
         return {
             # (various)
@@ -71,7 +75,6 @@ def get_half_of_image_file(filename: str, *, get_first_half: bool):
     """
     Returns one of two halves of image specified by `filename`.
     """
-    #logger.debug("Now halving: %s", filename)
     logger.debug("Halving: '%s'.", filename)
     # box – The crop rectangle, as a (left, upper, right, lower)-tuple.
     with Image.open(filename) as img:
@@ -90,6 +93,7 @@ def get_half_of_image_file(filename: str, *, get_first_half: bool):
 
 def get_thirds_of_image_file(filename: str, *, get_last_third: bool):
     """
+    Returns either first two-thirds or last third of image specified by `filename`.
     """
     logger.debug("Cutting '%s' into thirds.", filename)
     with Image.open(filename) as img:
@@ -97,16 +101,17 @@ def get_thirds_of_image_file(filename: str, *, get_last_third: bool):
         full_height = img.size[1]
         two_thirds_width = int(full_width * 2 / 3)
         if get_last_third:
-            logger.debug("getting last third.")
+            logger.debug("Getting last third.")
             box = (two_thirds_width, 0, full_width, full_height)
         else:
-            logger.debug("getting first two-thirds.")
+            logger.debug("Getting first two-thirds.")
             box = (0, 0, two_thirds_width, full_height)
         cropped_image = img.crop(box)
     return cropped_image
 
 def compile_images_from_soup(soup: BeautifulSoup):
     """
+    Compiles list of <img> and <a> references in `soup`.
     """
     images = set()
     for img in soup.find_all("img"):
@@ -117,11 +122,12 @@ def compile_images_from_soup(soup: BeautifulSoup):
 
 def delete_unused_images(index: list[str], *, target_dir: Path | str):
     """
+    Deletes images from `target_dir` that aren't referenced in `index`.
     """
     logger.debug("Found (%d) filenames in index.", len(index))
     image_files = tuple(filter(lambda file: file.is_file(), Path(target_dir).iterdir()))
-    num_image_files = len(image_files)
-    logger.debug("Found (%d) image files in '%s'.", num_image_files, target_dir)
+    logger.debug("Found (%d) files in '%s'.", len(image_files), target_dir)
+    # TODO: rm: tuple-coercion. What happens?
     unused_images = map(
         lambda file: file.name,
         tuple(
@@ -137,11 +143,6 @@ def delete_unused_images(index: list[str], *, target_dir: Path | str):
         imagefile.unlink()
         num_unused_images += 1
     logger.debug("Deleted %d unused image files in '%s'. Number of images remaining: %d.", num_unused_images, target_dir, num_image_files - num_unused_images)
-
-def resize_image_file(image_file: Path | str):
-    """
-    """
-    image_file.save()
 
 if __name__ == "__main__":
     GENERIC_IMAGE_PREFIX = "."
