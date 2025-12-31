@@ -124,22 +124,6 @@ if __name__ == "__main__":
                     num_files += 1
                 logger.info("(%d) HTML files have been created.", num_files)
 
-    def _get_blendingmode_dict():
-        """
-        """
-        blendingmode_dict = {}
-        for filepath in filter(lambda path_: path_.is_file() and path_.name != "hsx.html", Path(TARGET_DIR, "blending_modes").iterdir()):
-            soup = BeautifulSoup(filepath.read_text(), 'html.parser')
-            sections = split_from_blendingmodes_page(soup)
-            for section in sections:
-                h2_text = section.find("h2").text
-                h2_text = h2_text[:h2_text.index(PILCROW)]
-                blending_mode = re.sub(r" \((.+?)\)", r"_\1", h2_text.replace(" & ", "_and_").replace(" - ", "_")).replace(" ", "-").lower()
-                blendingmode_dict[h2_text] = blending_mode
-        import json
-        bm_dict_as_json = json.dumps(blendingmode_dict, indent=4)
-        print(bm_dict_as_json)
-
     def populate_blendingmodes_subdirectories():
         """
         Creates new 'blending_modes' subdirectories and populates them.
@@ -339,8 +323,7 @@ if __name__ == "__main__":
                     continue
                 raise Exception("'%s' contains a <script> tag." % filepath)
 
-    #split_docs()
+    split_docs()
     scan_files_for_script_nodes()
     #inspect_output()
-    #_get_blendingmode_dict()
 
