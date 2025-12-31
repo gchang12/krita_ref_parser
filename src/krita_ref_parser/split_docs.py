@@ -329,20 +329,15 @@ if __name__ == "__main__":
         """
         Raises Exception if any parsed content contains a <script> node.
         """
-        possible_script_nodes = {}
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
             logger.info("Now scanning files in '%s' for <script> tags.", dirpath)
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
                 script_node = soup.css.select_one("script")
-                if script_node is not None:
-                    raise Exception("'%s' contains a <script> tag." % filepath)
-                possible_script_nodes[str(filepath)] = script_node
-        script_nodes = list(filter(lambda filepath_scriptnode: filepath_scriptnode[1] is not None, possible_script_nodes.items()))
-        logger.info("There were (%d) script nodes in the excerpts.", len(script_nodes))
-        for filepath, _ in script_nodes:
-            logger.warning("A script node has been found in: %s", filepath)
+                if script_node is None:
+                    continue
+                raise Exception("'%s' contains a <script> tag." % filepath)
 
     #split_docs()
     scan_files_for_script_nodes()
