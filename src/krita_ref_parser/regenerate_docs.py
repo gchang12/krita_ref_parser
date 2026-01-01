@@ -64,11 +64,6 @@ def update_img_src(img: bs4.Tag):
         logger.error("%s has no 'src' attribute. Inspect.", img)
         raise key_err
 
-def normalize_internal_href(a: bs4.Tag):
-    """
-    """
-    a['href'] = "/" + a['href'].lstrip('./')
-
 # - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
 def internal_link_should_become_external(a: bs4.Tag, *, num_levels: int):
     """
@@ -345,7 +340,6 @@ if __name__ == "__main__":
                 write_soup_to_file(soup, filepath)
 
     # for updating paths and references
-    #normalize_internal_href,
     #replace_internal_reference_with_official,
 
     # strip headers

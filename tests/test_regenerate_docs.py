@@ -18,7 +18,6 @@ from krita_ref_parser.regenerate_docs import (
     update_references_to_blending_modes_sections,
     get_correct_blending_modes_path,
     update_img_src,
-    normalize_internal_href,
     internal_link_should_become_external,
     replace_internal_reference_with_official,
     # for changing behavior of links themselves
@@ -1145,17 +1144,6 @@ class ContainsInternalLinkTestCase(unittest.TestCase):
         a = soup.find("a", href=href)
         actual = internal_link_should_become_external(a, num_levels=num_levels)
         self.assertIs(actual, expected)
-
-    def test_normalize_internal_href(self):
-        """
-        """
-        soup = self.soup
-        href = "../layers_and_masks/transformation_masks.html#transformation-masks"
-        a = soup.find("a", href=href)
-        normalize_internal_href(a)
-        expected = "/layers_and_masks/transformation_masks.html#transformation-masks"
-        actual = a['href']
-        self.assertEqual(actual, expected)
 
 # - is_index_file: layers_and_masks/fill_layers.html
 class IndexTestCase(unittest.TestCase):
