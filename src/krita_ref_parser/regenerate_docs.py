@@ -121,13 +121,6 @@ def replace_internal_reference_with_official(internal_a: bs4.Tag):
 
 # MODIFY LINK BEHAVIOR
 
-# - Have links to external/official pages open new tabs.
-def have_a_tag_open_new_tab(a: bs4.Tag):
-    """
-    """
-    #for a in filter(lambda a: "external" in a['class'], soup.find_all("a")):
-    a['target'] = "_blank"
-
 # INDEX-FILE MANAGEMENT
 
 def is_index_file(filename: Path | str):

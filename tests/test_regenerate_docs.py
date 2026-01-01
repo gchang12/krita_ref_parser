@@ -20,8 +20,6 @@ from krita_ref_parser.regenerate_docs import (
     update_img_src,
     internal_link_should_become_external,
     replace_internal_reference_with_official,
-    # for changing behavior of links themselves
-    have_a_tag_open_new_tab,
     # for renovating index files
     extract_subsections,
     remove_links_from_index,
@@ -892,16 +890,6 @@ splitter.</p>
 </dl>
 </section>''')
         self.soup = soup
-
-    def test_have_a_tag_open_new_tab(self):
-        """
-        """
-        expected = "_blank"
-        for a in self.soup.css.select("a[class='external']"):
-            have_a_tag_open_new_tab(a)
-            actual = a['target']
-            with self.subTest():
-                self.assertEqual(actual, expected)
 
 # - has_link_to_krita_non-refman_article: main_menu/settings_menu.html
 class ContainsOfficialDocsLinkTestCase(unittest.TestCase):
