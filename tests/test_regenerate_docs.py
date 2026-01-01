@@ -23,9 +23,7 @@ from krita_ref_parser.regenerate_docs import (
     # for renovating index files
     extract_subsections,
     is_index_file,
-    #replace_blending_modes_index_file,
     # for renaming files
-    update_filename,
     update_references_to_filename,
     update_filename_record_of_index,
     )
@@ -1244,29 +1242,6 @@ class MovedFileTestCase(unittest.TestCase):
 <h1>References Fill Layer</h1>
 <p><a class='internal' href='../../layers_and_masks/fill_layers.html'>On Fill Layers</a></p>
 </section>""")
-
-    def test_update_filename(self):
-        """
-        """
-        root_dir = TARGET_DIR
-        src_path = Path(self.dirname, self.filename)
-        tgt_path = Path(self.dirname, "fill_layer_generators.html")
-        with self.subTest():
-            expected = True
-            actual = Path(root_dir, src_path).exists()
-            before_text = Path(root_dir, src_path).read_text(encoding="utf-8")
-            self.assertIs(actual, expected)
-            expected = False
-            actual = Path(root_dir, tgt_path).exists()
-        update_filename(root_dir, src_path, tgt_path)
-        with self.subTest():
-            expected = False
-            actual = Path(root_dir, src_path).exists()
-            self.assertIs(actual, expected)
-            expected = True
-            actual = Path(root_dir, tgt_path).exists()
-            after_text = Path(root_dir, tgt_path).read_text(encoding="utf-8")
-        self.assertEqual(before_text, after_text)
 
     def test_update_references_to_filename(self):
         """

@@ -136,18 +136,6 @@ def extract_subsections(soup: bs4.BeautifulSoup):
 # RENAMING FILES
 # - mv 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
 
-def update_filename(root_dir: Path | str, src_path: Path | str, tgt_path: Path | str):
-    """
-    """
-    #src_path = Path("layers_and_masks", "fill_layers.html")
-    #tgt_path = Path("layers_and_masks", "fill_layer_generators.html")
-    #root_dir = TARGET_DIR
-    shutil.move(
-        Path(root_dir, src_path),
-        Path(root_dir, tgt_path),
-    )
-# - and change header to 'Fill Layer Generators'
-
 def update_references_to_filename(
         soup: bs4.BeautifulSoup,
         section: Path | str,
