@@ -441,20 +441,6 @@ if __name__ == "__main__":
                     div['class'] += " index"
                 write_soup_to_file(soup, filepath)
 
-    # replace section container with div.
-    #replace_section_with_div,
-    def promote_blending_modes_h_tags_in_files():
-        """
-        """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            if dirpath.parts[-2] == "blending_modes":
-                h_level = 2
-            for filename in filenames:
-                filepath = dirpath.joinpath(filename)
-                soup = get_soup_from_file(filepath)
-                promote_h_tags(soup, h_levels=(h_level, h_level-1))
-                write_soup_to_file(soup, filepath)
-
     # strip icons (note the exceptions)
     #extract_icon,
     def strip_icons_from_all_files():
