@@ -6,6 +6,7 @@ Defines functions to return list of objects of the form:
     header: str,
     icon: str|null,
     figures: [{img, figcaption}]|null,
+    ...,
   }
 ]
 """
@@ -14,9 +15,13 @@ from pathlib import Path
 from typing import (
     Any,
     Iterable,
-    )
+    Sized,
+)
 
-from bs4 import BeautifulSoup
+from bs4 import (
+    BeautifulSoup,
+    Tag,
+)
 
 from krita_ref_parser._logging import logger
 
@@ -72,7 +77,7 @@ BLENDING_MODE_HSX_SECTION = (
     "blending_modes/hsx",
 )
 
-def detect_index_files_for_directories(source_dir: Path | str, *, dirs_with_no_indices=DIRS_WITH_NO_INDICES) -> None:
+def detect_index_files_for_directories(source_dir: Path | str, *, dirs_with_no_indices: Iterable[Path] = DIRS_WITH_NO_INDICES) -> None:
     """
     Checks if each directory has a corresponding index file.
     """
@@ -86,31 +91,32 @@ def detect_index_files_for_directories(source_dir: Path | str, *, dirs_with_no_i
         raise FileNotFoundError("These directories in '%s' lack complementing index files: %r" % (source_dir, missing_files))
     logger.info("All directories in '%s' have complementing index files.", source_dir)
 
-def get_header(soup: BeautifulSoup, *, h_level: int) -> str:
+def get_header(soup: BeautifulSoup | Tag, *, h_level: int) -> str:
     """
     Returns the header of a given <section> soup.
     """
+    h_text: str
     h_tag = "h%d" % h_level
     h_text = soup.find(h_tag).text
     h_text = h_text[:h_text.index(PILCROW)]
     logger.debug("Returning header: '%s'", h_text)
-    return h_text
+    return str(h_text)
 
-def get_section_id(soup: BeautifulSoup, *, h_level: int) -> str:
+def get_section_id(soup: BeautifulSoup | Tag, *, h_level: int) -> str:
     """
     Returns the id attribute of a <section> `soup`.
     """
     h_tag = soup.find("h%d" % h_level)
     a_href = h_tag.find("a", class_="headerlink")['href']
     logger.debug("Returning header: '%s'", a_href)
-    return a_href
+    return str(a_href)
 
-def get_icon(soup: BeautifulSoup) -> str | None:
+def get_icon(soup: BeautifulSoup | Tag) -> str | None:
     """
     Returns the src attribute of the first <img> of a `soup`.
     """
     try:
-        img_src = Path(soup.find("img")['src']).name
+        img_src = str(Path(str(soup.find("img")['src'])).name)
         logger.debug("Image found. Returning source: '%s'", img_src)
     except TypeError:
         img_src = None
@@ -130,7 +136,7 @@ def get_figures(soup: BeautifulSoup) -> None | list[dict[str, str]]:
         except AttributeError:
             figcaption = None
         fig_as_dict = {
-            "img": Path(img).name,
+            "img": Path(str(img)).name,
             "figcaption": figcaption,
         }
         figures.append(fig_as_dict)
@@ -164,11 +170,11 @@ if __name__ == "__main__":
         detect_index_files_for_directories(dirname)
         logger.info("Success!")
 
-    def determine_if_walk_entry_is_in_sections(sections_to_search: list[str]) -> Any:
+    def determine_if_walk_entry_is_in_sections(sections_to_search: Iterable[str]) -> Any:
         """
         Returns a function that checks if an item yielded by pathlib.Path.walk is in the provided section-list.
         """
-        def walk_entry_is_in_sections(dirpathdirnamesfilenames: tuple[Path, list[str], list[str]]):
+        def walk_entry_is_in_sections(dirpathdirnamesfilenames: tuple[Path, list[str], list[str]]) -> bool:
             """
             Returns True if the walk-entry is in the list of sections to search.
             """
@@ -177,7 +183,7 @@ if __name__ == "__main__":
             return content_path in sections_to_search
         return walk_entry_is_in_sections
 
-    def compile_entries_from_dir(dirpath: Path | str, filenames: list[str], *, h_level: int) -> list[dict[str, Any]]:
+    def compile_entries_from_dir(dirpath: Path, filenames: Iterable[str], *, h_level: int) -> list[dict[str, Any]]:
         """
         Aggregates each Krita documentation entry in a given section into a dict and appends it to a list, which is then returned.
         """
@@ -224,7 +230,7 @@ if __name__ == "__main__":
     # {'resource_management', 'blending_modes', 'dockers', 'filters', 'layers_and_masks', 'brushes', 'preferences', 'tools', 'main_menu'}
     # index files exist: YES
 
-    def compile_entries_from_dirs(sections_to_search: list[str], *, h_level: int) -> list[dict[str, Any]]:
+    def compile_entries_from_dirs(sections_to_search: Iterable[str], *, h_level: int) -> list[dict[str, Any]]:
         """
         Compiles Krita documentation entries from all sections into a list, which is returned.
         """
@@ -268,7 +274,7 @@ if __name__ == "__main__":
     logger.info("(%d) entries compiled into index.", len(INDEX))
     logger.info("Fields of index: %s.", tuple(INDEX[0].keys()))
 
-    def set_icons_to_null(index: list[dict[str, Any]], id_list: list[str]) -> None:
+    def set_icons_to_null(index: list[dict[str, Any]], id_list: Iterable[str]) -> None:
         """
         Sets icons in sections identified in `id_list` to null if they've been manually evaluated to be invalid.
         """
@@ -279,7 +285,7 @@ if __name__ == "__main__":
             except IndexError:
                 logger.warning("Record with sectionId='%s' not found.", id)
 
-    def update_renamed_record(index: list[dict[str, Any]], src_path: list[str], new_record: dict[str, bool | str]) -> None:
+    def update_renamed_record(index: list[dict[str, Any]], src_path: list[str], new_record: dict[str, object]) -> None:
         """
         Renames record identified by `src_path` to `tgt_path`.
         """
