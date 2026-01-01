@@ -24,11 +24,8 @@ from krita_ref_parser.regenerate_docs import (
     is_index_file,
     # for renaming files
     update_references_to_filename,
-    )
+)
 from krita_ref_parser._logging import logger
-
-LINK_TO_OFFICIAL_DOCS_CLASSNAME = "link-to-official-docs"
-OFFICIAL_DOCS_ROOT = "https://docs.krita.org/en/"
 
 SOURCE_DIR = "./tests/output/raw-excerpts/"
 TARGET_DIR = "./tests/output/excerpts/"
@@ -38,7 +35,7 @@ for dirname in (SOURCE_DIR, TARGET_DIR):
 
 # AUXILIARY-FUNCTIONS
 
-def get_soup(html_source: str | Path):
+def get_soup(html_source: str):
     """
     """
     if not isinstance(html_source, str):
