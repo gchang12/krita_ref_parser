@@ -212,8 +212,8 @@ if __name__ == "__main__":
             # figures: DONE
             article = {
                 "id": '-'.join((path_root + ['%02d' % index_no])),
-                "path": str(filepath.relative_to(Path(SOURCE_DIR)).with_suffix("")),
-                #"path": path_root + [filename],
+                #"path": str(filepath.relative_to(Path(SOURCE_DIR)).with_suffix("")),
+                "path": path_root + [filename],
                 "sectionId": section_id.lstrip('#'),
                 "header": header_text,
                 "isIndexFile": filepath.with_suffix("").exists(),
@@ -335,8 +335,11 @@ if __name__ == "__main__":
     new_record = {
         "header": "Fill Layer Generators",
         "isIndexFile": True,
-        "path": "layers_and_masks/fill_layer_generators",
-        }
+        "path": [
+            "layers_and_masks",
+            "fill_layer_generators.html"
+        ],
+    }
     update_renamed_record(INDEX, src_path, new_record)
     sort_index(INDEX)
     all_sections = \

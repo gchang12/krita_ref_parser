@@ -206,7 +206,7 @@ if __name__ == "__main__":
             is_nongeneric = not path.name.startswith(GENERIC_IMAGE_PREFIX)
             return all([is_sample_image, is_nongeneric])
         for imagefile in filter(
-            lambda path: is_nongeneric_blendingmode_sample_image,
+            lambda path: is_nongeneric_blendingmode_sample_image(path),
             Path(TARGET_DIR).iterdir(),
         ):
             sample_image_type = SampleImageType.get_sample_image_type(imagefile.name)
