@@ -119,8 +119,6 @@ def replace_internal_reference_with_official(internal_a: bs4.Tag):
     internal_a['class'].append(LINK_TO_OFFICIAL_DOCS_CLASSNAME)
     internal_a['class'].append("external")
 
-# MODIFY LINK BEHAVIOR
-
 # INDEX-FILE MANAGEMENT
 
 def is_index_file(filename: Path | str):
@@ -134,22 +132,6 @@ def extract_subsections(soup: bs4.BeautifulSoup):
     """
     for section in soup.css.select("section[id] > section[id]"):
         section.decompose()
-
-def remove_links_from_index(soup: bs4.BeautifulSoup, section: str):
-    """
-    """
-    for a in soup.css.select("ul > li > a"):
-        logger.debug("Checking if a['href'] ('%s') starts with '%s'.", a['href'], section)
-        if not a['href'].startswith(section):
-            continue
-        a.decompose()
-        logger.debug("Decomposed.")
-    for li in filter(lambda li: not li.contents, soup.css.select("ul > li")):
-        li.decompose()
-    for ul in soup.css.select("ul"):
-        are_blanks = [not str(content).strip() for content in ul.contents]
-        if all(are_blanks):
-            ul.decompose()
 
 # RENAMING FILES
 # - mv 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'

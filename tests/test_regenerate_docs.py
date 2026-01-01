@@ -22,7 +22,6 @@ from krita_ref_parser.regenerate_docs import (
     replace_internal_reference_with_official,
     # for renovating index files
     extract_subsections,
-    remove_links_from_index,
     is_index_file,
     #replace_blending_modes_index_file,
     # for renaming files
@@ -1160,46 +1159,6 @@ class IndexTestCase(unittest.TestCase):
         actual = is_index_file(filename)
         self.assertIs(actual, expected)
 
-    def test_remove_links_from_index(self):
-        """
-        """
-        soup = self.soup
-        section = self.section
-        with self.subTest():
-            actual = list(
-                map(lambda a: a['href'], filter(
-                    lambda a: \
-                        'internal' in a['class'] \
-                        and 'reference' in a['class'] \
-                        and a['href'].startswith(section),
-                    soup.find_all("a"),
-                    )
-                )
-            )
-            self.assertTrue(actual)
-            actual = soup.find("ul")
-            self.assertIsNotNone(actual)
-            actual = list(soup.css.select("ul > li"))
-            self.assertTrue(actual)
-        remove_links_from_index(soup, section)
-        #logger.critical("%s", soup)
-        with self.subTest():
-            actual = list(
-                map(lambda a: a['href'], filter(
-                    lambda a: \
-                        'internal' in a['class'] \
-                        and 'reference' in a['class'] \
-                        and a['href'].startswith(section),
-                    soup.find_all("a"),
-                    )
-                )
-            )
-            self.assertFalse(actual)
-            actual = soup.find("ul")
-            self.assertIsNone(actual)
-            actual = list(soup.css.select("ul > li"))
-            self.assertFalse(actual)
-
 
 # - is_index_file: layers_and_masks/fill_layers.html
 class SpecialIndexTestCase(unittest.TestCase):
@@ -1251,46 +1210,6 @@ class SpecialIndexTestCase(unittest.TestCase):
         expected = False
         actual = is_index_file(filename)
         self.assertIs(actual, expected)
-
-    def test_remove_links_from_index(self):
-        """
-        """
-        soup = self.soup
-        subsection = self.subsection
-        with self.subTest():
-            actual = list(
-                map(lambda a: a['href'], filter(
-                    lambda a: \
-                        'internal' in a['class'] \
-                        and 'reference' in a['class'] \
-                        and a['href'].startswith(subsection),
-                    soup.find_all("a"),
-                    )
-                )
-            )
-            self.assertTrue(actual)
-            actual = soup.find("ul")
-            self.assertIsNotNone(actual)
-            actual = list(soup.css.select("ul > li"))
-            self.assertTrue(actual)
-        remove_links_from_index(soup, subsection)
-        #logger.critical("%s", soup)
-        with self.subTest():
-            actual = list(
-                map(lambda a: a['href'], filter(
-                    lambda a: \
-                        'internal' in a['class'] \
-                        and 'reference' in a['class'] \
-                        and a['href'].startswith(subsection),
-                    soup.find_all("a"),
-                    )
-                )
-            )
-            self.assertFalse(actual)
-            actual = soup.find("ul")
-            self.assertIsNone(actual)
-            actual = list(soup.css.select("ul > li"))
-            self.assertFalse(actual)
 
 # - exception1: layers_and_masks/fill_layers.html
 #@unittest.skip("Not ready yet.")
