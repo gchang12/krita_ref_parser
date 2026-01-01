@@ -11,7 +11,6 @@ from bs4 import BeautifulSoup
 
 from krita_ref_parser.regenerate_docs import (
     # for inserting and removing content
-    prepend_link_tags_to_soup,
     extract_h_tag,
     extract_icon,
     remove_empty_tags,
@@ -145,35 +144,6 @@ class GeneralTestCase(unittest.TestCase):
         #logger.critical("actual: %s, expected: %s", actual, expected)
         actual = tuple(filter(lambda tag: tag, str(actual).splitlines()))
         self.assertTupleEqual(actual, expected)
-
-    #@unittest.skip("")
-    def test_prepend_link_tags_to_soup(self):
-        """
-        """
-        href_list = (
-            "/stylesheets/iframe/general.css",
-            "/stylesheets/iframe/index.css",
-            )
-        soup = self.soup
-        prepend_link_tags_to_soup(soup, href_list)
-        num_links = 0
-        for link in soup.find_all("link"):
-            logger.debug("Checking if href #%d is as expected.", num_links)
-            actual = link['href']
-            expected = href_list[num_links]
-            with self.subTest():
-                self.assertEqual(actual, expected)
-            logger.debug("Checking if 'rel' property #%d is as expected.", num_links)
-            actual = link['rel']
-            expected = ["stylesheet"]
-            with self.subTest():
-                self.assertEqual(actual, expected)
-            logger.debug("Checking if 'type' property #%d is as expected.", num_links)
-            actual = link['type']
-            expected = "text/css"
-            with self.subTest():
-                self.assertEqual(actual, expected)
-            num_links += 1
 
     #@unittest.skip("")
     def test_extract_h_tag(self):

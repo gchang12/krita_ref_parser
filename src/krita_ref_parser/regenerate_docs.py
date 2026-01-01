@@ -30,14 +30,6 @@ INDEX_FILE = "./output/index.json"
 
 # ADD-AND-DELETE CONTENT
 
-# - Prepend CSS link lines for files of these types: with-icon, without-icon, blending_modes, blending_mode-hsx
-def prepend_link_tags_to_soup(soup: bs4.BeautifulSoup, href_list: list[str], *, container="section"):
-    """
-    """
-    for href in href_list:
-        tag = soup.new_tag("link", rel="stylesheet", type="text/css", href=href)
-        soup.find(container).insert_before(tag)
-
 # - Extract h_ tags. Note that this also extracts the href.
 def extract_h_tag(soup: bs4.BeautifulSoup, *, h_level: int):
     """
@@ -290,7 +282,7 @@ if __name__ == "__main__":
         """
         return filepath.write_text(str(soup), encoding="utf-8")
 
-    def view_files_with_vim(files: list[Path | str], *, pattern: str = None, view=False):
+    def view_files(files: list[Path | str], *, pattern: str = None, view=False):
         """
         """
         if not view:
@@ -587,38 +579,36 @@ if __name__ == "__main__":
 
     clone_from_raw()
     print("Finished cloning files.")
-    view_files_with_vim(["../index.json"])
+    view_files(["../index.json"])
     rename_fill_layers_to_fill_layer_generators()
     print("Finished renaming 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'.")
-    view_files_with_vim(["dockers/layers.html", "dockers/palette_docker.html", "filters/artistic.html"], pattern="fill_layer_generators.html")
+    view_files(["dockers/layers.html", "dockers/palette_docker.html", "filters/artistic.html"], pattern="fill_layer_generators.html")
     update_img_sources_in_files()
     print("Finished updating image sources.")
-    view_files_with_vim(["blending_modes/arithmetic/addition.html"], pattern="src=")
+    view_files(["blending_modes/arithmetic/addition.html"], pattern="src=")
     update_references_to_blending_modes_sections_in_files()
     print("Finished updating references to blending_mode sources.")
-    view_files_with_vim(["blending_modes.html"], pattern="blending_modes/binary/xnor.html")
+    view_files(["blending_modes.html"], pattern="blending_modes/binary/xnor.html")
     strip_headers_from_files()
     print("Finished stripping <h[1-6]> tags.")
-    view_files_with_vim(["tools.html"], pattern="<h")
+    view_files(["tools.html"], pattern="<h")
     strip_icons_from_all_files()
     print("Finished stripping <img /> tags.")
-    view_files_with_vim(["tools/assistant.html"], pattern="<img ")
+    view_files(["tools/assistant.html"], pattern="<img ")
     strip_blending_modes_index_files()
-    view_files_with_vim(["brushes.html", "blending_modes.html", "layers_and_masks/fill_layer_generators.html"])
+    view_files(["brushes.html", "blending_modes.html", "layers_and_masks/fill_layer_generators.html"])
     #print("Finished cleaning up index files.")
     print("Finished stripping 'blending_modes' index files.")
-    view_files_with_vim(["tools.html", "brushes/brush_engines.html", "blending_modes/arithmetic.html"], pattern="<a href=")
+    view_files(["tools.html", "brushes/brush_engines.html", "blending_modes/arithmetic.html"], pattern="<a href=")
     replace_sections_with_divs_in_files()
     print("Finished replacing section[id] with div[id].")
-    view_files_with_vim(["layers_and_masks.html"], pattern="<div id=")
-    #prepend_link_tags_to_all_excerpts()
-    #print("Finished prepending <link /> tags.")
-    view_files_with_vim(["brushes/brush_engines.html"], pattern="<link ")
+    view_files(["layers_and_masks.html"], pattern="<div id=")
+    view_files(["brushes/brush_engines.html"], pattern="<link ")
     update_all_hrefs()
     compile_all_hrefs()
     print("Finished updating a.href references.")
-    view_files_with_vim(["../hrefs.txt"])
+    view_files(["../hrefs.txt"])
     have_all_a_tags_open_new_tabs()
     print("Finished setting target='_blank' for external links.")
-    view_files_with_vim(["layers_and_masks/fill_layer_generators/seexpr.html"], pattern="target=")
+    view_files(["layers_and_masks/fill_layer_generators/seexpr.html"], pattern="target=")
 
