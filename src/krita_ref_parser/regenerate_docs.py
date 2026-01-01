@@ -571,17 +571,6 @@ if __name__ == "__main__":
                 replace_a_tags_with_reactlink_tags(soup)
                 write_soup_to_file(soup, filepath)
 
-    def normalize_all_hrefs():
-        """
-        """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            for filename in filenames:
-                filepath = dirpath.joinpath(filename)
-                soup = get_soup_from_file(filepath)
-                for a in soup.css.select("a"):
-                    normalize_internal_href(a)
-                write_soup_to_file(soup, filepath)
-
     def compile_all_hrefs():
         """
         """
