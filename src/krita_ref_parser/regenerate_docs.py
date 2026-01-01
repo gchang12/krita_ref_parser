@@ -549,17 +549,6 @@ if __name__ == "__main__":
                 remove_empty_tags(soup)
                 write_soup_to_file(soup, filepath)
 
-    def remove_empty_toc_tags_from_files():
-        """
-        """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            for filename in filter(lambda filename: filename != "blending_modes.html", filenames):
-                filepath = dirpath.joinpath(filename)
-                soup = get_soup_from_file(filepath)
-                for tag in soup.css.select('div[class="toctree-wrapper compound"]'):
-                    tag.decompose()
-                write_soup_to_file(soup, filepath)
-
     def compile_all_hrefs():
         """
         """
@@ -676,7 +665,6 @@ if __name__ == "__main__":
     view_files_with_vim(["tools/assistant.html"], pattern="<img ")
     strip_blending_modes_index_files()
     #strip_index_files()
-    #remove_empty_toc_tags_from_files()
     view_files_with_vim(["brushes.html", "blending_modes.html", "layers_and_masks/fill_layer_generators.html"])
     #print("Finished cleaning up index files.")
     print("Finished stripping 'blending_modes' index files.")
