@@ -1,19 +1,16 @@
 """
+Tests functionality of index-compiler.
 """
 
 import unittest
 from pathlib import Path
-import shutil
 import logging
 
 from bs4 import BeautifulSoup
 
 from krita_ref_parser.compile_index import (
     detect_index_files_for_directories,
-    #compile_directories,
-    #compile_filenames,
     get_header,
-    #get_header_href,
     get_section_id,
     get_icon,
     get_figures,
@@ -28,10 +25,12 @@ for dirname in (SOURCE_DIR, TARGET_DIR):
 
 class ExcerptDirectoryTestCase(unittest.TestCase):
     """
+    Tests functionality on excerpt directory.
     """
 
     def setUp(self):
         """
+        Creates content directories and complementary index files for each one.
         """
         mock_dir = Path(TARGET_DIR, "TEST-for-excerpts-directory")
         mock_dir.mkdir(exist_ok=False)
@@ -48,12 +47,14 @@ class ExcerptDirectoryTestCase(unittest.TestCase):
 
     def test_detect_index_files_for_directories__HAS_COMPLEMENTING_INDEX_FILE(self):
         """
+        Asserts that directories with index files are logged.
         """
         with self.assertLogs(logger='krita_ref_parser', level='INFO'):
             detect_index_files_for_directories(source_dir=self.mock_dir)
 
     def test_detect_index_files_for_directories__NO_COMPLEMENTING_INDEX_FILE(self):
         """
+        Asserts exceptions are raised for directories without index files.
         """
         self.mock_dir.joinpath(self.subdirectories[0]).with_suffix('.html').unlink()
         with self.assertRaises(FileNotFoundError):
@@ -61,6 +62,7 @@ class ExcerptDirectoryTestCase(unittest.TestCase):
 
     def tearDown(self):
         """
+        Removes content directories and complementary index files.
         """
         for dirpath in filter(lambda path: path.is_dir(), self.mock_dir.iterdir()):
             dirpath.rmdir()
@@ -70,21 +72,21 @@ class ExcerptDirectoryTestCase(unittest.TestCase):
 
 # SOUP INSPECTION #
 
-
 class BlendingModesAdditionFileTestCase(unittest.TestCase):
     """
+    Tests functionality on index file of newly created 'blending_modes' subsection.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML.
         """
-        subdirectory = "blending_modes/arithmetic/"
-        filename = "addition.html"
-        path_to_test_dir = Path(SOURCE_DIR, subdirectory)
-        path_to_test_dir.mkdir(exist_ok=True, parents=True)
-        self.path_to_test_file = path_to_test_dir.joinpath(filename)
-        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
-        shutil.copyfile(path_to_og_file, self.path_to_test_file)
+        #subdirectory = "blending_modes/arithmetic/"
+        #filename = "addition.html"
+        #path_to_test_dir = Path(TARGET_DIR, subdirectory)
+        #path_to_test_dir.mkdir(exist_ok=True, parents=True)
+        #self.path_to_test_file = path_to_test_dir.joinpath(filename)
+        #self.path_to_test_file.write_text("", encoding="utf-8")
         self.soup_as_str = """<section id="addition">
 <span id="bm-addition"></span><span id="index-0"></span><h2>Addition<a class="headerlink" href="#addition" title="Link to this heading">¶</a></h2>
 <p>Adds the numerical values of two colors together:</p>
@@ -122,6 +124,7 @@ class BlendingModesAdditionFileTestCase(unittest.TestCase):
 
     def test_get_header(self):
         """
+        Tests 'get_header' on sample HTML.
         """
         expected = "Addition"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
@@ -130,6 +133,7 @@ class BlendingModesAdditionFileTestCase(unittest.TestCase):
 
     def test_get_section_id(self):
         """
+        Tests 'get_section_id' on sample HTML.
         """
         expected = "#addition"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
@@ -139,10 +143,12 @@ class BlendingModesAdditionFileTestCase(unittest.TestCase):
     @unittest.skip("The first image of each 'blending_modes/*' file is invalid as a hero-image.")
     def test_get_icon(self):
         """
+        Tests 'get_icon' on sample HTML.
         """
 
     def test_get_figures(self):
         """
+        Tests 'get_figures' on sample HTML.
         """
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
         expected = [
@@ -169,18 +175,18 @@ class BlendingModesAdditionFileTestCase(unittest.TestCase):
 
 class BlendingModesHSXFileTestCase(unittest.TestCase):
     """
+    Tests functionality on index file of newly created 'blending_modes/hsx' subsection.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML.
         """
-        subdirectory = "blending_modes/hsx/"
-        filename = "intensity.html"
-        path_to_test_dir = Path(SOURCE_DIR, subdirectory)
-        path_to_test_dir.mkdir(exist_ok=True, parents=True)
-        self.path_to_test_file = path_to_test_dir.joinpath(filename)
-        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
-        shutil.copyfile(path_to_og_file, self.path_to_test_file)
+        #subdirectory = "blending_modes/hsx/"
+        #filename = "intensity.html"
+        #path_to_test_dir = Path(SOURCE_DIR, subdirectory)
+        #path_to_test_dir.mkdir(exist_ok=True, parents=True)
+        #self.path_to_test_file = path_to_test_dir.joinpath(filename)
         self.soup_as_str = """<section id="intensity">
 <span id="bm-intensity"></span><h3>Intensity<a class="headerlink" href="#intensity" title="Link to this heading">¶</a></h3>
 <p>Takes the Hue and Saturation of the lower layer and outputs them with the intensity of the upper layer.</p>
@@ -194,6 +200,7 @@ class BlendingModesHSXFileTestCase(unittest.TestCase):
 
     def test_get_header(self):
         """
+        Tests 'get_header' on sample HTML; note: h_level=3.
         """
         expected = "Intensity"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
@@ -202,6 +209,7 @@ class BlendingModesHSXFileTestCase(unittest.TestCase):
 
     def test_get_header__GET_H2_FAIL(self):
         """
+        Tests 'get_header' on sample HTML; note: h_level=2.
         """
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
         with self.assertRaises(AttributeError):
@@ -210,10 +218,12 @@ class BlendingModesHSXFileTestCase(unittest.TestCase):
     @unittest.skip("The first image of each 'blending_modes/*' file is invalid as a hero-image.")
     def test_get_icon(self):
         """
+        Tests 'get_icon' on sample HTML.
         """
 
     def test_get_figures(self):
         """
+        Tests 'get_figures' on sample HTML; affirms that figcaption-text distinguishes between generic and non-generic sample images.
         """
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
         expected = [
@@ -228,18 +238,18 @@ class BlendingModesHSXFileTestCase(unittest.TestCase):
 
 class HeroImageFileTestCase(unittest.TestCase):
     """
+    Tests index-compiler functionality on file with a hero image.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML of mock-file.
         """
-        subdirectory = "tools/"
-        filename = "gradient_draw.html"
-        path_to_test_dir = Path(SOURCE_DIR, subdirectory)
-        path_to_test_dir.mkdir(exist_ok=True)
-        self.path_to_test_file = path_to_test_dir.joinpath(filename)
-        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
-        shutil.copyfile(path_to_og_file, self.path_to_test_file)
+        #subdirectory = "tools/"
+        #filename = "gradient_draw.html"
+        #path_to_test_dir = Path(SOURCE_DIR, subdirectory)
+        #path_to_test_dir.mkdir(exist_ok=True)
+        #self.path_to_test_file = path_to_test_dir.joinpath(filename)
         self.soup_as_str = """<section id="gradient-tool">
 <span id="index-0"></span><span id="id1"></span><h1>Gradient Tool<a class="headerlink" href="#gradient-tool" title="Link to this heading">¶</a></h1>
 <p><img alt="toolgradient" src="../../_images/gradient_drawing_tool.svg"/></p>
@@ -359,6 +369,7 @@ class HeroImageFileTestCase(unittest.TestCase):
 
     def test_get_icon(self):
         """
+        Tests 'get_icon' on sample HTML; affirms SVG suffix.
         """
         expected = "gradient_drawing_tool.svg"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
@@ -367,6 +378,7 @@ class HeroImageFileTestCase(unittest.TestCase):
 
     def test_get_header(self):
         """
+        Tests 'get_header' on sample HTML; note: h_level=1.
         """
         expected = "Gradient Tool"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
@@ -375,6 +387,7 @@ class HeroImageFileTestCase(unittest.TestCase):
 
     def test_get_figures(self):
         """
+        Tests 'get_figures' on sample HTML and affirms that figcaption-text distinguishes between generic and non-generic images.
         """
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
         expected = [
@@ -428,18 +441,19 @@ class HeroImageFileTestCase(unittest.TestCase):
 
 class NoHeroImageFileTestCase(unittest.TestCase):
     """
+    Tests index-compiler functionality on file without any hero image candidates.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML of mock-file.
         """
-        subdirectory = "layers_and_masks/"
-        filename = "clone_layers.html"
-        path_to_test_dir = Path(SOURCE_DIR, subdirectory)
-        path_to_test_dir.mkdir(exist_ok=True)
-        self.path_to_test_file = path_to_test_dir.joinpath(filename)
-        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
-        shutil.copyfile(path_to_og_file, self.path_to_test_file)
+        #subdirectory = "layers_and_masks/"
+        #filename = "clone_layers.html"
+        #path_to_test_dir = Path(SOURCE_DIR, subdirectory)
+        #path_to_test_dir.mkdir(exist_ok=True)
+        #self.path_to_test_file = path_to_test_dir.joinpath(filename)
+        #path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
         self.soup_as_str = """<section id="clone-layers">
 <span id="index-0"></span><span id="id1"></span><h1>Clone Layers<a class="headerlink" href="#clone-layers" title="Link to this heading">¶</a></h1>
 <p>A clone layer is a layer that keeps an up-to-date copy of another layer. You cannot draw or paint on it directly, but it can be used to create effects by applying different types of layers and masks (e.g. filter layers or masks).</p>
@@ -469,6 +483,7 @@ class NoHeroImageFileTestCase(unittest.TestCase):
 
     def test_get_header(self):
         """
+        Tests 'get_header' on sample HTML.
         """
         expected = "Clone Layers"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
@@ -477,35 +492,39 @@ class NoHeroImageFileTestCase(unittest.TestCase):
 
     def test_get_icon(self):
         """
+        Tests 'get_icon' on sample HTML; asserts that the return-value is None.
         """
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
         actual = get_icon(soup)
         self.assertIsNone(actual)
 
+@unittest.skip("Inheriting from BlendingModesAdditionFileTestCase because the cases are identical.")
 class FigureFileTestCase(BlendingModesAdditionFileTestCase):
     """
+    Tests figure-compilation functionality on a file that has figures.
     """
 
     def setUp(self):
         """
+        Reinitializes another test-case.
         """
         logger.debug("FigureFileTestCase: Inheriting from BlendingModesAdditionFileTestCase because the cases are identical.")
         super().setUp()
 
 class NoFigureFileTestCase(unittest.TestCase):
     """
+    Tests figure-compilation functionality on a file that lacks figures.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML.
         """
-        subdirectory = "layers_and_masks/"
-        filename = "filter_masks.html"
-        path_to_test_dir = Path(SOURCE_DIR, subdirectory)
-        path_to_test_dir.mkdir(exist_ok=True, parents=True)
-        self.path_to_test_file = path_to_test_dir.joinpath(filename)
-        path_to_og_file = Path(*SOURCE_DIR.split("/")[2:] + [subdirectory, filename])
-        shutil.copyfile(path_to_og_file, self.path_to_test_file)
+        #subdirectory = "layers_and_masks/"
+        #filename = "filter_masks.html"
+        #path_to_test_dir = Path(SOURCE_DIR, subdirectory)
+        #path_to_test_dir.mkdir(exist_ok=True, parents=True)
+        #self.path_to_test_file = path_to_test_dir.joinpath(filename)
         self.soup_as_str = """<section id="filter-masks">
 <span id="index-0"></span><span id="id1"></span><h1>Filter Masks<a class="headerlink" href="#filter-masks" title="Link to this heading">¶</a></h1>
 <p>Filter masks show an area of their layer with a filter (such as blur, levels, brightness / contrast etc.). For example, if you select an area of a paint layer and add a Filter Mask, you will be asked to choose a filter. If you choose the blur filter, you will see the area you selected blurred.</p>
@@ -522,6 +541,7 @@ class NoFigureFileTestCase(unittest.TestCase):
 
     def test_get_header(self):
         """
+        Tests 'get_header' on sample HTML.
         """
         expected = "Filter Masks"
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
@@ -530,14 +550,9 @@ class NoFigureFileTestCase(unittest.TestCase):
 
     def test_get_figures(self):
         """
+        Tests 'get_figures' on sample HTML and asserts the return-value to be None.
         """
         soup = BeautifulSoup(self.soup_as_str, 'html.parser')
-        expected = [
-            {
-                "img": "Blending_modes_Intensity_Sample_image_with_dots.png",
-                "figcaption": "Left: Normal. Right: Intensity."
-            },
-        ]
         actual = get_figures(soup)
         self.assertIsNone(actual)
 

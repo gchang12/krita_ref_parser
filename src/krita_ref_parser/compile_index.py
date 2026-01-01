@@ -11,15 +11,19 @@ Defines functions to return list of objects of the form:
 """
 
 from pathlib import Path
+from typing import (
+    Any,
+    Iterable,
+    )
 
 from bs4 import BeautifulSoup
 
 from krita_ref_parser._logging import logger
 
-PILCROW = "¶"
+PILCROW: str = "¶"
 
-SOURCE_DIR = "./output/raw-excerpts/"
-INDEX_PATH = "./output/index.json"
+SOURCE_DIR: str = "./output/raw-excerpts/"
+INDEX_PATH: str = "./output/index.json"
 
 DIRS_WITH_NO_INDICES = (
     Path(SOURCE_DIR, "layers_and_masks", "fill_layer_generators"),
@@ -43,13 +47,13 @@ ALL_SECTIONS = {
 SECTIONS_WITHOUT_ICONS = tuple(
     map(
         lambda keyvalue: keyvalue[0],
-        filter(lambda keyvalue: keyvalue[1] is False, ALL_SECTIONS.items())
+        filter(lambda keyvalue: keyvalue[1] is False, ALL_SECTIONS.items()),
     )
 )
 SECTIONS_WITH_ICONS = tuple(
     map(
         lambda keyvalue: keyvalue[0],
-        filter(lambda keyvalue: keyvalue[1] is True, ALL_SECTIONS.items())
+        filter(lambda keyvalue: keyvalue[1] is True, ALL_SECTIONS.items()),
     )
 )
 BLENDING_MODE_SECTIONS = (
@@ -68,8 +72,9 @@ BLENDING_MODE_HSX_SECTION = (
     "blending_modes/hsx",
 )
 
-def detect_index_files_for_directories(source_dir: Path | str, *, dirs_with_no_indices=DIRS_WITH_NO_INDICES):
+def detect_index_files_for_directories(source_dir: Path | str, *, dirs_with_no_indices=DIRS_WITH_NO_INDICES) -> None:
     """
+    Checks if each directory has a corresponding index file.
     """
     missing_files = set()
     for dirpath in filter(
@@ -81,8 +86,9 @@ def detect_index_files_for_directories(source_dir: Path | str, *, dirs_with_no_i
         raise FileNotFoundError("These directories in '%s' lack complementing index files: %r" % (source_dir, missing_files))
     logger.info("All directories in '%s' have complementing index files.", source_dir)
 
-def get_header(soup: BeautifulSoup, *, h_level: int):
+def get_header(soup: BeautifulSoup, *, h_level: int) -> str:
     """
+    Returns the header of a given <section> soup.
     """
     h_tag = "h%d" % h_level
     h_text = soup.find(h_tag).text
@@ -90,16 +96,18 @@ def get_header(soup: BeautifulSoup, *, h_level: int):
     logger.debug("Returning header: '%s'", h_text)
     return h_text
 
-def get_section_id(soup: BeautifulSoup, *, h_level: int):
+def get_section_id(soup: BeautifulSoup, *, h_level: int) -> str:
     """
+    Returns the id attribute of a <section> `soup`.
     """
     h_tag = soup.find("h%d" % h_level)
     a_href = h_tag.find("a", class_="headerlink")['href']
     logger.debug("Returning header: '%s'", a_href)
     return a_href
 
-def get_icon(soup: BeautifulSoup):
+def get_icon(soup: BeautifulSoup) -> str | None:
     """
+    Returns the src attribute of the first <img> of a `soup`.
     """
     try:
         img_src = Path(soup.find("img")['src']).name
@@ -109,8 +117,9 @@ def get_icon(soup: BeautifulSoup):
         logger.debug("No image found. Returning None.")
     return img_src
 
-def get_figures(soup: BeautifulSoup):
+def get_figures(soup: BeautifulSoup) -> None | list[dict[str, str]]:
     """
+    Returns a list of <figure> tags serialized as dict-objects.
     """
     figures = []
     for figure in soup.find_all("figure"):
@@ -147,26 +156,30 @@ if __name__ == "__main__":
     ROOT_LEN = 2
     INDEX = []
 
-    def validate_directory(dirname: Path | str):
+    def validate_directory(dirname: Path | str) -> None:
         """
+        Wraps 'detect_index_files_for_directories'
         """
         logger.info("Validating: An index file exists for each directory in '%s'.", dirname)
         detect_index_files_for_directories(dirname)
         logger.info("Success!")
 
-    def determine_if_walk_entry_is_in_sections(sections_to_search: list[str]):
+    def determine_if_walk_entry_is_in_sections(sections_to_search: list[str]) -> Any:
         """
+        Returns a function that checks if an item yielded by pathlib.Path.walk is in the provided section-list.
         """
         def walk_entry_is_in_sections(dirpathdirnamesfilenames: tuple[Path, list[str], list[str]]):
             """
+            Returns True if the walk-entry is in the list of sections to search.
             """
             dirpath, dirnames, filenames = dirpathdirnamesfilenames
             content_path = "/".join(dirpath.parts[ROOT_LEN:])
             return content_path in sections_to_search
         return walk_entry_is_in_sections
 
-    def compile_entries_from_dir(dirpath: Path | str, filenames: list[str], *, h_level: int):
+    def compile_entries_from_dir(dirpath: Path | str, filenames: list[str], *, h_level: int) -> list[dict[str, Any]]:
         """
+        Aggregates each Krita documentation entry in a given section into a dict and appends it to a list, which is then returned.
         """
         index = []
         path_root = list(dirpath.parts[ROOT_LEN:])
@@ -193,14 +206,14 @@ if __name__ == "__main__":
             # figures: DONE
             article = {
                 "id": '-'.join((path_root + ['%02d' % index_no])),
-                "path": path_root + [filename],
+                "path": str(filepath.relative_to(Path(SOURCE_DIR)).with_suffix("")),
+                #"path": path_root + [filename],
+                "sectionId": section_id.lstrip('#'),
                 "header": header_text,
-                "articleId": section_id.lstrip('#'),
-                "icon": icon,
-                "figures": figures,
                 "isIndexFile": filepath.with_suffix("").exists(),
-                "pathAsStr": str(filepath.relative_to(Path(SOURCE_DIR)).with_suffix("")),
                 "firstSentence": first_sentence,
+                "iconSrc": icon,
+                "figures": figures,
             }
             index.append(article)
         logger.info("Indexed (%d) sections from '%s'.", len(filenames), dirpath)
@@ -211,8 +224,9 @@ if __name__ == "__main__":
     # {'resource_management', 'blending_modes', 'dockers', 'filters', 'layers_and_masks', 'brushes', 'preferences', 'tools', 'main_menu'}
     # index files exist: YES
 
-    def compile_entries_from_dirs(sections_to_search: list[str], *, h_level: int):
+    def compile_entries_from_dirs(sections_to_search: list[str], *, h_level: int) -> list[dict[str, Any]]:
         """
+        Compiles Krita documentation entries from all sections into a list, which is returned.
         """
         index = []
         for dirpath, dirnames, filenames in filter(determine_if_walk_entry_is_in_sections(sections_to_search), Path(SOURCE_DIR).walk()):
@@ -221,8 +235,9 @@ if __name__ == "__main__":
             index.extend(compile_entries_from_dir(dirpath, filenames, h_level=h_level))
         return index
 
-    def compile_entries_from_root():
+    def compile_entries_from_root() -> list[dict[str, Any]]:
         """
+        Compiles files present in root of documentation.
         """
         index = []
         h_level = 1
@@ -253,77 +268,79 @@ if __name__ == "__main__":
     logger.info("(%d) entries compiled into index.", len(INDEX))
     logger.info("Fields of index: %s.", tuple(INDEX[0].keys()))
 
-    def set_icons_to_null():
+    def set_icons_to_null(index: list[dict[str, Any]], id_list: list[str]) -> None:
         """
+        Sets icons in sections identified in `id_list` to null if they've been manually evaluated to be invalid.
         """
-        id_list = (
-            "chalk-brush-engine",
-            "crop-tool",
-            "color-sampler-tool",
-            )
         for id in id_list:
             try:
-                record = list(filter(lambda record: record['articleId'] == id, INDEX)).pop()
-                record['icon'] = None
+                record = list(filter(lambda record: record['sectionId'] == id, index)).pop()
+                record['iconSrc'] = None
             except IndexError:
-                logger.warning("Record with articleId='%s' not found.", id)
+                logger.warning("Record with sectionId='%s' not found.", id)
 
-    set_icons_to_null()
-
-    def update_renamed_records():
+    def update_renamed_record(index: list[dict[str, Any]], src_path: list[str], new_record: dict[str, bool | str]) -> None:
         """
+        Renames record identified by `src_path` to `tgt_path`.
         """
-        src_path = ["layers_and_masks", "fill_layers.html"]
-        tgt_path = ["layers_and_masks", "fill_layer_generators.html"]
-        new_record = {
-            "path": tgt_path,
-            "header": "Fill Layer Generators",
-            "isIndexFile": True,
-            "pathAsStr": "layers_and_masks/fill_layer_generators",
-            }
         try:
-            record = list(filter(lambda record: record['path'] == src_path, INDEX)).pop()
+            record = list(filter(lambda record: record['path'] == src_path, index)).pop()
         except IndexError:
             logger.warning("Record with path_id='%s' has already been updated.", src_path)
             return
         record.update(new_record)
 
-    update_renamed_records()
+    def sort_index(index: list[dict[str, Any]]) -> None:
+        """
+        Sorts the given index in-place.
+        """
+        index.sort(key=lambda record: '/'.join(record['path']))
 
-    def sort_index():
+    def affirm_all_sections_are_in_index(index: list[dict[str, Any]], all_sections: Iterable[str]) -> None:
         """
+        Raises error if not all documented sections are not in `index`.
         """
-        INDEX.sort(key=lambda record: '/'.join(record['path']))
-
-    sort_index()
-
-    def affirm_all_sections_are_in_index():
-        """
-        """
-        all_sections = \
-            SECTIONS_WITH_ICONS \
-            + SECTIONS_WITHOUT_ICONS \
-            + BLENDING_MODE_SECTIONS \
-            + BLENDING_MODE_HSX_SECTION
         set_of_all_sections = set(all_sections)
         set_of_all_sections.add('')
-        index_dirs = set(map(lambda entry: '/'.join(entry['path'][:-1]), INDEX))
+        index_dirs = set(map(lambda entry: '/'.join(entry['path'][:-1]), index))
         try:
             assert (set_of_all_sections == index_dirs) is True
         except AssertionError as assert_err:
             print("Expected sections: %r.\n Actual sections: %r" % (set_of_all_sections, index_dirs))
             raise assert_err
         logger.info("These sections compose the entirety of the index: %s.", set_of_all_sections)
-    affirm_all_sections_are_in_index()
 
-    def confirm_uniqueness_of_ids():
+    def confirm_uniqueness_of_ids(index: list[dict[str, Any]]) -> None:
         """
+        Raises AssertionError if the index does not contain unique IDs.
         """
-        ids = list(map(lambda record: record['id'], INDEX))
+        ids = list(map(lambda record: record['id'], index))
         id_set = set(ids)
         assert len(ids) == len(id_set)
 
-    confirm_uniqueness_of_ids()
+    id_list = (
+        "chalk-brush-engine", # brushes/brush_engines
+        "crop-tool", # tools
+        "color-sampler-tool", # tools
+        )
+    set_icons_to_null(INDEX, id_list)
+    src_path = ["layers_and_masks", "fill_layers.html"]
+    #tgt_path = ["layers_and_masks", "fill_layer_generators.html"]
+    new_record = {
+        "header": "Fill Layer Generators",
+        "isIndexFile": True,
+        "path": "layers_and_masks/fill_layer_generators",
+        }
+    update_renamed_record(INDEX, src_path, new_record)
+    sort_index(INDEX)
+    all_sections = \
+        SECTIONS_WITH_ICONS \
+        + SECTIONS_WITHOUT_ICONS \
+        + BLENDING_MODE_SECTIONS \
+        + BLENDING_MODE_HSX_SECTION
+    affirm_all_sections_are_in_index(INDEX, all_sections)
+    confirm_uniqueness_of_ids(INDEX)
+
     index_path = Path(INDEX_PATH)
     print("Saving index to: '%s'" % index_path)
     with open(index_path, mode="w") as wfile:
