@@ -21,7 +21,6 @@ from krita_ref_parser.regenerate_docs import (
     internal_link_should_become_external,
     replace_internal_reference_with_official,
     # for changing behavior of links themselves
-    replace_a_tags_with_reactlink_tags,
     have_a_tag_open_new_tab,
     # for renovating index files
     extract_subsections,
@@ -175,19 +174,6 @@ class GeneralTestCase(unittest.TestCase):
             actual = internal_a['href']
             with self.subTest():
                 self.assertEqual(actual, expected)
-
-    def test_replace_a_tags_with_reactlink_tags(self):
-        """
-        """
-        soup = self.soup
-        expected = []
-        for a in soup.find_all("a"):
-            expected.append((a.text, a['href']))
-        replace_a_tags_with_reactlink_tags(soup)
-        actual = []
-        for Link in soup.find_all("Link"):
-            actual.append((Link.text, Link['to']))
-        self.assertListEqual(actual, expected)
 
 # - with icon: tools/assistant.html
 #@unittest.skip("This has already been covered.")

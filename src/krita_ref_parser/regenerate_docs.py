@@ -121,15 +121,6 @@ def replace_internal_reference_with_official(internal_a: bs4.Tag):
 
 # MODIFY LINK BEHAVIOR
 
-# - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
-def replace_a_tags_with_reactlink_tags(soup: bs4.BeautifulSoup, *, new_name="Link", new_href_name="to"):
-    """
-    """
-    # NOTE: May change depending on web interface implementation
-    for a in filter(lambda a: "internal" in a['class'], soup.find_all("a")):
-        a.name = new_name
-        a[new_href_name] = a.attrs.pop('href')
-
 # - Have links to external/official pages open new tabs.
 def have_a_tag_open_new_tab(a: bs4.Tag):
     """
@@ -340,7 +331,6 @@ if __name__ == "__main__":
                 write_soup_to_file(soup, filepath)
 
     # for updating paths and references
-    #replace_internal_reference_with_official,
 
     # strip headers
     #extract_h_tag,
