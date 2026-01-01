@@ -1,4 +1,5 @@
 """
+Modifies and finalizes excerpts and complementary files before writing them to disk.
 """
 
 from io import open
@@ -6,8 +7,14 @@ import shutil
 import json
 from pathlib import Path
 
-import bs4
-from bs4 import BeautifulSoup
+from typing import (
+    Any,
+)
+
+from bs4 import (
+    BeautifulSoup,
+    Tag,
+)
 
 #from krita_ref_parser.amputate_images import SampleImageType
 from krita_ref_parser.compile_index import (
@@ -30,21 +37,22 @@ INDEX_FILE = "./output/index.json"
 
 # ADD-AND-DELETE CONTENT
 
-# - Extract h_ tags. Note that this also extracts the href.
-def extract_h_tag(soup: bs4.BeautifulSoup, *, h_level: int):
+def extract_h_tag(soup: BeautifulSoup | Tag, *, h_level: int) -> None:
     """
+    Removes first `h{h_level}` tag from `soup`; also removes href to `h{h_level}`.
     """
     h_tag = "h%d" % h_level
     soup.find(h_tag).decompose()
 
-# - Extract icons
-def extract_icon(soup: bs4.BeautifulSoup):
+def extract_icon(soup: BeautifulSoup | Tag) -> None:
     """
+    Removes first `img` tag from `soup`.
     """
     soup.find("img").decompose()
 
-def replace_section_with_div(soup: bs4.BeautifulSoup, *, og_repl=("section[id]", "div")):
+def replace_section_with_div(soup: BeautifulSoup | Tag, *, og_repl=("section[id]", "div")) -> None:
     """
+    Replaces tag identified by first half of `og_repl` with second half in `soup`; sets tag.class = 'excerpt' also.
     """
     og, repl = og_repl
     section = soup.css.select_one(og)
@@ -53,43 +61,45 @@ def replace_section_with_div(soup: bs4.BeautifulSoup, *, og_repl=("section[id]",
 
 # REFERENCE MANAGEMENT
 
-# - Change image sources to /images/{filename}
-def update_img_src(img: bs4.Tag):
+def update_img_src(img: Tag) -> None:
     """
+    Changes `img`.src to '/images/' + `img`.src.
     """
-    #for img in soup.find_all("img"):
     try:
-        img['src'] = "/images/" + Path(img['src']).name
+        img['src'] = "/images/" + Path(str(img['src'])).name
     except KeyError as key_err:
         logger.error("%s has no 'src' attribute. Inspect.", img)
         raise key_err
 
-# - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
-def internal_link_should_become_external(a: bs4.Tag, *, num_levels: int):
+def internal_link_should_become_external(a: Tag, *, num_levels: int) -> bool:
     """
+    Determines if `a` should have 'internal' in class attribute, based on the number of occurrences of '..' inside `a`.href.
     """
-    #for a in filter(lambda a: "internal" in a['class'], soup.find_all("a")):
     href_path = a['href'].split('/')
     logger.debug("Checking if '%s' has %d instances of '..'", a['href'], num_levels)
     return href_path.count('..') == num_levels
 
-# - Delete references to extracted sections
-def update_references_to_blending_modes_sections(root_dir: Path | str, internal_a: bs4.Tag):
+def update_references_to_blending_modes_section(root_dir: Path | str, internal_a: Tag) -> None:
     """
+    Updates reference to 'blending_modes' subsection article in `internal_a` based on if it exists in `root_dir`.
     """
-    normalized_href = internal_a['href'].lstrip('./')
-    renormalized_href = normalized_href.replace(".html#", "/") + ".html"
-    full_path_to_tgt = Path(root_dir, renormalized_href)
+    minimal_href = internal_a['href'].lstrip('./')
+    # e.g., blending_modes/arithmetic.html#addition -> blending_modes/arithmetic/addition.html
+    def convert_blending_modes_href(href: str) -> str:
+        """
+        Converts href of the form: blending_modes/arithmetic.html#addition -> blending_modes/arithmetic/addition.html
+        """
+        return href.replace(".html#", "/") + ".html"
+    blending_modes_href = convert_blending_modes_href(minimal_href)
+    full_path_to_tgt = Path(root_dir, blending_modes_href)
     logger.debug("Checking if '%s' exists.", full_path_to_tgt)
     if not full_path_to_tgt.exists():
         raise FileNotFoundError("Fatal error: '%s' should exist, but it doesn't." % full_path_to_tgt)
-    internal_a['href'] = "/" + renormalized_href
-    # normalize link to blending_modes/* section
-    # if link exists: further normalize
-    # o.w.: raise Exception | replace with link to official docs.
+    internal_a['href'] = "/" + blending_modes_href
 
-def get_correct_blending_modes_path(file_id: str, root_dir: Path | str):
+def get_correct_blending_modes_path(file_id: str, root_dir: Path | str) -> tuple[str, str, str]:
     """
+    Returns 3-tuple that identifies path to 'blending_modes' subsubsection, if it exists.
     """
     for dirpath, dirnames, filenames in Path(root_dir).walk():
         if "blending_modes" not in dirpath.parts:
@@ -106,14 +116,10 @@ def get_correct_blending_modes_path(file_id: str, root_dir: Path | str):
             return (dirpath.name, filename, file_id)
     raise KeyError("'%s' not found in '%s/blending_modes/**'" % (file_id, root_dir))
 
-# - Delete references to extracted sections
-def replace_internal_reference_with_official(internal_a: bs4.Tag):
+def replace_internal_reference_with_official(internal_a: Tag) -> None:
     """
+    Changes href of `internal_a` to full URL to official docs and changes class attribute accordingly.
     """
-    # check if references are dead.
-    # if yes: raise Exception | replace with link to official docs.
-    # if no: normalize link
-    #for a in soup.css.select("a[class='internal']"):
     internal_a['href'] = '/'.join([OFFICIAL_DOCS_ROOT.rstrip('/'), internal_a['href'].lstrip('./')])
     internal_a['class'].remove("internal")
     internal_a['class'].append(LINK_TO_OFFICIAL_DOCS_CLASSNAME)
@@ -121,40 +127,38 @@ def replace_internal_reference_with_official(internal_a: bs4.Tag):
 
 # INDEX-FILE MANAGEMENT
 
-def is_index_file(filename: Path | str):
+def is_index_file(filename: Path | str) -> bool:
     """
+    Returns True if `filename` represents an index file.
     """
     return Path(filename).with_suffix("").is_dir()
 
-# - Extract blending_modes/* subsections.
-def extract_subsections(soup: bs4.BeautifulSoup):
+def extract_subsections(soup: BeautifulSoup | Tag) -> None:
     """
+    Removes all subsections from `soup`.
     """
     for section in soup.css.select("section[id] > section[id]"):
         section.decompose()
 
 # RENAMING FILES
-# - mv 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
 
 def update_references_to_filename(
-        soup: bs4.BeautifulSoup,
+        soup: BeautifulSoup | Tag,
         section: Path | str,
         src_name: Path | str,
         tgt_name: Path | str,
-    ):
+    ) -> None:
     """
+    Changes all references in `soup` from `section/src_name` to `section/tgt_name`.
     """
     src_path = '/'.join([str(section), str(src_name)])
     for internal_a in soup.css.select("a"):
-        logger.debug("Checking if '%s' is present in '%s' (type=%r).", src_path, internal_a['href'], type(internal_a['href']))
+        logger.debug("Checking if '%s' is present in '%s'.", src_path, internal_a['href'])
         if src_path not in str(internal_a['href']):
             continue
-        dots = filter(lambda href: href == '..', internal_a['href'].split('/'))
+        dots = filter(lambda href_part: href_part == '..', internal_a['href'].split('/'))
         internal_a['href'] = '/'.join(list(dots) + [str(section), str(tgt_name)])
         logger.debug("Present.")
-    #logger.debug("Last internal a found: %s.", internal_a)
-    #src_path = Path("layers_and_masks", "fill_layers.html")
-    #tgt_path = Path("layers_and_masks", "fill_layer_generators.html")
 
 if __name__ == "__main__":
     import subprocess
@@ -162,72 +166,56 @@ if __name__ == "__main__":
 
     # HELPER FUNCTIONS
 
-    def get_soup_from_file(filepath: Path):
+    def get_soup_from_file(filepath: Path) -> BeautifulSoup:
         """
+        Returns BeautifulSoup from `filepath`.
         """
         soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
         return soup
 
-    def write_soup_to_file(soup: bs4.BeautifulSoup, filepath: Path):
+    def write_soup_to_file(soup: BeautifulSoup, filepath: Path) -> int:
         """
+        Writes `soup` to `filepath`.
         """
         return filepath.write_text(str(soup), encoding="utf-8")
 
-    def view_files(files: list[Path | str], *, pattern: str = None, view=False):
+    def view_files(files: list[Path | str], *, view=False) -> None:
         """
+        Opens `files` in vim.
         """
         if not view:
             return
-        #return
-        #user_response = input("These files have changed: %r\nView them? (y/n) " % files)
-        #if user_response != "y":
-            #return
         args = ["vim", "-R"]
         args.extend([str(Path(TARGET_DIR, file)) for file in files])
-        if pattern is not None:
-            args.append("+/'" + pattern + "'")
-        elif pattern is None:
-            pass
-        elif not isinstance(pattern, str):
-            raise TypeError("Pass in an argument of type 'str'. Argument was of type: %r" % type(pattern))
         subprocess.run(args)
-        user_response = input("Stop building? (y/n) ")
-        if user_response == "y":
-            #subprocess.run(args)
-            sys.exit()
 
-    # clone raw-excerpts/ to excerpts/
+    # MAIN FUNCTIONS
 
-    def clone_from_raw():
+    def clone_from_raw(target_dir: str | Path, source_dir: str | Path) -> None:
         """
+        Recreates `target_dir` from `source_dir`; removes href directory also.
         """
-        logger.debug("Removing '%s'.", TARGET_DIR)
-        shutil.rmtree(TARGET_DIR, ignore_errors=True)
-        logger.debug("Cloning from '%s' to '%s'.", SOURCE_DIR, TARGET_DIR)
-        shutil.copytree(SOURCE_DIR, TARGET_DIR)
-        Path(TARGET_DIR, "..", "hrefs.txt").unlink(missing_ok=True)
+        logger.debug("Removing '%s'.", target_dir)
+        shutil.rmtree(target_dir, ignore_errors=True)
+        logger.debug("Cloning from '%s' to '%s'.", source_dir, target_dir)
+        shutil.copytree(source_dir, target_dir)
+        Path(target_dir, "..", "hrefs.txt").unlink(missing_ok=True)
         logger.debug("Removed 'hrefs.txt'.")
 
-    # rename 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'
-    # - update index s.t. header = "Fill Layer Generators"
-    # for renaming files
-    #update_filename,
-    #update_references_to_filename,
-    #update_filename_record_of_index,
-
-    def rename_fill_layers_to_fill_layer_generators():
+    def rename_fill_layers_to_fill_layer_generators(target_dir: str | Path) -> None:
         """
+        Renames 'layers_and_masks/fill_layers' to 'layers_and_masks/fill_layer_generators' and updates references in `target_dir` to former accordingly.
         """
         section = "layers_and_masks"
         src_name = "fill_layers.html"
         tgt_name = "fill_layer_generators.html"
-        logger.info("Moving '%s/%s/%s' to '%s/%s/%s'.", TARGET_DIR, section, src_name, TARGET_DIR, section, tgt_name)
+        logger.info("Moving '%s/%s/%s' to '%s/%s/%s'.", target_dir, section, src_name, target_dir, section, tgt_name)
         shutil.move(
-            Path(TARGET_DIR, section, src_name),
-            Path(TARGET_DIR, section, tgt_name),
+            Path(target_dir, section, src_name),
+            Path(target_dir, section, tgt_name),
         )
         logger.info("Replacing all references to '%s/%s' with '%s/%s'.", section, src_name, section, tgt_name)
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
@@ -235,15 +223,11 @@ if __name__ == "__main__":
                 write_soup_to_file(soup, filepath)
             logger.info("Replaced references in '%s' section.", dirpath.name)
 
-    # update all references to files, then normalize them
-    #update_img_src,
-
-    def update_img_sources_in_files():
+    def update_img_sources_in_files(target_dir: str | Path) -> None:
         """
+        Prefixes all img.src attributes with '/images/' in `target_dir` files.
         """
-        section = "layers_and_masks"
-        src_name = ""
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
             section = dirpath.name
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
@@ -253,30 +237,26 @@ if __name__ == "__main__":
                     update_img_src(img)
                 write_soup_to_file(soup, filepath)
 
-    #update_references_to_blending_modes_sections_in_files
-    def update_references_to_blending_modes_sections_in_files():
+    def update_references_to_blending_modes_sections_in_files(target_dir: str | Path) -> None:
         """
+        Updates all references to 'blending_modes' subsubsection articles in `target_dir`.
         """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
                 for a in soup.css.select("a"):
                     try:
-                        update_references_to_blending_modes_sections(TARGET_DIR, a)
+                        update_references_to_blending_modes_section(target_dir, a)
                     except FileNotFoundError:
                         logger.warning("Error occurred while trying to update %s.", a['href'])
                 write_soup_to_file(soup, filepath)
 
-    # for updating paths and references
-
-    # strip headers
-    #extract_h_tag,
-
-    def strip_headers_from_files():
+    def strip_headers_from_files(target_dir: str | Path) -> None:
         """
+        Removes headers from all files in `target_dir`.
         """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
             if dirpath.parts[-1] == "hsx":
                 h_level = 3
             elif dirpath.parts[-2] == "blending_modes":
@@ -292,14 +272,12 @@ if __name__ == "__main__":
                 extract_h_tag(soup, h_level=h_level)
                 write_soup_to_file(soup, filepath)
 
-    # replace section container with div.
-    #replace_section_with_div,
-    def replace_sections_with_divs_in_files():
+    def replace_sections_with_divs_in_files(target_dir: str | Path) -> None:
         """
+        Replaces main container for each file in `target_dir` from 'section' to 'div'.
         """
         og_repl = ("section[id]", "div")
-        #og_repl = ("div", "div")
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
@@ -309,39 +287,11 @@ if __name__ == "__main__":
                     div['class'] += " index"
                 write_soup_to_file(soup, filepath)
 
-    # strip icons (note the exceptions)
-    #extract_icon,
-    def strip_icons_from_all_files():
+    def strip_blending_modes_index_files(target_dir: str | Path) -> None:
         """
+        Removes file-sections from 'blending_modes' index files.
         """
-        exceptional_files = (
-            "crop.html", # tools
-            "color_sampler.html", # tools
-            "chalk_engine.html", # brush_engines
-            )
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            section = dirpath.name
-            if section not in SECTIONS_WITH_ICONS:
-                continue
-            for filename in filter(lambda filename: filename not in exceptional_files, filenames):
-                filepath = dirpath.joinpath(filename)
-                soup = get_soup_from_file(filepath)
-                logger.debug("Extracting icon from: '%s'.", filepath)
-                extract_icon(soup)
-                write_soup_to_file(soup, filepath)
-
-    # strip index files, noting blending-mode and blending-mode-hsx exceptions
-    # - leave 'blending_modes.html' alone
-    # - remove subsections of blending_modes/*.html
-    # - remove #hsx-blending-modes
-    # for renovating index files
-    #extract_subsections,
-    #is_index_file,
-
-    def strip_blending_modes_index_files():
-        """
-        """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
             logger.debug("dirpath.parts: %r", dirpath.parts)
             if dirpath.name != "blending_modes": # target only blending mode subsections
                 continue
@@ -355,11 +305,11 @@ if __name__ == "__main__":
                     extract_subsections(soup)
                 write_soup_to_file(soup, filepath)
 
-    #have_a_tag_open_new_tab,
-    def have_all_a_tags_open_new_tabs():
+    def have_all_a_tags_open_new_tabs(target_dir: str | Path) -> None:
         """
+        Makes <a> tags with 'external' in class attribute open URL in new tab.
         """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
@@ -369,11 +319,12 @@ if __name__ == "__main__":
                     a['target'] = "_blank"
                 write_soup_to_file(soup, filepath)
 
-    def compile_all_hrefs():
+    def compile_all_hrefs(target_dir: str | Path) -> None:
         """
+        Compiles list of 'href' values in `target_dir` and writes it to file.
         """
         hrefs = set()
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
@@ -381,26 +332,31 @@ if __name__ == "__main__":
                     hrefs.add(a['href'])
         href_list = list(hrefs)
         href_list.sort()
+        return href_list
+
+    def write_href_list_to_file(target_dir: str | Path, href_list: list[str], *, filename: str | Path = "hrefs.txt"):
+        """
+        Writes `href_list` to `target_dir`/`filename`.
+        """
         text_to_write = "\n".join(href_list)
-        list_file = Path(TARGET_DIR, "..", "hrefs.txt")
+        list_file = Path(target_dir, "..", filename)
         list_file.write_text(text_to_write, encoding="utf-8")
 
-    def check_if_path_is_in_index(path: list[str], index: list[dict]):
+    def update_all_hrefs(index: list[dict[str, Any]], target_dir: str | Path) -> None:
         """
+        Validates then normalizes all href values in `target_dir` in accordance with `index`.
         """
-        try:
-            record = list(filter(lambda record: record['path'] == path, index)).pop()
-            return True
-        except IndexError:
-            raise KeyError("'%s' does not exist in index.", path)
-
-    def update_all_hrefs():
-        """
-        """
-        with open(INDEX_FILE, encoding="utf-8") as rfile:
-            index = json.load(rfile)
-        root_dir = Path(TARGET_DIR)
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
+        def check_if_path_is_in_index(path: list[str], index: list[dict]):
+            """
+            Returns True if `path` is in `index`.
+            """
+            try:
+                record = list(filter(lambda record: record['path'] == path, index)).pop()
+                return True
+            except IndexError:
+                raise KeyError("'%s' does not exist in index.", path)
+        root_dir = Path(target_dir)
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
             path = list(dirpath.relative_to(root_dir).parts)
             #record_found = False
             logger.debug("dirpath: %r", dirpath)
@@ -436,7 +392,7 @@ if __name__ == "__main__":
                     if "#" in href and ("blending_modes" in dirpath.parts or "blending_modes" in href):
                         file_id = href[href.index("#"):]
                         try:
-                            correct_bm_path = get_correct_blending_modes_path(file_id, TARGET_DIR)
+                            correct_bm_path = get_correct_blending_modes_path(file_id, target_dir)
                             if "blending_modes" in correct_bm_path:
                                 a['href'] = "/" + '/'.join(correct_bm_path)
                             else:
@@ -450,7 +406,7 @@ if __name__ == "__main__":
                     href = a['href']
                     if href.count('/') == 1 and '#' in href:
                         filename, file_id = tuple(href.lstrip('/').split("#"))
-                        if not Path(TARGET_DIR, filename).exists():
+                        if not Path(target_dir, filename).exists():
                             logger.debug("Filename %s does not exist in root. Linking to official docs.", filename)
                             a['title'] = "To official Krita docs"
                             a['href'] = OFFICIAL_DOCS_ROOT + "reference_manual" + href
@@ -465,43 +421,43 @@ if __name__ == "__main__":
                     a['target'] = '_blank'
                 write_soup_to_file(soup, filepath)
 
-    def regenerate_docs():
+    def regenerate_docs() -> None:
         """
+        Validates and prints processed documentation to disk.
         """
-        clone_from_raw()
+        clone_from_raw(TARGET_DIR, SOURCE_DIR)
         print("Finished cloning files.")
         view_files(["../index.json"])
-        rename_fill_layers_to_fill_layer_generators()
+        rename_fill_layers_to_fill_layer_generators(TARGET_DIR)
         print("Finished renaming 'layers_and_masks/fill_layers.html' to 'layers_and_masks/fill_layer_generators.html'.")
-        view_files(["dockers/layers.html", "dockers/palette_docker.html", "filters/artistic.html"], pattern="fill_layer_generators.html")
-        update_img_sources_in_files()
+        view_files(["dockers/layers.html", "dockers/palette_docker.html", "filters/artistic.html"])
+        update_img_sources_in_files(TARGET_DIR)
         print("Finished updating image sources.")
-        view_files(["blending_modes/arithmetic/addition.html"], pattern="src=")
-        update_references_to_blending_modes_sections_in_files()
+        view_files(["blending_modes/arithmetic/addition.html"])
+        update_references_to_blending_modes_sections_in_files(TARGET_DIR)
         print("Finished updating references to blending_mode sources.")
-        view_files(["blending_modes.html"], pattern="blending_modes/binary/xnor.html")
-        strip_headers_from_files()
+        view_files(["blending_modes.html"])
+        strip_headers_from_files(TARGET_DIR)
         print("Finished stripping <h[1-6]> tags.")
-        view_files(["tools.html"], pattern="<h")
-        strip_icons_from_all_files()
-        print("Finished stripping <img /> tags.")
-        view_files(["tools/assistant.html"], pattern="<img ")
-        strip_blending_modes_index_files()
+        view_files(["tools.html"])
+        strip_blending_modes_index_files(TARGET_DIR)
         view_files(["brushes.html", "blending_modes.html", "layers_and_masks/fill_layer_generators.html"])
-        #print("Finished cleaning up index files.")
         print("Finished stripping 'blending_modes' index files.")
-        view_files(["tools.html", "brushes/brush_engines.html", "blending_modes/arithmetic.html"], pattern="<a href=")
-        replace_sections_with_divs_in_files()
+        view_files(["tools.html", "brushes/brush_engines.html", "blending_modes/arithmetic.html"])
+        replace_sections_with_divs_in_files(TARGET_DIR)
         print("Finished replacing section[id] with div[id].")
-        view_files(["layers_and_masks.html"], pattern="<div id=")
-        view_files(["brushes/brush_engines.html"], pattern="<link ")
-        update_all_hrefs()
-        compile_all_hrefs()
+        view_files(["layers_and_masks.html"])
+        view_files(["brushes/brush_engines.html"])
+        with open(INDEX_FILE, encoding="utf-8") as rfile:
+            index = json.load(rfile)
+        update_all_hrefs(index, TARGET_DIR)
+        href_list = compile_all_hrefs(TARGET_DIR)
+        write_href_list_to_file(TARGET_DIR, href_list)
         print("Finished updating a.href references.")
         view_files(["../hrefs.txt"])
-        have_all_a_tags_open_new_tabs()
+        have_all_a_tags_open_new_tabs(TARGET_DIR)
         print("Finished setting target='_blank' for external links.")
-        view_files(["layers_and_masks/fill_layer_generators/seexpr.html"], pattern="target=")
+        view_files(["layers_and_masks/fill_layer_generators/seexpr.html"])
 
     regenerate_docs()
 
