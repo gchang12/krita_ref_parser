@@ -538,17 +538,6 @@ if __name__ == "__main__":
                     a['target'] = "_blank"
                 write_soup_to_file(soup, filepath)
 
-    #remove_empty_tags,
-    def remove_empty_tags_from_files():
-        """
-        """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            for filename in filenames:
-                filepath = dirpath.joinpath(filename)
-                soup = get_soup_from_file(filepath)
-                remove_empty_tags(soup)
-                write_soup_to_file(soup, filepath)
-
     def compile_all_hrefs():
         """
         """
