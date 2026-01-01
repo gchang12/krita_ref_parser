@@ -560,17 +560,6 @@ if __name__ == "__main__":
                     tag.decompose()
                 write_soup_to_file(soup, filepath)
 
-    #replace_a_tags_with_reactlink_tags,
-    def replace_all_a_tags_with_reactlink_tags():
-        """
-        """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            for filename in filenames:
-                filepath = dirpath.joinpath(filename)
-                soup = get_soup_from_file(filepath)
-                replace_a_tags_with_reactlink_tags(soup)
-                write_soup_to_file(soup, filepath)
-
     def compile_all_hrefs():
         """
         """
