@@ -51,14 +51,6 @@ def replace_section_with_div(soup: bs4.BeautifulSoup, *, og_repl=("section[id]",
     section.name = repl
     section['class'] = "excerpt"
 
-def promote_h_tags(soup: bs4.BeautifulSoup, *, h_levels: tuple[int]):
-    """
-    """
-    og_level, tgt_level = og_and_tgt_levels
-    h_tag_name = "h%d" % og_level
-    for h_ in soup.find_all(h_tag_name):
-        h_.name = "h%d" % tgt_level
-
 # REFERENCE MANAGEMENT
 
 # - check if a-href exists.
