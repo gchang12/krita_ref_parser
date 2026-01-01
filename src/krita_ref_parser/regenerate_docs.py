@@ -354,10 +354,10 @@ if __name__ == "__main__":
             index = json.load(rfile)
         path = [section, src_name]
         new_record = {
-            "path": [section, tgt_name],
+            #"path": [section, tgt_name],
             "header": "Fill Layer Generators",
             "isIndexFile": True,
-            "pathAsStr": "layers_and_masks/fill_layer_generators",
+            "path": "layers_and_masks/fill_layer_generators",
             }
         logger.info("Updating record where 'path'=%s to %s.", path, new_record)
         update_filename_record_of_index(index, path, new_record)
@@ -581,21 +581,6 @@ if __name__ == "__main__":
                 for a in soup.css.select("a"):
                     normalize_internal_href(a)
                 write_soup_to_file(soup, filepath)
-
-    #prepend_link_tags_to_soup
-    def prepend_link_tags_to_all_excerpts():
-        """
-        """
-        href_list = [
-            "/styling/stylesheets/for-iframes.css",
-        ]
-        doctype = "<!DOCTYPE html>"
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            for filename in filenames:
-                filepath = dirpath.joinpath(filename)
-                soup = get_soup_from_file(filepath)
-                prepend_link_tags_to_soup(soup, href_list, container="div")
-                write_soup_to_file(doctype + str(soup), filepath)
 
     def compile_all_hrefs():
         """
