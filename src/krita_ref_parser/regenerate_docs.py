@@ -339,8 +339,9 @@ if __name__ == "__main__":
         src_name = "fill_layers.html"
         tgt_name = "fill_layer_generators.html"
         logger.info("Moving '%s/%s/%s' to '%s/%s/%s'.", TARGET_DIR, section, src_name, TARGET_DIR, section, tgt_name)
-        update_filename(
-            TARGET_DIR, Path(section, src_name), Path(section, tgt_name),
+        shutil.move(
+            Path(TARGET_DIR, section, src_name),
+            Path(TARGET_DIR, section, tgt_name),
         )
         logger.info("Replacing all references to '%s/%s' with '%s/%s'.", section, src_name, section, tgt_name)
         for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
@@ -350,19 +351,6 @@ if __name__ == "__main__":
                 update_references_to_filename(soup, section, src_name, tgt_name)
                 write_soup_to_file(soup, filepath)
             logger.info("Replaced references in '%s' section.", dirpath.name)
-        with open(INDEX_FILE, encoding="utf-8") as rfile:
-            index = json.load(rfile)
-        path = [section, src_name]
-        new_record = {
-            #"path": [section, tgt_name],
-            "header": "Fill Layer Generators",
-            "isIndexFile": True,
-            "path": "layers_and_masks/fill_layer_generators",
-            }
-        logger.info("Updating record where 'path'=%s to %s.", path, new_record)
-        update_filename_record_of_index(index, path, new_record)
-        with open(INDEX_FILE, encoding="utf-8", mode="w") as wfile:
-            json.dump(index, wfile, indent=2)
 
     # update all references to files, then normalize them
     #update_img_src,
