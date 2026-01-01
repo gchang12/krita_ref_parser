@@ -25,7 +25,6 @@ from krita_ref_parser.regenerate_docs import (
     is_index_file,
     # for renaming files
     update_references_to_filename,
-    update_filename_record_of_index,
     )
 from krita_ref_parser._logging import logger
 
@@ -1265,19 +1264,6 @@ class MovedFileTestCase(unittest.TestCase):
         with self.subTest(msg="Assert: Source DNE."):
             actual = soup.find("a", href=old_href)
             self.assertIsNone(actual)
-
-    def test_update_filename_record_of_index(self):
-        """
-        """
-        index = self.mock_index
-        new_record = self.mock_index[0].copy()
-        new_record['path'] = [self.dirname, self.filename]
-        new_record['header'] = "Fill Layer Generators"
-        path = ["layers_and_masks", "fill_layers.html"]
-        update_filename_record_of_index(index, path, new_record)
-        actual = self.mock_index[0].copy()
-        expected = new_record
-        self.assertDictEqual(actual, expected)
 
 # - contains_image: filters/artistic.html
 class ContainsImageTestCase(unittest.TestCase):

@@ -156,31 +156,6 @@ def update_references_to_filename(
     #src_path = Path("layers_and_masks", "fill_layers.html")
     #tgt_path = Path("layers_and_masks", "fill_layer_generators.html")
 
-def update_filename_record_of_index(index: list[dict], path_id: list[str], new_record: dict):
-    """
-    """
-    #src_path=["layers_and_masks", "fill_layers.html"]
-    #tgt_path=
-    #new_record = {
-    #    'path': ["layers_and_masks", "fill_layer_generator.html"],
-    #    'header': "Fill Layer Generator",
-    #}
-    #with open(index_file, encoding="utf-8") as rfile:
-        #index = json.load(rfile)
-    try:
-        record = list(filter(lambda record: record['path'] == path_id, index)).pop()
-    except IndexError:
-        logger.warning("Record with path_id='%s' has already been updated.", path_id)
-        return
-    for key in record:
-        try:
-            record[key] = new_record[key]
-            logger.info("Setting record['%s'] = %r.", key, new_record[key])
-        except KeyError:
-            logger.debug("'%s' not found in provided record.", key)
-    # - modify index.json as necessary. (NOTE: Warrants manual operation).
-    # - Do NOT extract SampleImageType figures.
-
 if __name__ == "__main__":
     import subprocess
     import sys
