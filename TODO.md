@@ -1,6 +1,8 @@
 
 TODO
 ====
+Reinsert krita-shortcut-parser and strip it of its independence
+Make sure that all index-modifications are in one module.
 Add function to inspect for script tags and remove them also.
 Add docstrings before I forget what all this does.
 Shake the proverbial trees of this program.
