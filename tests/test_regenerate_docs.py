@@ -13,7 +13,6 @@ from krita_ref_parser.regenerate_docs import (
     # for inserting and removing content
     extract_h_tag,
     extract_icon,
-    remove_empty_tags,
     replace_section_with_div,
     promote_h_tags,
     # for updating paths and references
@@ -166,33 +165,6 @@ class GeneralTestCase(unittest.TestCase):
         self.assertIsNotNone(actual)
         extract_icon(soup)
         actual = soup.find("img")
-        self.assertIsNone(actual)
-
-    #@unittest.skip("")
-    def test_remove_empty_tags__TAGS_WITH_ID_REMAIN(self):
-        """
-        """
-        soup = self.soup
-        div_contents = soup.find('div').find()
-        logger.debug("Contents of only div[id='empty-tag'] tag: %r", div_contents)
-        self.assertIsNone(div_contents)
-        remove_empty_tags(soup)
-        actual = soup.find('div')
-        self.assertIsNotNone(actual)
-        self.assertIn('id', actual.attrs)
-
-    #@unittest.skip("")
-    def test_remove_empty_tags__TAGS_WITHOUT_ID_ARE_GONE(self):
-        """
-        """
-        soup = self.soup
-        span = soup.find('span')
-        contents = span.find()
-        logger.debug("Contents of only span[id='empty-tag'] tag: %r", contents)
-        self.assertIsNone(contents)
-        self.assertNotIn('id', soup.find('span').attrs)
-        remove_empty_tags(soup)
-        actual = soup.find('span')
         self.assertIsNone(actual)
 
     def test_update_references_to_blending_modes_sections(self):

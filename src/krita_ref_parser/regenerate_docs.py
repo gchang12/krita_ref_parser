@@ -51,17 +51,6 @@ def replace_section_with_div(soup: bs4.BeautifulSoup, *, og_repl=("section[id]",
     section.name = repl
     section['class'] = "excerpt"
 
-def remove_empty_tags(soup: bs4.BeautifulSoup):
-    """
-    """
-    for tag in filter(
-        lambda tag: \
-            not tag.contents \
-            and 'id' not in tag.attrs,
-        soup.find_all(),
-    ):
-        tag.decompose()
-
 def promote_h_tags(soup: bs4.BeautifulSoup, *, h_levels: tuple[int]):
     """
     """
