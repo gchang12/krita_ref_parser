@@ -1,16 +1,4 @@
 
-TODO
-====
-Reinsert krita-shortcut-parser and strip it of its independence
-Make sure that all index-modifications are in one module.
-Add function to inspect for script tags and remove them also.
-Add docstrings before I forget what all this does.
-Shake the proverbial trees of this program.
-Modify:
-- CONTRIBUTING.md
-- AUTHORS.md
-- CHANGELOG.md
-
 DONE
 ====
 split_docs.py
@@ -30,6 +18,14 @@ Regenerate index with the new `pathAsStr` field.
 Clear out archived files.
 Add some `resize_image_file` function to `amputate_images.py`.
 Rotate `Gradients_Comparison` image file 90 degrees clockwise.
+Make sure that all index-modifications are in one module.
+Add function to inspect for script tags and remove them also.
+Add docstrings before I forget what all this does.
+Shake the proverbial trees of this program.
+Modify:
+- CONTRIBUTING.md
+- AUTHORS.md
+- CHANGELOG.md
 
 ABANDONED
 =========
