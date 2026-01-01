@@ -15,7 +15,7 @@ from krita_ref_parser.regenerate_docs import (
     extract_icon,
     replace_section_with_div,
     # for updating paths and references
-    update_references_to_blending_modes_sections,
+    update_references_to_blending_modes_section,
     get_correct_blending_modes_path,
     update_img_src,
     internal_link_should_become_external,
@@ -47,18 +47,14 @@ def get_soup(html_source: str) -> BeautifulSoup:
 
 # TEST-CASES
 
-# - has_ref_to_blending_modes_ref: ???
-#@unittest.skip("This has been already tested.")
-class GeneralTestCase(unittest.TestCase):
+class GenericTestCase(unittest.TestCase):
     """
+    Tests doc-regen on a quintessential excerpt file.
     """
-    # All file-text should:
-    # - have headers
-    # - be prepended with CSS <link> lines
-    # - have all references to blending_modes/* subsections corrected to fit new file structure.
 
     def setUp(self):
         """
+        Initializes soup and 'blending_modes' list.
         """
         html_source_lines = (
             "<section id='GeneralTestCase'>",
@@ -91,6 +87,7 @@ class GeneralTestCase(unittest.TestCase):
 
     def test_get_correct_blending_modes_path(self):
         """
+        Checks that correct blending_modes can be obtained.
         """
         root_dir = "./tests/output/excerpts/"
         id_text = "#bm-inverse-subtract"
@@ -105,6 +102,7 @@ class GeneralTestCase(unittest.TestCase):
 
     def test_replace_section_with_div(self):
         """
+        Checks that tag-renaming works.
         """
         html_source_lines = (
             '<div class="excerpt" id="GeneralTestCase">',
@@ -115,7 +113,6 @@ class GeneralTestCase(unittest.TestCase):
             '<div id="empty-tag"></div>',
             '</div>',
         )
-        #expected = get_soup("\n".join(html_source_lines))
         expected = html_source_lines
         html_source_lines = (
             '<section id="GeneralTestCase">',
@@ -128,13 +125,12 @@ class GeneralTestCase(unittest.TestCase):
         )
         actual = get_soup("\n".join(html_source_lines))
         replace_section_with_div(actual)
-        #logger.critical("actual: %s, expected: %s", actual, expected)
         actual = tuple(filter(lambda tag: tag, str(actual).splitlines()))
         self.assertTupleEqual(actual, expected)
 
-    #@unittest.skip("")
     def test_extract_h_tag(self):
         """
+        Checks that <h[1-6]> deletion works.
         """
         h_level = 1
         soup = self.soup
@@ -144,9 +140,9 @@ class GeneralTestCase(unittest.TestCase):
         actual = soup.find("h1")
         self.assertIsNone(actual)
 
-    #@unittest.skip("")
     def test_extract_icon(self):
         """
+        Checks that <img> deletion works.
         """
         soup = self.soup
         actual = soup.find("img")
@@ -155,26 +151,27 @@ class GeneralTestCase(unittest.TestCase):
         actual = soup.find("img")
         self.assertIsNone(actual)
 
-    def test_update_references_to_blending_modes_sections(self):
+    def test_update_references_to_blending_modes_section(self):
         """
+        Affirms that references to blending_modes/* are corrected to fit new filetree.
         """
         soup = self.soup
         for internal_a in soup.find_all('a'):
-            update_references_to_blending_modes_sections(TARGET_DIR, internal_a)
+            update_references_to_blending_modes_section(TARGET_DIR, internal_a)
         for blending_mode, internal_a in zip(self.blending_modes, soup.find_all('a')):
             expected = "/blending_modes/arithmetic/%s.html" % blending_mode
             actual = internal_a['href']
             with self.subTest():
                 self.assertEqual(actual, expected)
 
-# - with icon: tools/assistant.html
-#@unittest.skip("This has already been covered.")
 class ContainsIconTestCase(unittest.TestCase):
     """
+    Tests doc-regen on a mock-file with an icon.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML.
         """
         html_source_lines = (
             "<section id='GeneralTestCase'>",
@@ -190,9 +187,9 @@ class ContainsIconTestCase(unittest.TestCase):
         soup = get_soup("\n".join(html_source_lines))
         self.soup = soup
 
-    #@unittest.skip("")
     def test_extract_icon(self):
         """
+        Tests icon deletion on file that's got an icon.
         """
         soup = self.soup
         actual = soup.find("img")
@@ -201,15 +198,14 @@ class ContainsIconTestCase(unittest.TestCase):
         actual = soup.find("img")
         self.assertIsNone(actual)
 
-# - without icon: dockers/add_shape.html
 class DoesNotContainIconTestCase(unittest.TestCase):
     """
+    Tests doc-regen on a mock-file without any icon candidates.
     """
-    # Some file-text should:
-    # - lack icons
 
     def setUp(self):
         """
+        Initializes sample HTML soup from 'dockers/add_shape.html'
         """
         soup = get_soup('''<section id="add-shape">
 <span id="add-shape-docker"></span><h1>Add Shape<a class="headerlink" href="#add-shape" title="Link to this heading">¶</a></h1>
@@ -220,9 +216,10 @@ class DoesNotContainIconTestCase(unittest.TestCase):
 </section>''')
         self.soup = soup
 
-    #@unittest.skip("...Do I want to make sure that no images have been accidentally added?")
+    @unittest.skip("...Do I want to make sure that no images have been accidentally added?")
     def test_extract_icon(self):
         """
+        Tests that AttributeError is raised upon trying to delete nonexistent <img> from soup.
         """
         soup = self.soup
         actual = soup.find("img")
@@ -234,15 +231,14 @@ class DoesNotContainIconTestCase(unittest.TestCase):
         self.assertIsNone(actual)
         logger.debug("Clear.")
 
-# - blending_modes: arithmetic.html
 class BlendingModeIndexTestCase(unittest.TestCase):
     """
+    Tests <section>-deletion on a 'blending_modes' subsection index page.
     """
-    # Some file-text should:
-    # - have certain subsections removed
 
     def setUp(self):
         """
+        Initializes sample HTML from 'blending_modes/arithmetic.html'.
         """
         soup = get_soup('''<section id="arithmetic">
 <span id="bm-cat-arithmetic"></span><h1>Arithmetic<a class="headerlink" href="#arithmetic" title="Link to this heading">¶</a></h1>
@@ -388,6 +384,7 @@ One puts the black and white lineart on top, sets the layer to ‘Multiply’, a
 
     def test_extract_subsections(self):
         """
+        Asserts that subsection extraction is successful.
         """
         soup = self.soup
         actual = tuple(soup.css.select("section[id] > section[id]"))
@@ -398,13 +395,14 @@ One puts the black and white lineart on top, sets the layer to ‘Multiply’, a
         actual = tuple(soup.css.select("section[id] > section[id]"))
         self.assertFalse(actual)
 
-# - blending_modes: arithmetic/addition.html
 class BlendingModeArticleTestCase(unittest.TestCase):
     """
+    Tests doc-regen on 'blending_modes' article excerpt.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML from 'blending_modes/arithmetic/addition.html'.
         """
         soup = get_soup('''<section id="addition">
 <span id="bm-addition"></span><span id="index-0"></span><h2>Addition<a class="headerlink" href="#addition" title="Link to this heading">¶</a></h2>
@@ -445,6 +443,7 @@ class BlendingModeArticleTestCase(unittest.TestCase):
 
     def test_is_index_file(self):
         """
+        Checks that False is returned.
         """
         filename = Path(*self.section)
         expected = False
@@ -453,6 +452,7 @@ class BlendingModeArticleTestCase(unittest.TestCase):
 
     def test_update_img_src(self):
         """
+        Checks that img.src attributes are updated.
         """
         for img in self.soup.find_all("img"):
             expected = "/images/" + Path(img['src']).name
@@ -465,12 +465,13 @@ class BlendingModeArticleTestCase(unittest.TestCase):
 # - is_blending_modes_hsx: blending_modes/hsx.html
 class BlendingModeHSXIndexTestCase(unittest.TestCase):
     """
+    Demos doc-regen on 'blending_modes/hsx' index file.
+    Some file-text should have certain subsections removed.
     """
-    # Some file-text should:
-    # - have certain subsections removed
 
     def setUp(self):
         """
+        Initializes sample HTML from 'blending_modes/hsx' index.
         """
         soup = get_soup('''<section id="hsx">
 <span id="bm-cat-hsx"></span><span id="index-0"></span><h1>HSX<a class="headerlink" href="#hsx" title="Link to this heading">¶</a></h1>
@@ -784,6 +785,7 @@ Checks whether the upper layer’s pixel has a lower Saturation than the lower l
 
     def test_MANUALLY_REMOVE_SUBSECTIONS(self):
         """
+        Checks that certain headers are missing post-removal.
         """
         soup = self.soup
         section = soup.find(id="hsx-blending-modes")
@@ -794,13 +796,14 @@ Checks whether the upper layer’s pixel has a lower Saturation than the lower l
         actual = soup.find(id="hsx-blending-modes")
         self.assertIsNone(actual)
 
-# - blending_modes/hsx: blending_modes/hsx/intensity.html
 class BlendingModeHSXArticleTestCase(unittest.TestCase):
     """
+    Tests h-tag extraction on 'blending_modes/hsx' article.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML from 'blending_modes/hsx/intensity'.
         """
         soup = get_soup('''<section id="intensity">
 <span id="bm-intensity"></span><h3>Intensity<a class="headerlink" href="#intensity" title="Link to this heading">¶</a></h3>
@@ -814,9 +817,9 @@ class BlendingModeHSXArticleTestCase(unittest.TestCase):
 </section>''')
         self.soup = soup
 
-    #@unittest.skip("")
     def test_extract_h_tag(self):
         """
+        Checks to see if <h3> has really been deleted.
         """
         h_level = 3
         soup = self.soup
@@ -826,15 +829,15 @@ class BlendingModeHSXArticleTestCase(unittest.TestCase):
         actual = soup.find("h3")
         self.assertIsNone(actual)
 
-# - has_external_link: fill_layer_generators/seexpr.html
+@unittest.skip("Functions for which this class exists have been deleted.")
 class ContainsExternalLinkTestCase(unittest.TestCase):
     """
+    Tests doc-regen on a file with external links. 
     """
-    # All file-text should:
-    # - have external links that are opened in new tabs
 
     def setUp(self):
         """
+        Initializes sample HTML from 'fill_layer_generators/seexpr'.
         """
         soup = get_soup('''<section id="seexpr">
 <span id="seexpr-fill-layer"></span><span id="index-0"></span><h1>SeExpr<a class="headerlink" href="#seexpr" title="Link to this heading">¶</a></h1>
@@ -885,16 +888,17 @@ splitter.</p>
 </section>''')
         self.soup = soup
 
-# - has_link_to_krita_non-refman_article: main_menu/settings_menu.html
 class ContainsOfficialDocsLinkTestCase(unittest.TestCase):
     """
+    Excerpt file that contains references to official Krita docs article(s).
+    Some file-text should have links that point to:
+    - different parts of this website.
+    - parts of the krita-docs that aren't in reference_manual/*
     """
-    # Some file-text should:
-    # - have links that point to different parts of this website.
-    # - have links that point to parts of the krita-docs that aren't in reference_manual/*
 
     def setUp(self):
         """
+        Initializes sample HTML from 'main_menu/settings_menu'.
         """
         soup = get_soup('''<section id="seexpr">
 <span id="seexpr-fill-layer"></span><span id="index-0"></span><h1>SeExpr<a class="headerlink" href="#seexpr" title="Link to this heading">¶</a></h1>
@@ -947,6 +951,7 @@ splitter.</p>
 
     def test_internal_link_should_become_external(self):
         """
+        Checks that href values with right number of '..' instances should point to official docs.
         """
         expected = True
         num_levels = 3
@@ -958,6 +963,7 @@ splitter.</p>
 
     def test_replace_internal_reference_with_official(self):
         """
+        Checks that href points to official docs and that class values have been adjusted accordingly.
         """
         soup = self.soup
         href = "../../../tutorials/seexpr.html#seexpr-tut-intro"
@@ -974,13 +980,14 @@ splitter.</p>
         actual = set(a['class']) # iterable
         self.assertSetEqual(actual, expected)
 
-# - has_link_to_krita_refman_article: dockers/animation_curves.html
 class ContainsInternalLinkTestCase(unittest.TestCase):
     """
+    File that contains reference to docs-krita-org/reference_manual/* section.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML from 'dockers/animation_curves'.
         """
         soup = get_soup('''<section id="animation-curves-docker">
 <span id="index-0"></span><span id="id1"></span><h1>Animation Curves Docker<a class="headerlink" href="#animation-curves-docker" title="Link to this heading">¶</a></h1>
@@ -1102,8 +1109,9 @@ class ContainsInternalLinkTestCase(unittest.TestCase):
 </section>''')
         self.soup = soup
 
-    def test_internal_link_become_external(self):
+    def test_internal_link_should_become_external(self):
         """
+        Validates return-value.
         """
         soup = self.soup
         expected = False
@@ -1113,13 +1121,14 @@ class ContainsInternalLinkTestCase(unittest.TestCase):
         actual = internal_link_should_become_external(a, num_levels=num_levels)
         self.assertIs(actual, expected)
 
-# - is_index_file: layers_and_masks/fill_layers.html
 class IndexTestCase(unittest.TestCase):
     """
+    Index file for non-blending_modes section.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML from 'main_menu'.
         """
         soup = get_soup('''
 <section id="main-menu">
@@ -1148,20 +1157,21 @@ class IndexTestCase(unittest.TestCase):
 
     def test_is_index_file(self):
         """
+        Validates return-value; should be True.
         """
         filename = Path(TARGET_DIR, self.section).with_suffix(".html")
         expected = True
         actual = is_index_file(filename)
         self.assertIs(actual, expected)
 
-
-# - is_index_file: layers_and_masks/fill_layers.html
 class SpecialIndexTestCase(unittest.TestCase):
     """
+    The index file 'layers_and_masks/fill_layers.html', which is slated to be renamed to its directory.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML from 'layers_and_masks/fill_layers'.
         """
         soup = get_soup('''<section id="fill-layers">
 <span id="index-0"></span><span id="id1"></span><h1>Fill Layers<a class="headerlink" href="#fill-layers" title="Link to this heading">¶</a></h1>
@@ -1192,6 +1202,7 @@ class SpecialIndexTestCase(unittest.TestCase):
 
     def test_is_index_file(self):
         """
+        Should return True post-renaming.
         """
         filename = Path(TARGET_DIR, *self.section).with_name("fill_layer_generators.html")
         expected = True
@@ -1200,44 +1211,52 @@ class SpecialIndexTestCase(unittest.TestCase):
 
     def test_is_index_file__DIR_DNE(self):
         """
+        Should return False pre-renaming.
         """
         filename = Path(TARGET_DIR, *self.section)
         expected = False
         actual = is_index_file(filename)
         self.assertIs(actual, expected)
 
-# - exception1: layers_and_masks/fill_layers.html
-#@unittest.skip("Not ready yet.")
 class MovedFileTestCase(unittest.TestCase):
     """
+    Sample file that contains a reference to the renamed file.
+    All file-text should have all references to moved files corrected.
+    Renamed file: 'layers_and_masks/fill_layers.html' -> 'layers_and_masks/fill_layer_generators.html'
     """
-    # All file-text should:
-    # - have all references to moved files corrected
 
     def setUp(self):
         """
+        Initializes sample HTML that references the renamed file under scrutiny.
         """
+        self.section = "layer_and_masks"
+        self.src_name = "fill_layers.html"
+        self.tgt_name = "fill_layer_generators.html"
         self.soup = get_soup("""<section id='dummy'>
 <h1>References Fill Layer</h1>
-<p><a class='internal' href='../../layers_and_masks/fill_layers.html'>On Fill Layers</a></p>
-</section>""")
+<p><a class='internal' href='../../%s/%s'>On Fill Layers</a></p>
+</section>""" % (self.section, self.src_name) )
 
     def test_update_references_to_filename(self):
         """
+        Contrasts href values pre-renaming and post-renaming.
         """
         soup = self.soup
-        section = "layers_and_masks"
-        src_name = "fill_layers.html"
-        tgt_name = "fill_layer_generators.html"
-        new_href = '../../%s/%s' % (section, tgt_name)
-        old_href = '../../%s/%s' % (section, src_name)
+        section = self.section
+        src_name = self.src_name
+        tgt_name = self.tgt_name
+        new_href = f'../../{section}/{tgt_name}'
+        old_href = f'../../{section}/{src_name}'
+        logger.debug("Validating href values pre-renaming.")
         with self.subTest(msg="Assert: Target DNE."):
             actual = soup.find("a", href=new_href)
             self.assertIsNone(actual)
         with self.subTest(msg="Assert: Source exists."):
             actual = soup.find("a", href=old_href)
             self.assertIsNotNone(actual)
+        logger.debug("OK. Now changing references to %s to %s.", old_href, new_href)
         update_references_to_filename(soup, section, src_name, tgt_name)
+        logger.debug("OK. Validating href values post-renaming.")
         with self.subTest(msg="Assert: Target exists."):
             actual = soup.find("a", href=new_href)
             self.assertIsNotNone(actual)
@@ -1245,13 +1264,14 @@ class MovedFileTestCase(unittest.TestCase):
             actual = soup.find("a", href=old_href)
             self.assertIsNone(actual)
 
-# - contains_image: filters/artistic.html
 class ContainsImageTestCase(unittest.TestCase):
     """
+    File that contains <img> tags.
     """
 
     def setUp(self):
         """
+        Initializes sample HTML from 'filters/artistic'.
         """
         soup = get_soup('''<section id="artistic">
 <span id="artistic-filters"></span><span id="index-0"></span><h1>Artistic<a class="headerlink" href="#artistic" title="Link to this heading">¶</a></h1>
@@ -1329,6 +1349,7 @@ The halftoning process works by making a pattern image (commonly named <em>scree
 
     def test_update_img_src(self):
         """
+        Checks that img.src attributes have been updated.
         """
         soup = self.soup
         expected = []
