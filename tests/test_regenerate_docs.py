@@ -5,7 +5,6 @@ import io
 import unittest
 from unittest.mock import patch
 from pathlib import Path
-import shutil
 
 from bs4 import BeautifulSoup
 
@@ -1219,24 +1218,6 @@ class MovedFileTestCase(unittest.TestCase):
     def setUp(self):
         """
         """
-        self.dirname = "layers_and_masks"
-        self.filename = "fill_layers.html"
-        self.mock_index = [
-            {
-                "path": [
-                    "layers_and_masks",
-                    "fill_layers.html",
-                ],
-                "header": "Fill Layers",
-                "section": "#fill-layers",
-                "icon": None,
-                "figures": None,
-            },
-        ]
-        shutil.copyfile(
-            Path(SOURCE_DIR, self.dirname, self.filename),
-            Path(TARGET_DIR, self.dirname, self.filename),
-        )
         self.soup = get_soup("""<section id='dummy'>
 <h1>References Fill Layer</h1>
 <p><a class='internal' href='../../layers_and_masks/fill_layers.html'>On Fill Layers</a></p>
