@@ -482,30 +482,7 @@ if __name__ == "__main__":
     # - remove #hsx-blending-modes
     # for renovating index files
     #extract_subsections,
-    #remove_links_from_index,
     #is_index_file,
-
-    def strip_index_files():
-        """
-        """
-        for dirpath, dirnames, filenames in Path(TARGET_DIR).walk():
-            if dirpath.parts[-2] == "blending_modes": # if it's a blending mode subsection, skip
-                continue
-            #section = dirpath.name
-            for filename in filenames:
-                if filename == "blending_modes.html":
-                    continue
-                filepath = dirpath.joinpath(filename)
-                logger.debug("Checking if %r is an index file.", filepath)
-                if not is_index_file(filepath):
-                    logger.debug("'%s' is not an index file. Skipping.", filepath)
-                    continue
-                logger.debug("'%s' is an index file. Processing.", filepath)
-                soup = get_soup_from_file(filepath)
-                section = filepath.with_suffix("").name
-                remove_links_from_index(soup, section)
-                write_soup_to_file(soup, filepath)
-            logger.debug("Finished stripping index for '%s'.", section)
 
     def strip_blending_modes_index_files():
         """
@@ -653,7 +630,6 @@ if __name__ == "__main__":
     print("Finished stripping <img /> tags.")
     view_files_with_vim(["tools/assistant.html"], pattern="<img ")
     strip_blending_modes_index_files()
-    #strip_index_files()
     view_files_with_vim(["brushes.html", "blending_modes.html", "layers_and_masks/fill_layer_generators.html"])
     #print("Finished cleaning up index files.")
     print("Finished stripping 'blending_modes' index files.")
