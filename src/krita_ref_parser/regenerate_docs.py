@@ -678,19 +678,6 @@ if __name__ == "__main__":
                     a['target'] = '_blank'
                 write_soup_to_file(soup, filepath)
 
-    def check_index(check=False):
-        """
-        """
-        if not check:
-            return
-        with open(INDEX_FILE, encoding="utf-8") as rfile:
-            index = json.load(rfile)
-        for record in index:
-            path = record['path']
-            if len(path) == 1:
-                return True
-        raise Exception("Unable to find path in index whose length is equal to one. ")
-
     clone_from_raw()
     print("Finished cloning files.")
     view_files_with_vim(["../index.json"])
