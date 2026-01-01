@@ -17,7 +17,6 @@ from krita_ref_parser.regenerate_docs import (
     # for updating paths and references
     update_references_to_blending_modes_sections,
     get_correct_blending_modes_path,
-    a_href_exists,
     update_img_src,
     normalize_internal_href,
     internal_link_should_become_external,
@@ -213,24 +212,6 @@ class ContainsIconTestCase(unittest.TestCase):
         )
         soup = get_soup("\n".join(html_source_lines))
         self.soup = soup
-
-    def test_a_href_exists(self):
-        """
-        """
-        expected = True
-        soup = self.soup
-        a = soup.find('a')
-        actual = a_href_exists(a, root_dir=TARGET_DIR)
-        self.assertIs(actual, expected)
-
-    def test_a_href_exists__BLENDING_MODE(self):
-        """
-        """
-        expected = True
-        soup = self.soup
-        a = soup.find('a', href="../../blending_modes/arithmetic.html#addition")
-        actual = a_href_exists(a, root_dir=TARGET_DIR)
-        self.assertIs(actual, expected)
 
     #@unittest.skip("")
     def test_extract_icon(self):

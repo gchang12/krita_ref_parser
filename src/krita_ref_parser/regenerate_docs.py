@@ -53,19 +53,6 @@ def replace_section_with_div(soup: bs4.BeautifulSoup, *, og_repl=("section[id]",
 
 # REFERENCE MANAGEMENT
 
-# - check if a-href exists.
-def a_href_exists(a: bs4.Tag, *, root_dir: Path | str):
-    """
-    """
-    a_href = a['href']
-    stripped_a_href = a_href.lstrip('./')
-    if "blending_modes/" in stripped_a_href and "/" in stripped_a_href[stripped_a_href.index("blending_modes/"):]:
-        stripped_a_href = stripped_a_href.replace('.html#', '/') + '.html'
-    if "#" in stripped_a_href:
-        stripped_a_href = stripped_a_href[:stripped_a_href.index("#")]
-    normalized_a_href = Path(root_dir, stripped_a_href)
-    return normalized_a_href.exists()
-
 # - Change image sources to /images/{filename}
 def update_img_src(img: bs4.Tag):
     """
@@ -83,7 +70,6 @@ def normalize_internal_href(a: bs4.Tag):
     a['href'] = "/" + a['href'].lstrip('./')
 
 # - Change documentation links to official docs website as needed; add extra class denoting a link as an official-docs link.
-# NOTE: Isn't this accomplished already by 'a_href_exists'?
 def internal_link_should_become_external(a: bs4.Tag, *, num_levels: int):
     """
     """
@@ -359,7 +345,6 @@ if __name__ == "__main__":
                 write_soup_to_file(soup, filepath)
 
     # for updating paths and references
-    #a_href_exists,
     #normalize_internal_href,
     #replace_internal_reference_with_official,
 
