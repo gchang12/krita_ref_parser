@@ -75,7 +75,7 @@ def internal_link_should_become_external(a: Tag, *, num_levels: int) -> bool:
     """
     Determines if `a` should have 'internal' in class attribute, based on the number of occurrences of '..' inside `a`.href.
     """
-    href_path = a['href'].split('/')
+    href_path = str(a['href']).split('/')
     logger.debug("Checking if '%s' has %d instances of '..'", a['href'], num_levels)
     return href_path.count('..') == num_levels
 
@@ -83,7 +83,7 @@ def update_references_to_blending_modes_section(root_dir: Path | str, internal_a
     """
     Updates reference to 'blending_modes' subsection article in `internal_a` based on if it exists in `root_dir`.
     """
-    minimal_href = internal_a['href'].lstrip('./')
+    minimal_href = str(internal_a['href']).lstrip('./')
     # e.g., blending_modes/arithmetic.html#addition -> blending_modes/arithmetic/addition.html
     def convert_blending_modes_href(href: str) -> str:
         """
@@ -120,7 +120,7 @@ def replace_internal_reference_with_official(internal_a: Tag) -> None:
     """
     Changes href of `internal_a` to full URL to official docs and changes class attribute accordingly.
     """
-    internal_a['href'] = '/'.join([OFFICIAL_DOCS_ROOT.rstrip('/'), internal_a['href'].lstrip('./')])
+    internal_a['href'] = '/'.join([OFFICIAL_DOCS_ROOT.rstrip('/'), str(internal_a['href']).lstrip('./')])
     internal_a['class'].remove("internal")
     internal_a['class'].append(LINK_TO_OFFICIAL_DOCS_CLASSNAME)
     internal_a['class'].append("external")
@@ -156,7 +156,7 @@ def update_references_to_filename(
         logger.debug("Checking if '%s' is present in '%s'.", src_path, internal_a['href'])
         if src_path not in str(internal_a['href']):
             continue
-        dots = filter(lambda href_part: href_part == '..', internal_a['href'].split('/'))
+        dots = filter(lambda href_part: href_part == '..', str(internal_a['href']).split('/'))
         internal_a['href'] = '/'.join(list(dots) + [str(section), str(tgt_name)])
         logger.debug("Present.")
 
@@ -319,9 +319,9 @@ if __name__ == "__main__":
                     a['target'] = "_blank"
                 write_soup_to_file(soup, filepath)
 
-    def compile_all_hrefs(target_dir: str | Path) -> None:
+    def compile_all_hrefs(target_dir: str | Path) -> list[str]:
         """
-        Compiles list of 'href' values in `target_dir` and writes it to file.
+        Compiles sorted list of 'href' values in `target_dir`.
         """
         hrefs = set()
         for dirpath, dirnames, filenames in Path(target_dir).walk():
@@ -329,12 +329,12 @@ if __name__ == "__main__":
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
                 for a in soup.css.select("a"):
-                    hrefs.add(a['href'])
+                    hrefs.add(str(a['href']))
         href_list = list(hrefs)
         href_list.sort()
         return href_list
 
-    def write_href_list_to_file(target_dir: str | Path, href_list: list[str], *, filename: str | Path = "hrefs.txt"):
+    def write_href_list_to_file(target_dir: str | Path, href_list: list[str], *, filename: str | Path = "hrefs.txt") -> None:
         """
         Writes `href_list` to `target_dir`/`filename`.
         """
@@ -346,7 +346,7 @@ if __name__ == "__main__":
         """
         Validates then normalizes all href values in `target_dir` in accordance with `index`.
         """
-        def check_if_path_is_in_index(path: list[str], index: list[dict]):
+        def check_if_path_is_in_index(path: list[str], index: list[dict[str, Any]]) -> bool:
             """
             Returns True if `path` is in `index`.
             """
@@ -369,7 +369,7 @@ if __name__ == "__main__":
                 num_levels = len(path)
                 soup = get_soup_from_file(filepath)
                 for a in soup.css.select("a"):
-                    href = a['href']
+                    href = str(a['href'])
                     if 'internal' not in a['class']:
                         continue
                     if '_images' in href:
@@ -390,34 +390,35 @@ if __name__ == "__main__":
                         a['href'] = '/' + new_href
                     #href = a['href']
                     if "#" in href and ("blending_modes" in dirpath.parts or "blending_modes" in href):
-                        file_id = href[href.index("#"):]
+                        file_id = str(href[href.index("#"):])
                         try:
                             correct_bm_path = get_correct_blending_modes_path(file_id, target_dir)
                             if "blending_modes" in correct_bm_path:
                                 a['href'] = "/" + '/'.join(correct_bm_path)
                             else:
                                 a['href'] = "/blending_modes/" + '/'.join(correct_bm_path)
-                            a['href'] = a['href'].replace('/#', '#')
+                            a['href'] = str(a['href']).replace('/#', '#')
                         except KeyError as key_err:
                             logger.debug("KeyError: %s", key_err)
                     #href = a['href']
                     if href.endswith("#hsx-blending-modes"):
                         a['href'] = "/" + href[:href.index("#hsx-blending-modes")]
-                    href = a['href']
-                    if href.count('/') == 1 and '#' in href:
-                        filename, file_id = tuple(href.lstrip('/').split("#"))
+                    og_href = str(a['href'])
+                    if og_href.count('/') == 1 and '#' in og_href:
+                        filename, file_id = tuple(og_href.lstrip('/').split("#"))
                         if not Path(target_dir, filename).exists():
                             logger.debug("Filename %s does not exist in root. Linking to official docs.", filename)
                             a['title'] = "To official Krita docs"
-                            a['href'] = OFFICIAL_DOCS_ROOT + "reference_manual" + href
+                            a['href'] = OFFICIAL_DOCS_ROOT + "reference_manual" + og_href
                             a['class'] = "reference external " + LINK_TO_OFFICIAL_DOCS_CLASSNAME
                             a['target'] = "_blank"
                 write_soup_to_file(soup, filepath)
                 path.pop()
                 logger.debug("Replacing all internal links on 'blending_modes.html' to excerpt-links.")
                 for a in filter(lambda a: "internal" in a['class'], soup.css.select("a")):
-                    a['title'] = "To excerpt of '%s'" % a['href'].lstrip('/')
-                    a['href'] = '/excerpts' + a['href']
+                    a_href = str(a['href'])
+                    a['title'] = "To excerpt of '%s'" % a_href.lstrip('/')
+                    a['href'] = '/excerpts' + a_href
                     a['target'] = '_blank'
                 write_soup_to_file(soup, filepath)
 

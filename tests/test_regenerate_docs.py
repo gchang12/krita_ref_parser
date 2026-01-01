@@ -1,4 +1,5 @@
 """
+Tests validation and output functionality of program.
 """
 
 import io
@@ -35,8 +36,9 @@ for dirname in (SOURCE_DIR, TARGET_DIR):
 
 # AUXILIARY-FUNCTIONS
 
-def get_soup(html_source: str):
+def get_soup(html_source: str) -> BeautifulSoup:
     """
+    Returns BeautifulSoup object from `html_source`
     """
     if not isinstance(html_source, str):
         raise TypeError('Must pass raw-HTML as str. Type of argument passed: %r' % type(html_source))
@@ -1336,3 +1338,4 @@ The halftoning process works by making a pattern image (commonly named <em>scree
             update_img_src(img)
             actual.append(img['src'])
         self.assertListEqual(actual, expected)
+
