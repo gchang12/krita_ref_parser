@@ -425,7 +425,7 @@ if __name__ == "__main__":
                 for a in filter(lambda a: "internal" in a['class'], soup.css.select("a")):
                     a_href = str(a['href'])
                     a['title'] = "To excerpt of '%s'" % a_href.lstrip('/')
-                    a['href'] = '/excerpts' + a_href
+                    a['href'] = '/reference_manual' + a_href
                     a['target'] = '_blank'
                 write_soup_to_file(soup, filepath)
 
