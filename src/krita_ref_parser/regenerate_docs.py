@@ -177,12 +177,11 @@ if __name__ == "__main__":
         soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
         return soup
 
-    def write_soup_to_file(soup: BeautifulSoup, filepath: Path, *, prepend_doctype_declaration: bool = False) -> int:
+    def write_soup_to_file(soup: BeautifulSoup, filepath: Path) -> int:
         """
         Writes `soup` to `filepath`.
         """
-        prefix = ("" if not prepend_doctype_declaration else "<!DOCTYPE html>\n")
-        return filepath.write_text(prefix + str(soup), encoding="utf-8")
+        return filepath.write_text(str(soup), encoding="utf-8")
 
     def view_files(files: list[Path | str], *, view: bool = False) -> None:
         """
@@ -284,6 +283,8 @@ if __name__ == "__main__":
         og_repl = ("section[id]", "div")
         for dirpath, dirnames, filenames in Path(target_dir).walk():
             class_list = str(dirpath.relative_to(target_dir)).split("/")
+            if class_list[0] == ".":
+                class_list[0] = "_root"
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
@@ -438,7 +439,18 @@ if __name__ == "__main__":
                 soup = get_soup_from_file(filepath)
                 for tag in tags:
                     soup.div.insert_before(tag)
-                write_soup_to_file(soup, filepath, prepend_doctype_declaration=True)
+                write_soup_to_file(soup, filepath)
+
+    def prepend_doctype_declaration_to_all_files(target_dir: str | Path) -> None:
+        """
+        Prepends '<!DOCTYPE html>' to all HTML files in `target_dir`.
+        """
+        prefix = "<!DOCTYPE html>\n"
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                filetext = filepath.read_text(encoding="utf-8")
+                filepath.write_text(prefix + filetext, encoding="utf-8")
 
     def regenerate_docs() -> None:
         """
@@ -484,6 +496,9 @@ if __name__ == "__main__":
         prepend_tags_to_all_files([link_tag, "\n"], TARGET_DIR)
         print("Finished prepending %s to all files." % link_tag)
         view_files(["brushes.html"])
+        prepend_doctype_declaration_to_all_files(TARGET_DIR)
+        print("Finished prepending doctype declaration to all files.")
+        view_files(["brushes.html"], view=True)
 
     regenerate_docs()
 
