@@ -177,11 +177,12 @@ if __name__ == "__main__":
         soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "html.parser")
         return soup
 
-    def write_soup_to_file(soup: BeautifulSoup, filepath: Path) -> int:
+    def write_soup_to_file(soup: BeautifulSoup, filepath: Path, *, prepend_doctype_declaration: bool = False) -> int:
         """
         Writes `soup` to `filepath`.
         """
-        return filepath.write_text(str(soup), encoding="utf-8")
+        prefix = ("" if not prepend_doctype_declaration else "<!DOCTYPE html>\n")
+        return filepath.write_text(prefix + str(soup), encoding="utf-8")
 
     def view_files(files: list[Path | str], *, view: bool = False) -> None:
         """
@@ -429,7 +430,7 @@ if __name__ == "__main__":
 
     def prepend_tags_to_all_files(tags: Iterable[Tag], target_dir: str | Path) -> None:
         """
-        Prepends tags to all HTML files in `target_dir`.
+        Prepends `tags` to all HTML files in `target_dir`.
         """
         for dirpath, dirnames, filenames in Path(target_dir).walk():
             for filename in filenames:
@@ -437,7 +438,7 @@ if __name__ == "__main__":
                 soup = get_soup_from_file(filepath)
                 for tag in tags:
                     soup.div.insert_before(tag)
-                write_soup_to_file(soup, filepath)
+                write_soup_to_file(soup, filepath, prepend_doctype_declaration=True)
 
     def regenerate_docs() -> None:
         """
