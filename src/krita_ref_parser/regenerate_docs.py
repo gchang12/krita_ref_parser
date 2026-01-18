@@ -9,6 +9,9 @@ from pathlib import Path
 
 from typing import (
     Any,
+    Tuple,
+    List,
+    Iterable,
 )
 
 from bs4 import (
@@ -50,7 +53,7 @@ def extract_icon(soup: BeautifulSoup | Tag) -> None:
     """
     soup.find("img").decompose()
 
-def replace_section_with_div(soup: BeautifulSoup | Tag, *, og_repl=("section[id]", "div")) -> None:
+def replace_section_with_div(soup: BeautifulSoup | Tag, *, og_repl: Tuple[str, str] = ("section[id]", "div"), class_list: List[str] = []) -> None:
     """
     Replaces tag identified by first half of `og_repl` with second half in `soup`; sets tag.class = 'excerpt' also.
     """
@@ -58,6 +61,7 @@ def replace_section_with_div(soup: BeautifulSoup | Tag, *, og_repl=("section[id]
     section = soup.css.select_one(og)
     section.name = repl
     section['class'] = "excerpt"
+    section['data-section'] = class_list
 
 # REFERENCE MANAGEMENT
 
@@ -179,7 +183,7 @@ if __name__ == "__main__":
         """
         return filepath.write_text(str(soup), encoding="utf-8")
 
-    def view_files(files: list[Path | str], *, view=False) -> None:
+    def view_files(files: list[Path | str], *, view: bool = False) -> None:
         """
         Opens `files` in vim.
         """
@@ -278,10 +282,11 @@ if __name__ == "__main__":
         """
         og_repl = ("section[id]", "div")
         for dirpath, dirnames, filenames in Path(target_dir).walk():
+            class_list = str(dirpath.relative_to(target_dir)).split("/")
             for filename in filenames:
                 filepath = dirpath.joinpath(filename)
                 soup = get_soup_from_file(filepath)
-                replace_section_with_div(soup, og_repl=og_repl)
+                replace_section_with_div(soup, og_repl=og_repl, class_list=class_list)
                 if is_index_file(Path(dirpath, filename)):
                     div = soup.css.select_one("div")
                     div['class'] += " index"
@@ -422,6 +427,18 @@ if __name__ == "__main__":
                     a['target'] = '_blank'
                 write_soup_to_file(soup, filepath)
 
+    def prepend_tags_to_all_files(tags: Iterable[Tag], target_dir: str | Path) -> None:
+        """
+        Prepends tags to all HTML files in `target_dir`.
+        """
+        for dirpath, dirnames, filenames in Path(target_dir).walk():
+            for filename in filenames:
+                filepath = dirpath.joinpath(filename)
+                soup = get_soup_from_file(filepath)
+                for tag in tags:
+                    soup.div.insert_before(tag)
+                write_soup_to_file(soup, filepath)
+
     def regenerate_docs() -> None:
         """
         Validates and prints processed documentation to disk.
@@ -459,6 +476,13 @@ if __name__ == "__main__":
         have_all_a_tags_open_new_tabs(TARGET_DIR)
         print("Finished setting target='_blank' for external links.")
         view_files(["layers_and_masks/fill_layer_generators/seexpr.html"])
+        link_tag = BeautifulSoup().new_tag("link")
+        link_tag['rel'] = "stylesheet"
+        link_tag['href'] = "/styles/excerpts.css"
+        link_tag['id'] = "excerpt-styles-link"
+        prepend_tags_to_all_files([link_tag, "\n"], TARGET_DIR)
+        print("Finished prepending %s to all files." % link_tag)
+        view_files(["brushes.html"])
 
     regenerate_docs()
 
