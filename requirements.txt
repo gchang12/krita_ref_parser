@@ -14,6 +14,7 @@ filelock==3.20.0
 idna==3.11
 imagesize==1.4.1
 Jinja2==3.1.6
+-e git+https://github.com/gchang12/krita_ref_parser.git@2504f0bb6aa5822a6db983d43145b9f612c52552#egg=krita_ref_parser
 MarkupSafe==3.0.3
 packaging==25.0
 pillow==12.0.0
