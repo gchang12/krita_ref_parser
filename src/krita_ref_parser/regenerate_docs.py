@@ -493,6 +493,7 @@ if __name__ == "__main__":
         link_tag['rel'] = "stylesheet"
         link_tag['href'] = "/styles/excerpts.css"
         link_tag['id'] = "excerpt-styles-link"
+        link_tag['type'] = "text/css"
         prepend_tags_to_all_files([link_tag, "\n"], TARGET_DIR)
         print("Finished prepending %s to all files." % link_tag)
         view_files(["brushes.html"])
