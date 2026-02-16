@@ -189,7 +189,7 @@ if __name__ == "__main__":
         """
         index = []
         path_root = list(dirpath.parts[ROOT_LEN:])
-        for index_no, filename in enumerate(filenames):
+        for index_no, filename in enumerate(sorted(filenames)):
             #path = path_buf.copy()
             #path.append(filename)
             # path: DONE
