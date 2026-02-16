@@ -310,6 +310,7 @@ if __name__ == "__main__":
                     soup.css.select_one("#hsx-blending-modes").decompose()
                 else:
                     extract_subsections(soup)
+                    extract_h_tag(soup, h_level=1)
                 write_soup_to_file(soup, filepath)
 
     def have_all_a_tags_open_new_tabs(target_dir: str | Path) -> None:
@@ -499,7 +500,7 @@ if __name__ == "__main__":
         view_files(["brushes.html"])
         prepend_doctype_declaration_to_all_files(TARGET_DIR)
         print("Finished prepending doctype declaration to all files.")
-        view_files(["brushes.html"], view=True)
+        view_files(["brushes.html"])
 
     regenerate_docs()
 
