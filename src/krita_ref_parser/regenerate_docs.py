@@ -308,6 +308,7 @@ if __name__ == "__main__":
                 soup = get_soup_from_file(filepath)
                 if filename == "hsx.html":
                     soup.css.select_one("#hsx-blending-modes").decompose()
+                    extract_h_tag(soup, h_level=1)
                 else:
                     extract_subsections(soup)
                     extract_h_tag(soup, h_level=1)
