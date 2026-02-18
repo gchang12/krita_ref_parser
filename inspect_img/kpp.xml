@@ -1,0 +1,342 @@
+<preset name="v)_Texture_Impressionism" paintopid="paintbrush">
+ <param name="ColorSource/Type" type="string"/>
+ <![CDATA[plain]]>
+ <param name="CompositeOp" type="string"/>
+ <![CDATA[normal]]>
+ <param name="DarkenSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"> <curve>0,0;1,1;</curve> </params> ]]>
+ <param name="DarkenUseCurve" type="internal"/>
+ true
+ <param name="DarkenUseSameCurve" type="internal"/>
+ true
+ <param name="DarkenValue" type="internal"/>
+ 1
+ <param name="DarkencurveMode" type="internal"/>
+ 0
+ <param name="EraserMode" type="internal"/>
+ false
+ <param name="FlowSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"> <curve>0,0.528384;1,1;</curve> </params> ]]>
+ <param name="FlowUseCurve" type="internal"/>
+ true
+ <param name="FlowUseSameCurve" type="internal"/>
+ true
+ <param name="FlowValue" type="internal"/>
+ 1
+ <param name="FlowcurveMode" type="internal"/>
+ 0
+ <param name="HorizontalMirrorEnabled" type="internal"/>
+ true
+ <param name="KisPrecisionOption/AutoPrecisionEnabled" type="internal"/>
+ false
+ <param name="KisPrecisionOption/DeltaValue" type="internal"/>
+ 15
+ <param name="KisPrecisionOption/SizeToStartFrom" type="internal"/>
+ 0
+ <param name="KisPrecisionOption/precisionLevel" type="internal"/>
+ 1
+ <param name="MaskingBrush/Enabled" type="internal"/>
+ false
+ <param name="MaskingBrush/MaskingCompositeOp" type="string"/>
+ <![CDATA[multiply]]>
+ <param name="MaskingBrush/MasterSizeCoeff" type="internal"/>
+ 0.24339832945674428
+ <param name="MaskingBrush/Preset/FlowSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="MaskingBrush/Preset/FlowUseCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/FlowUseSameCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/FlowValue" type="internal"/>
+ 1
+ <param name="MaskingBrush/Preset/FlowcurveMode" type="internal"/>
+ 0
+ <param name="MaskingBrush/Preset/HorizontalMirrorEnabled" type="internal"/>
+ false
+ <param name="MaskingBrush/Preset/MirrorSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="MaskingBrush/Preset/MirrorUseCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/MirrorUseSameCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/MirrorValue" type="internal"/>
+ 1
+ <param name="MaskingBrush/Preset/MirrorcurveMode" type="internal"/>
+ 0
+ <param name="MaskingBrush/Preset/OpacitySensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="MaskingBrush/Preset/OpacityUseCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/OpacityUseSameCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/OpacityValue" type="internal"/>
+ 1
+ <param name="MaskingBrush/Preset/OpacitycurveMode" type="internal"/>
+ 0
+ <param name="MaskingBrush/Preset/PressureMirror" type="internal"/>
+ false
+ <param name="MaskingBrush/Preset/PressureRatio" type="internal"/>
+ false
+ <param name="MaskingBrush/Preset/PressureRotation" type="internal"/>
+ false
+ <param name="MaskingBrush/Preset/PressureScatter" type="internal"/>
+ false
+ <param name="MaskingBrush/Preset/PressureSize" type="internal"/>
+ false
+ <param name="MaskingBrush/Preset/RatioSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="MaskingBrush/Preset/RatioUseCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/RatioUseSameCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/RatioValue" type="internal"/>
+ 1
+ <param name="MaskingBrush/Preset/RatiocurveMode" type="internal"/>
+ 0
+ <param name="MaskingBrush/Preset/RotationSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="MaskingBrush/Preset/RotationUseCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/RotationUseSameCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/RotationValue" type="internal"/>
+ 1
+ <param name="MaskingBrush/Preset/RotationcurveMode" type="internal"/>
+ 0
+ <param name="MaskingBrush/Preset/ScatterSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="MaskingBrush/Preset/ScatterUseCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/ScatterUseSameCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/ScatterValue" type="internal"/>
+ 5
+ <param name="MaskingBrush/Preset/ScattercurveMode" type="internal"/>
+ 0
+ <param name="MaskingBrush/Preset/Scattering/AxisX" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/Scattering/AxisY" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/SizeSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="MaskingBrush/Preset/SizeUseCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/SizeUseSameCurve" type="internal"/>
+ true
+ <param name="MaskingBrush/Preset/SizeValue" type="internal"/>
+ 1
+ <param name="MaskingBrush/Preset/SizecurveMode" type="internal"/>
+ 0
+ <param name="MaskingBrush/Preset/VerticalMirrorEnabled" type="internal"/>
+ false
+ <param name="MaskingBrush/Preset/brush_definition" type="string"/>
+ <![CDATA[<Brush type="auto_brush" useAutoSpacing="0" autoSpacingCoeff="1" angle="0" spacing="0.1" BrushVersion="2" density="1" randomness="0"> <MaskGenerator ratio="1" vfade="0.5" spikes="2" type="circle" hfade="0.5" antialiasEdges="0" diameter="19.4719" id="default"/> </Brush> ]]>
+ <param name="MaskingBrush/Preset/requiredBrushFile" type="string"/>
+ <![CDATA[ ]]>
+ <param name="MaskingBrush/Preset/requiredBrushFilesList" type="string"/>
+ <![CDATA[ ]]>
+ <param name="MaskingBrush/UseMasterSize" type="internal"/>
+ true
+ <param name="MirrorSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="fuzzy"> <curve>0,0;1,1;</curve> </params> ]]>
+ <param name="MirrorUseCurve" type="internal"/>
+ true
+ <param name="MirrorUseSameCurve" type="internal"/>
+ true
+ <param name="MirrorValue" type="internal"/>
+ 1
+ <param name="MirrorcurveMode" type="internal"/>
+ 0
+ <param name="MixSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"> <curve>0,0;1,1;</curve> </params> ]]>
+ <param name="MixUseCurve" type="internal"/>
+ true
+ <param name="MixUseSameCurve" type="internal"/>
+ true
+ <param name="MixValue" type="internal"/>
+ 1
+ <param name="MixcurveMode" type="internal"/>
+ 0
+ <param name="OpacitySensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"> <curve>0,0;1,1;</curve> </params> ]]>
+ <param name="OpacityUseCurve" type="internal"/>
+ false
+ <param name="OpacityUseSameCurve" type="internal"/>
+ true
+ <param name="OpacityValue" type="internal"/>
+ 1
+ <param name="OpacitycurveMode" type="internal"/>
+ 0
+ <param name="PaintOpAction" type="internal"/>
+ 2
+ <param name="PaintOpSettings/ignoreSpacing" type="internal"/>
+ false
+ <param name="PaintOpSettings/isAirbrushing" type="internal"/>
+ false
+ <param name="PaintOpSettings/rate" type="internal"/>
+ 20
+ <param name="PaintOpSettings/updateSpacingBetweenDabs" type="internal"/>
+ false
+ <param name="PressureDarken" type="internal"/>
+ false
+ <param name="PressureMirror" type="internal"/>
+ true
+ <param name="PressureMix" type="internal"/>
+ false
+ <param name="PressureRate" type="internal"/>
+ false
+ <param name="PressureRatio" type="internal"/>
+ false
+ <param name="PressureRotation" type="internal"/>
+ true
+ <param name="PressureScatter" type="internal"/>
+ true
+ <param name="PressureSharpness" type="internal"/>
+ false
+ <param name="PressureSize" type="internal"/>
+ true
+ <param name="PressureSoftness" type="internal"/>
+ false
+ <param name="PressureSpacing" type="internal"/>
+ false
+ <param name="PressureTexture/Strength/" type="internal"/>
+ true
+ <param name="Pressureh" type="internal"/>
+ true
+ <param name="Pressures" type="internal"/>
+ false
+ <param name="Pressurev" type="internal"/>
+ true
+ <param name="RateSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="RateUseCurve" type="internal"/>
+ true
+ <param name="RateUseSameCurve" type="internal"/>
+ true
+ <param name="RateValue" type="internal"/>
+ 1
+ <param name="RatecurveMode" type="internal"/>
+ 0
+ <param name="RatioSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="RatioUseCurve" type="internal"/>
+ true
+ <param name="RatioUseSameCurve" type="internal"/>
+ true
+ <param name="RatioValue" type="internal"/>
+ 1
+ <param name="RatiocurveMode" type="internal"/>
+ 0
+ <param name="RotationSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params fanCornersStep="30" fanCornersEnabled="1" lockedAngleMode="0" angleOffset="91" id="drawingangle"> <curve>0,0;1,1;</curve> </params> ]]>
+ <param name="RotationUseCurve" type="internal"/>
+ true
+ <param name="RotationUseSameCurve" type="internal"/>
+ true
+ <param name="RotationValue" type="internal"/>
+ 1
+ <param name="RotationcurveMode" type="internal"/>
+ 0
+ <param name="ScatterSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="ScatterUseCurve" type="internal"/>
+ true
+ <param name="ScatterUseSameCurve" type="internal"/>
+ true
+ <param name="ScatterValue" type="internal"/>
+ 2.18
+ <param name="ScattercurveMode" type="internal"/>
+ 0
+ <param name="Scattering/AxisX" type="internal"/>
+ true
+ <param name="Scattering/AxisY" type="internal"/>
+ true
+ <param name="Sharpness/threshold" type="internal"/>
+ 4
+ <param name="SharpnessSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="SharpnessUseCurve" type="internal"/>
+ true
+ <param name="SharpnessUseSameCurve" type="internal"/>
+ true
+ <param name="SharpnessValue" type="internal"/>
+ 1
+ <param name="SharpnesscurveMode" type="internal"/>
+ 0
+ <param name="SizeSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="sensorslist"> <ChildSensor id="fuzzy"> <curve>0,0.436308;0.323671,0.497487;1,1;</curve> </ChildSensor> <ChildSensor id="pressure"> <curve>0,0.436308;0.323671,0.497487;1,1;</curve> </ChildSensor> </params> ]]>
+ <param name="SizeUseCurve" type="internal"/>
+ true
+ <param name="SizeUseSameCurve" type="internal"/>
+ true
+ <param name="SizeValue" type="internal"/>
+ 1
+ <param name="SizecurveMode" type="internal"/>
+ 0
+ <param name="SoftnessSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="SoftnessUseCurve" type="internal"/>
+ true
+ <param name="SoftnessUseSameCurve" type="internal"/>
+ true
+ <param name="SoftnessValue" type="internal"/>
+ 1
+ <param name="SoftnesscurveMode" type="internal"/>
+ 0
+ <param name="Spacing/Isotropic" type="internal"/>
+ false
+ <param name="SpacingSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="SpacingUseCurve" type="internal"/>
+ true
+ <param name="SpacingUseSameCurve" type="internal"/>
+ true
+ <param name="SpacingValue" type="internal"/>
+ 1
+ <param name="SpacingcurveMode" type="internal"/>
+ 0
+ <param name="Texture/Pattern/Enabled" type="internal"/>
+ false
+ <param name="VerticalMirrorEnabled" type="internal"/>
+ true
+ <param name="brush_definition" type="string"/>
+ <![CDATA[<Brush scale="0.3125" type="gbr_brush" useAutoSpacing="1" autoSpacingCoeff="0.11" ColorAsMask="0" angle="0" spacing="0.1" BrushVersion="2" filename="impressionism_brush.gih"/> ]]>
+ <param name="hSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="fuzzy"> <curve>0,0.497816;1,0.591495;</curve> </params> ]]>
+ <param name="hUseCurve" type="internal"/>
+ true
+ <param name="hUseSameCurve" type="internal"/>
+ true
+ <param name="hValue" type="internal"/>
+ 1
+ <param name="hcurveMode" type="internal"/>
+ 0
+ <param name="lodUserAllowed" type="internal"/>
+ false
+ <param name="paintop" type="string"/>
+ <![CDATA[paintbrush]]>
+ <param name="requiredBrushFile" type="string"/>
+ <![CDATA[impressionism_brush.gih]]>
+ <param name="requiredBrushFilesList" type="string"/>
+ <![CDATA[impressionism_brush.gih]]>
+ <param name="sSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="pressure"/> ]]>
+ <param name="sUseCurve" type="internal"/>
+ true
+ <param name="sUseSameCurve" type="internal"/>
+ true
+ <param name="sValue" type="internal"/>
+ 1
+ <param name="scurveMode" type="internal"/>
+ 0
+ <param name="vSensor" type="string"/>
+ <![CDATA[<!DOCTYPE params> <params id="fuzzy"> <curve>0,0.480349;1,0.616445;</curve> </params> ]]>
+ <param name="vUseCurve" type="internal"/>
+ true
+ <param name="vUseSameCurve" type="internal"/>
+ true
+ <param name="vValue" type="internal"/>
+ 1
+ <param name="vcurveMode" type="internal"/>
+ 0
+</preset>
