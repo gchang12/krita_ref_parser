@@ -1,48 +1,28 @@
+import os
+from pathlib import Path
+
 from krita import *
 
-all_presets = Application.resources("preset")
+ALL_PRESETS = Application.resources("preset")
 
-name = "b) Airbrush Soft"
-resource = all_presets[name]
+def get_preset(name):
+    return ALL_PRESETS[name]
 
-#qmwin = Krita.instance().activeWindow().qwindow()
-k = Krita.instance()
-window = k.activeWindow() 
-#window.activeView().setCurrentBrushPreset(resource)
-qmwin = window.qwindow()
-#print(view)
-#view.setCurrentBrushPreset(resource)
-#qmwin = window.qwindow()
-#qmwin = view.window().qwindow()
-w1 = qmwin.findChild(QWidget, "KisPaintOpPresetsEditor")
-pc = PresetChooser(w1)
-pc.setCurrentPreset(resource)
-#w1.paintopActivated(name)
-#w1.KisPaintOpPresetsEditor
-##w1.setCurrentPaintOpId(name)
-#stuff = (dir(w1.staticMetaObject.connectSlotsByName))
-#w1.metaObject.KisPaintOpPresetsEditor
-w2 = w1.findChild(QWidget, "liveBrushPreviewView")
-pc = PresetChooser(w2)
-pc.setCurrentPreset(resource)
-#w2.setForegroundBrush(all_presets[name])
-    #print(all_presets)
-#print(type(all_presets))
-#stuff = (dir(w2.staticMetaObject))
-#with open("./Desktop/debugging.txt", mode="w") as wfile: wfile.writelines([thing + "\n" for thing in stuff])
-pixmap = w2.grab()
-pixmap.save("./Desktop/presets/%s.png" % name, format="png")
+def save_preset(name, preset):
+    k = Krita.instance()
+    window = k.activeWindow() 
+    qmwin = window.qwindow()
+    presets_editor = qmwin.findChild(QWidget, "KisPaintOpPresetsEditor")
+    brush_previewer = presets_editor.findChild(QGraphicsView, "liveBrushPreviewView")
+    presets_chooser = PresetChooser(brush_previewer)
+    presets_chooser.setCurrentPreset(preset)
+    pixmap = presets_chooser.grab()
+    pixmap.save(os.path.join(".", "Desktop", "presets", name + '.png'))
 
-#for name, resource in all_presets.items(): pass
-#help(all_presets)
-    #psc = PresetChooser()
-#rs = "c) Pencil-1 Hard"
-    #psc.setCurrentPreset(resource)
-    #pixmap = w2.grab()
-    #pixmap.save("./Desktop/presets/%s.png" % name, format="png")
-#w2.grab
+if __name__ == "__main__":
+    #name = "b) Airbrush Soft"
+    #preset = get_preset(name)
+    #save_preset(name, preset)
+    for name, preset in ALL_PRESETS.items():
+        save_preset(name, preset)
 
-'''
-with open("./Desktop/presets.txt", mode="w") as wfile:
-    wfile.writelines([preset + "\n" for preset in all_presets])
-'''
