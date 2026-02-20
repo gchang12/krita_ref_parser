@@ -149,16 +149,6 @@ def get_figures(soup: BeautifulSoup) -> None | list[dict[str, str]]:
 if __name__ == "__main__":
     # Walk file-tree and replicate it in JSON
     import json
-    '''
-    [
-      {
-        path: [str],
-        header: str,
-        icon: str|null,
-        figures: [{img, figcaption}]|null,
-      }
-    ]
-    '''
     ROOT_LEN = 2
     INDEX = []
 

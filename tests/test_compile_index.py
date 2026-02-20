@@ -16,6 +16,11 @@ from krita_ref_parser.compile_index import (
     get_figures,
 )
 from krita_ref_parser._logging import logger
+from krita_ref_parser.compile_index import (
+    ALL_SECTIONS,
+    BLENDING_MODE_SECTIONS,
+    BLENDING_MODE_HSX_SECTION,
+)
 
 SOURCE_DIR = "./tests/output/raw-excerpts/"
 TARGET_DIR = "./tests/output/"
