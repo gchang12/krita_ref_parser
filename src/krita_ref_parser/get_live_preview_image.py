@@ -6,7 +6,7 @@ K = Krita.instance()
 # open document
 ACTIVE_WINDOW = K.activeWindow()
 
-def save_preset(name: str, preset, directory: str):
+def save_preset(name, preset, directory):
     """
     """
     # locate brush previewer
@@ -23,13 +23,14 @@ def save_preset(name: str, preset, directory: str):
 if __name__ == "__main__":
     # get all presets
     ALL_PRESETS = K.resources("preset")
-    # save live-previews of all presets
+    # save live-previews of ten presets
     directory = "Desktop/presets"
-    '''
-    for name, preset in ALL_PRESETS.items():
+    maximum = 10
+    presets = set()
+    for preset_no, (name, preset) in enumerate(ALL_PRESETS.items(), start=1):
+        if preset_no == maximum:
+            break
         ACTIVE_WINDOW.activeView().setCurrentBrushPreset(preset)
+        presets.add(ACTIVE_WINDOW.activeView().currentBrushPreset().name())
         save_preset(name, preset, directory)
-    '''
-    name = "b) Airbrush Soft"
-    preset = ALL_PRESETS[name]
-    save_preset(name, preset, directory)
+    print(len(presets)) # output should imply that this is equal to 1.
