@@ -13,11 +13,7 @@ preset = ALL_PRESETS[name]
 
 # open document
 active_window = K.activeWindow()
-active_view = active_window.activeView()
-#document = K.createDocument(1, 1, "GET_BRUSH_PREVIEW", "RGBA", "U8", "", 120.0)
-#active_window.addView(document)
-
-active_view.setCurrentBrushPreset(preset) # TODO: Figure out where this goes.
+active_window.activeView().setCurrentBrushPreset(preset) # TODO: Figure out where this goes.
 
 # locate brush previewer
 qmwin = active_window.qwindow()
