@@ -199,6 +199,8 @@ if __name__ == "__main__":
                     break
             if not first_sentence:
                 first_sentence = None
+            if "\n" in first_sentence:
+                first_sentence = first_sentence[:first_sentence.index("\n")]
             # figures: DONE
             article = {
                 "id": '-'.join((path_root + ['%02d' % index_no])),
@@ -207,6 +209,7 @@ if __name__ == "__main__":
                 "sectionId": section_id.lstrip('#'),
                 "header": header_text,
                 "isIndexFile": filepath.with_suffix("").exists(),
+                #"firstParagraph": first_sentence,
                 "firstSentence": first_sentence,
                 "iconSrc": icon,
                 "figures": figures,
