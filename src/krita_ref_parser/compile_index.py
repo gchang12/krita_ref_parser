@@ -199,8 +199,8 @@ if __name__ == "__main__":
                     break
             if not first_para:
                 first_para = None
-            if "\n" in first_para:
-                first_para = first_para[:first_para.index("\n")]
+            else:
+                first_para = first_para.replace("\n", " ")
             # figures: DONE
             article = {
                 "id": '-'.join((path_root + ['%02d' % index_no])),
@@ -209,7 +209,7 @@ if __name__ == "__main__":
                 "sectionId": section_id.lstrip('#'),
                 "header": header_text,
                 "isIndexFile": filepath.with_suffix("").exists(),
-                "firstParagraph": first_para,
+                "firstPara": first_para,
                 #"firstSentence": first_sentence,
                 "iconSrc": icon,
                 "figures": figures,
