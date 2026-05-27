@@ -127,6 +127,7 @@ def get_figures(soup: BeautifulSoup) -> None | list[dict[str, str]]:
     """
     Returns a list of <figure> tags serialized as dict-objects.
     """
+    # TODO: change 'img' to 'imgSrc'
     figures = []
     for figure in soup.find_all("figure"):
         img = figure.find('img')['src']
@@ -136,7 +137,8 @@ def get_figures(soup: BeautifulSoup) -> None | list[dict[str, str]]:
         except AttributeError:
             figcaption = None
         fig_as_dict = {
-            "img": Path(str(img)).name,
+            "imgSrc": Path(str(img)).name,
+            #"img": Path(str(img)).name,
             "figcaption": figcaption,
         }
         figures.append(fig_as_dict)
@@ -194,20 +196,24 @@ if __name__ == "__main__":
             # icon: DONE
             figures = get_figures(soup)
             for p in soup.find_all("p"):
-                first_sentence = p.text
-                if first_sentence:
+                first_para = p.text
+                if first_para:
                     break
-            if not first_sentence:
-                first_sentence = None
+            if not first_para:
+                first_para = None
+            else:
+                first_para = first_para.replace("\n", " ")
             # figures: DONE
             article = {
-                "id": '-'.join((path_root + ['%02d' % index_no])),
+                #"id": '-'.join((path_root + ['%02d' % index_no])),
+                "id": '/'.join([*path_root, filename]),
                 #"path": str(filepath.relative_to(Path(SOURCE_DIR)).with_suffix("")),
                 "path": path_root + [filename],
                 "sectionId": section_id.lstrip('#'),
                 "header": header_text,
                 "isIndexFile": filepath.with_suffix("").exists(),
-                "firstSentence": first_sentence,
+                "firstPara": first_para,
+                #"firstSentence": first_sentence,
                 "iconSrc": icon,
                 "figures": figures,
             }
